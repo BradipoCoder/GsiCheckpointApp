@@ -1,0 +1,16 @@
+page-home {
+  ion-content.content {
+    h1 {
+      color: map-get($colors, primary);
+    }
+
+    code {
+      color: map-get($colors, light);
+    }
+
+    hr {
+      background-color: map-get($colors, dark);
+    }
+  }
+
+}

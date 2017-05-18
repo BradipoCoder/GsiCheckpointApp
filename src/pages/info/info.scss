@@ -1,0 +1,11 @@
+page-info {
+  ion-content.content {
+    color: map-get($colors, light);
+    h1 {
+      color: map-get($colors, primary);
+    }
+
+
+  }
+
+}
