@@ -19,11 +19,10 @@
 
         <ion-row>
             <ion-col>
-                <button ion-button primary>Inizia</button>
+                <button ion-button primary [navPush]="loginPage" [navParams]="loginPageParams">Inizia</button>
             </ion-col>
         </ion-row>
     </ion-grid>
-
 
 
 </ion-content>
