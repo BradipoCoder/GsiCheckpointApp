@@ -1,0 +1,48 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>GSI Checkpoint - CFG</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-grid *ngIf="viewIsReady">
+    <ion-row>
+      <ion-col>
+        <h1>
+          Configuration
+        </h1>
+        <ion-item>
+          <ion-label>Modifiche abilitate</ion-label>
+          <ion-toggle [(ngModel)]="canModify" (ngModelChange)="onModsToggle($event)" ></ion-toggle>
+        </ion-item>
+
+        <ion-list>
+          <ion-item>
+            <ion-label stacked color="primary">CRM Url</ion-label>
+            <ion-input [(ngModel)]="cfg.crm_url" (ngModelChange)="onConfigChange('crm_url', $event)" [disabled]=isFormDisabled></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-label stacked color="primary">CRM Rest API version</ion-label>
+            <ion-input [(ngModel)]="cfg.api_version" (ngModelChange)="onConfigChange('api_version', $event)" [disabled]=isFormDisabled></ion-input>
+          </ion-item>
+
+        </ion-list>
+
+
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <hr />
+        <code>{{cfg|json}}</code>
+        <hr />
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
+

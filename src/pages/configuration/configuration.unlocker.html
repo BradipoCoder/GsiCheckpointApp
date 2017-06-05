@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Unlock code
+    </ion-title>
+    <ion-buttons start>
+      <button ion-button (click)="dismiss()">
+        <ion-icon name="md-close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-item>
+    <ion-label stacked color="primary">Unlock code</ion-label>
+    <ion-input [(ngModel)]="unlock_code"></ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-buttons>
+      <button ion-button full icon-left (click)="dismiss()">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        OK
+      </button>
+    </ion-buttons>
+  </ion-item>
+</ion-content>
+

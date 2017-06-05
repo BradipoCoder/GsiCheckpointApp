@@ -5,44 +5,67 @@ import {SplashScreen} from "@ionic-native/splash-screen";
 
 import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
+import {ConfigurationPage} from "../pages/configuration/configuration";
+
+import {ConfigurationService} from '../services/configuration.service';
+
+import _ from "lodash";
 
 @Component({
-    templateUrl: 'app.html'
+  templateUrl: 'app.html'
 })
-export class MyApp {
-    @ViewChild(Nav) nav: Nav;
+export class MyApp
+{
+  @ViewChild(Nav) nav: Nav;
 
 
-    rootPage: any = HomePage;
+  rootPage: any = ConfigurationPage;
 
 
-    pages: Array<{title: string, icon: string, component: any}>;
+  pages: Array<{ title: string, icon: string, component: any }>;
 
-    constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
+  constructor(
+    public platform: Platform
+    , public statusBar: StatusBar
+    , public splashScreen: SplashScreen
+    , private configurationService: ConfigurationService
+  )
+  {
 
-        //
-        this.initializeApp();
+    // Main menu items
+    this.pages = [
+      {title: 'Home', icon: 'home', component: HomePage},
+      {title: 'Configuration', icon: 'information-circle', component: ConfigurationPage},
+      {title: 'Info', icon: 'information-circle', component: InfoPage}
+    ];
 
-        // used for an example of ngFor and navigation
-        this.pages = [
-            {title: 'Home', icon: 'home', component: HomePage},
-            {title: 'Info', icon: 'information-circle', component: InfoPage}
-        ];
+    this.configurationService.setUp().then(() => {
+      console.log("OKI");
 
-    }
+      this.initializeApp();
 
-    initializeApp() {
-        this.platform.ready().then(() => {
-            // Okay, so the platform is ready and our plugins are available.
-            // Here you can do any higher level native things you might need.
-            this.statusBar.styleDefault();
-            this.splashScreen.hide();
-        });
-    }
+    }).catch((e) => {
+      console.log("Setup error: " + e);
+    });
 
-    openPage(page) {
-        // Reset the content nav to have just this page
-        // we wouldn't want the back button to show in this scenario
-        this.nav.setRoot(page.component);
-    }
+
+  }
+
+  initializeApp()
+  {
+    this.platform.ready().then(() =>
+    {
+      // Okay, so the platform is ready and our plugins are available.
+      // Here you can do any higher level native things you might need.
+      this.statusBar.styleDefault();
+      this.splashScreen.hide();
+    });
+  }
+
+  openPage(page)
+  {
+    // Reset the content nav to have just this page
+    // we wouldn't want the back button to show in this scenario
+    this.nav.setRoot(page.component);
+  }
 }

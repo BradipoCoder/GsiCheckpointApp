@@ -35,3 +35,11 @@ ion-nav{
     background-color: map-get($colors, app-bg);
   }
 }
+
+
+code{
+  background-color:  map-get($colors, dark);
+  color: map-get($colors, danger);
+  padding: 5px;
+  font-size: 10px;
+}
