@@ -20,28 +20,35 @@ $font-path: "../assets/fonts";
 // The "primary" color is the only required color in the map.
 
 $colors: (
-        app-bg: #323740,
-        menu-bg: #00ff00,
-        primary: #488aff,
-        secondary: #32db64,
-        danger: #f53d3d,
-        light: #f4f4f4,
-        dark: #222
+  primary: #2b998e,
+  secondary: #7ecce5,
+  danger: #f53d3d,
+  light: #797978,
+  dark: #3c3c3b,
+  muted: #9d9c9c,
+  darkest: #222222,
+  green-light: #05beac,
+  green-dark: #2b998e,
+  blue-light: #7ecce5,
+  yellow-light: #efd04d,
+  violet-light: #99abff
+);
 
+// Ideally, we should use app-colors all around the application
+$app-colors: (
+  app-bg: color($colors, primary),
+  menu-bg: color($colors, green-light),
+  header-bg: color($colors, primary),
+  content-color: color($colors, darkest),
 
 );
 
-// App iOS Variables
+// Variable overrides
 // --------------------------------------------------
-// iOS only Sass variables can go here
+$toolbar-background: color($app-colors, header-bg);
+$toolbar-md-title-font-size: 1.4rem;
+$toolbar-md-height: 32px;
 
-// App Material Design Variables
-// --------------------------------------------------
-// Material Design only Sass variables can go here
-
-// App Windows Variables
-// --------------------------------------------------
-// Windows only Sass variables can go here
 
 // App Theme
 // --------------------------------------------------

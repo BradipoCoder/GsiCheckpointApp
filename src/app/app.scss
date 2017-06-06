@@ -17,13 +17,15 @@
 
 /* Menu */
 ion-menu{
+  ion-header{}
   ion-content.content{
-    background-color: map-get($colors, menu-bg);
-  }
-  ion-list{
-    button.item{
-      ion-icon{
-        color: map-get($colors, danger);
+    background: color($app-colors, menu-bg);
+    ion-list{
+      button.item{
+        background: color($app-colors, menu-bg);
+        ion-icon{
+          color: color($colors, darkest);
+        }
       }
     }
   }
@@ -31,15 +33,27 @@ ion-menu{
 
 /* Main App content */
 ion-nav{
+  ion-header{
+    ion-navbar{
+      .bar-button-menutoggle-md ion-icon {
+        font-size: 1.6rem;
+      }
+    }
+  }
+
   ion-content.content{
-    background-color: map-get($colors, app-bg);
+    //background-color: map-get($app-colors, app-bg);
+    //color: map-get($app-colors, content-color);
+
+    background: color($app-colors, app-bg);
+    color: color($app-colors, content-color);
   }
 }
 
 
 code{
-  background-color:  map-get($colors, dark);
-  color: map-get($colors, danger);
+  background: color($colors, dark);
+  color: color($colors, danger);
   padding: 5px;
   font-size: 10px;
 }

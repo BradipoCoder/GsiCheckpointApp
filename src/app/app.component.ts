@@ -19,7 +19,7 @@ export class MyApp
   @ViewChild(Nav) nav: Nav;
 
 
-  rootPage: any = ConfigurationPage;
+  rootPage: any = HomePage;
 
 
   pages: Array<{ title: string, icon: string, component: any }>;

@@ -9,6 +9,8 @@ import _ from "lodash";
 export class ConfigurationService
 {
   prefix: string = "cfg_";
+
+  //@todo: do NOT put unlock code into default config/config and provide method to unlock/check edits
   default_config: any = {
     crm_url: 'http://gsi.crm.mekit.it'
     , api_version: 'v4_1'

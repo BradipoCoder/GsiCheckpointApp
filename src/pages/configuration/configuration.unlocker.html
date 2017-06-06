@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Unlock code
+      Codice sblocco
     </ion-title>
     <ion-buttons start>
       <button ion-button (click)="dismiss()">
@@ -13,14 +13,23 @@
 
 <ion-content>
   <ion-item>
+    <p>
+      Per modificare le configurazioni è necessario inserire il codice di sblocco.
+    </p>
+  </ion-item>
+  <ion-item>
     <ion-label stacked color="primary">Unlock code</ion-label>
     <ion-input [(ngModel)]="unlock_code"></ion-input>
   </ion-item>
   <ion-item>
     <ion-buttons>
-      <button ion-button full icon-left (click)="dismiss()">
+      <button ion-button color="primary" icon-left (click)="dismiss()">
         <ion-icon name="checkmark-circle"></ion-icon>
         OK
+      </button>
+      <button ion-button outline color="danger" icon-right (click)="dismiss()">
+        Annulla
+        <ion-icon name="close-circle"></ion-icon>
       </button>
     </ion-buttons>
   </ion-item>
