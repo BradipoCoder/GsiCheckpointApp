@@ -3,37 +3,43 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-      <ion-title>GSI Checkpoint - HOME</ion-title>
+    <ion-title>Home</ion-title>
   </ion-navbar>
 </ion-header>
 
-
-<ion-content *ngIf="!isUserAuthenticated()">
-  <page-login></page-login>
+<ion-content>
+  <div *ngIf="isUserAuthenticated(); then authenticatedBlock else unknownUserBlock"></div>
 </ion-content>
 
+<!--The login block for unauthenticated users-->
+<ng-template #unknownUserBlock>
+  <div>
+    <h1>Traccia GSI</h1>
+    <page-login></page-login>
+  </div>
+</ng-template>
 
-<ion-content *ngIf="isUserAuthenticated()">
-
-
-
+<!--The block to use to show current status-->
+<ng-template #authenticatedBlock>
+  <div>
     <ion-grid>
-        <ion-row>
-            <ion-col>
-                <p>
-                    Ciao! Chi sei? Boooooooooooh? Clicca il tasto inizia!
-                </p>
-            </ion-col>
-        </ion-row>
-
-        <ion-row>
-            <ion-col>
-                <button ion-button primary [navPush]="loginPage" [navParams]="loginPageParams">Inizia</button>
-            </ion-col>
-        </ion-row>
+      <ion-row>
+        <ion-col>
+          <p>
+            Ciao!
+          </p>
+        </ion-col>
+      </ion-row>
     </ion-grid>
+  </div>
+</ng-template>
 
 
-</ion-content>
+
+
+
+
+
+
 
 

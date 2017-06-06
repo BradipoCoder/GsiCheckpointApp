@@ -7,14 +7,14 @@
       <ion-list>
         <ion-item>
           <ion-label stacked>Nome utente</ion-label>
-          <ion-input value="{{username}}"></ion-input>
+          <ion-input [(ngModel)]="username"></ion-input>
         </ion-item>
         <ion-item>
           <ion-label stacked>Password</ion-label>
-          <ion-input value="{{password}}" type="password"></ion-input>
+          <ion-input [(ngModel)]="password" type="password"></ion-input>
         </ion-item>
         <ion-item>
-          <button ion-button block outline color="lightest">
+          <button ion-button block outline color="lightest" (click)="authenticate()">
             INIZIA
           </button>
         </ion-item>

@@ -10,20 +10,12 @@ import {LoginPage} from "../login/login";
 })
 export class HomePage
 {
-  loginPage: any;
-  loginPageParams: Object;
+
 
   constructor(public navCtrl: NavController
     , private userService: UserService)
   {
-    this.loginPage = LoginPage;
-    this.loginPageParams = {xxx: 123, yyy: 456};
-
-    /*
-    console.log("Auth1: " + this.userService.isAuthenticated());
-    this.userService.authenticate("aaa", "bbb");
-    console.log("Auth2: " + this.userService.isAuthenticated());
-    */
+    //
   }
 
   /**

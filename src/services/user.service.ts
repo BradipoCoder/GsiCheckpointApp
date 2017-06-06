@@ -19,6 +19,7 @@ export class UserService
   }
 
   authenticate(username, password):boolean {
+    console.log("Authenticating user: " + username);
     this.authenticated = true;
     return this.isAuthenticated();
   }
