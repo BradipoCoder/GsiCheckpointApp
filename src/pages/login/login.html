@@ -1,30 +1,25 @@
-<ion-header>
-    <ion-navbar>
-        <button ion-button menuToggle>
-            <ion-icon name="menu"></ion-icon>
-        </button>
-        <ion-title>GSI Checkpoint - LOGIN</ion-title>
-    </ion-navbar>
-</ion-header>
+<ion-grid>
+  <ion-row>
+    <ion-col>
+      <p>
+        Effettua il login per iniziare
+      </p>
+      <ion-list>
+        <ion-item>
+          <ion-label stacked>Nome utente</ion-label>
+          <ion-input value="{{username}}"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label stacked>Password</ion-label>
+          <ion-input value="{{password}}" type="password"></ion-input>
+        </ion-item>
+        <ion-item>
+          <button ion-button block outline color="lightest">
+            INIZIA
+          </button>
+        </ion-item>
+      </ion-list>
+    </ion-col>
+  </ion-row>
+</ion-grid>
 
-<ion-content>
-    <ion-grid>
-        <ion-row>
-            <ion-col>
-                <h1>
-                    LOGIN
-                </h1>
-                <ion-list>
-                    <ion-item>
-                        <ion-label stacked color="primary">Nome utente</ion-label>
-                        <ion-input value="{{username}}" placeholder=""></ion-input>
-                    </ion-item>
-                    <ion-item>
-                        <ion-label stacked color="primary">Password</ion-label>
-                        <ion-input value="{{password}}" type="password" placeholder=""></ion-input>
-                    </ion-item>
-                </ion-list>
-            </ion-col>
-        </ion-row>
-    </ion-grid>
-</ion-content>

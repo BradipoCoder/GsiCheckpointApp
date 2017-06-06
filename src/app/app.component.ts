@@ -39,8 +39,8 @@ export class MyApp
       {title: 'Info', icon: 'information-circle', component: InfoPage}
     ];
 
+    //init services before starting the app
     this.configurationService.setUp().then(() => {
-      console.log("OKI");
 
       this.initializeApp();
 

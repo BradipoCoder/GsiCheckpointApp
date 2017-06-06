@@ -11,6 +11,9 @@ import {IonicStorageModule} from '@ionic/storage';
 
 /* Services */
 import {ConfigurationService} from '../services/configuration.service';
+import {RestService} from '../services/rest.service';
+import {UserService} from '../services/user.service';
+import {RemoteDataService} from '../services/remote.data.service';
 
 /* Pages */
 import {HomePage} from "../pages/home/home";
@@ -53,6 +56,9 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     StatusBar
     , SplashScreen
     , ConfigurationService
+    , RestService
+    , UserService
+    , RemoteDataService
     , {provide: ErrorHandler, useClass: IonicErrorHandler},
   ]
 })
