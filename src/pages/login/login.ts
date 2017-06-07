@@ -14,13 +14,13 @@ export class LoginPage
   constructor(public navCtrl: NavController
     , private userService: UserService)
   {
-    this.username = "";
-    this.password = "";
+    this.username = "admin";
+    this.password = "admin";
   }
 
-  authenticate(): void
+  login(): void
   {
-    this.userService.authenticate(this.username, this.password);
+    this.userService.login(this.username, this.password);
   }
 
 }

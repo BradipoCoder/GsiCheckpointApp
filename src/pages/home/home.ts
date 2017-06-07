@@ -15,7 +15,14 @@ export class HomePage
   constructor(public navCtrl: NavController
     , private userService: UserService)
   {
-    //
+
+  }
+
+
+
+  getUserId():string
+  {
+    return this.userService.getUserId();
   }
 
   /**
