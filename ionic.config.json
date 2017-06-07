@@ -1,5 +1,11 @@
 {
   "name": "GSI Checkpoint",
   "app_id": "1c271157",
-  "type": "ionic-angular"
+  "type": "ionic-angular",
+  "proxies": [
+    {
+      "path": "/api",
+      "proxyUrl": "http://api.steampowered.com"
+    }
+  ]
 }

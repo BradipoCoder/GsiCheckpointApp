@@ -9,7 +9,7 @@ import {ConfigurationPage} from "../pages/configuration/configuration";
 
 import {ConfigurationService} from '../services/configuration.service';
 
-import _ from "lodash";
+//import _ from "lodash";
 
 @Component({
   templateUrl: 'app.html'
