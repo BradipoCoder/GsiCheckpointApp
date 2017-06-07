@@ -23,7 +23,6 @@ import {ConfigurationPage} from "../pages/configuration/configuration";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
 
 /* Other/Utils/Tools */
-/*import md5 from "../../node_modules/blueimp-md5";*/
 
 @NgModule({
   declarations: [
@@ -64,10 +63,4 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
   ]
 })
 export class AppModule
-{
-  constructor()
-  {
-    /*let pwd = md5("fico");
-    console.log("AppModule: " + pwd);*/
-  }
-}
+{}
