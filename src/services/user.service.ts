@@ -38,6 +38,9 @@ export class UserService
     if(_.has(this.user_data, key))
     {
       answer = _.get(this.user_data, key);
+    } else if (key == '*')
+    {
+      answer = this.user_data;
     } else {
       answer = '';
     }
@@ -45,7 +48,10 @@ export class UserService
     return answer;
   }
 
-
+  /**
+   *
+   * @returns {Promise<any>}
+   */
   logout(): Promise<any>
   {
     let self = this;

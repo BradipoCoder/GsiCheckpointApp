@@ -34,13 +34,16 @@
 
       <ion-row>
         <ion-col>
-          <button ion-button (click)="scanQR()">SCAN</button>
+          <ion-label>User data</ion-label>
+          <code>{{getUserData("*")|json}}</code>
         </ion-col>
       </ion-row>
 
       <ion-row>
         <ion-col>
+          <ion-label>Last scanned QR Code</ion-label>
           <code>{{lastScannedBarcode}}</code>
+          <button ion-button (click)="scanQR()">SCAN</button>
         </ion-col>
       </ion-row>
 

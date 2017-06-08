@@ -1,9 +1,8 @@
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
-import { BarcodeScanner } from '@ionic-native/barcode-scanner';
+import {CodeScanService} from '../../services/code.scan.service';
 
-import {LoginPage} from "../login/login";
 
 @Component({
   selector: 'page-home',
@@ -15,7 +14,8 @@ export class HomePage
 
   constructor(public navCtrl: NavController
     , private userService: UserService
-    , private barcodeScanner:BarcodeScanner)
+    , private codeScanService: CodeScanService
+    )
   {
 
   }
@@ -24,10 +24,9 @@ export class HomePage
   {
     console.log("launching QR CODE reader...");
 
-    this.barcodeScanner.scan().then((barcodeData) =>
+    this.codeScanService.scanQR({expect:'GSI-IN'}).then((barcodeData) =>
     {
       this.lastScannedBarcode = JSON.stringify(barcodeData);
-      console.error("Barcode data: " + this.lastScannedBarcode);
 
     }, (e) => {
       console.error("Error scanning barcode: " + e);

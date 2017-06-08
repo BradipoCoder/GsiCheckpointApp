@@ -16,6 +16,7 @@ import {ConfigurationService} from '../services/configuration.service';
 import {RestService} from '../services/rest.service';
 import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
+import {CodeScanService} from '../services/code.scan.service';
 
 /* Pages */
 import {HomePage} from "../pages/home/home";
@@ -65,6 +66,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , RestService
     , UserService
     , RemoteDataService
+    , CodeScanService
     , {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
