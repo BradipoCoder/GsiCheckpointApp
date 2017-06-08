@@ -18,7 +18,10 @@ export class HomePage
 
   }
 
-
+  getUserFullName():string
+  {
+    return this.userService.getUserFullName();
+  }
 
   getUserId():string
   {

@@ -4,8 +4,10 @@ import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 
 import {HomePage} from "../pages/home/home";
-import {InfoPage} from "../pages/info/info";
 import {ConfigurationPage} from "../pages/configuration/configuration";
+import {InfoPage} from "../pages/info/info";
+import {LogoutPage} from "../pages/logout/logout";
+
 
 import {ConfigurationService} from '../services/configuration.service';
 
@@ -35,8 +37,9 @@ export class MyApp
     // Main menu items
     this.pages = [
       {title: 'Home', icon: 'home', component: HomePage},
-      {title: 'Configuration', icon: 'information-circle', component: ConfigurationPage},
-      {title: 'Info', icon: 'information-circle', component: InfoPage}
+      {title: 'Configuration', icon: 'hammer', component: ConfigurationPage},
+      {title: 'Info', icon: 'information-circle', component: InfoPage},
+      {title: 'Logout', icon: 'exit', component: LogoutPage}
     ];
 
     //init services before starting the app

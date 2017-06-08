@@ -19,6 +19,7 @@ import {RemoteDataService} from '../services/remote.data.service';
 import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
 import {LoginPage} from "../pages/login/login";
+import {LogoutPage} from "../pages/logout/logout";
 import {ConfigurationPage} from "../pages/configuration/configuration";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
 
@@ -30,6 +31,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , HomePage
     , InfoPage
     , LoginPage
+    , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage
   ],
@@ -49,6 +51,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , HomePage
     , InfoPage
     , LoginPage
+    , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage
   ],

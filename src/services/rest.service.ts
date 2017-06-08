@@ -13,27 +13,18 @@ export class RestService
   /* @type SugarCrmJsRestConsumer */
   private sugar: any;
 
-  /*
-   console.log("TEST(has lib?): " + !_.isUndefined(SugarCrmJsRestConsumer));
 
-
-
-   this.sugar = new SugarCrmJsRestConsumer("http://gsi.crm.mekit.it", "v4_1");
-
-   let cfg = this.sugar.getConfig();
-   console.log("TEST(config):" + JSON.stringify(cfg));
-
-   this.sugar.login("admin", "admin")
-   .then(function(response)
-   {
-   console.log("TEST(login):" + JSON.stringify(response));
-   })
-   .catch(function(error)
-   {
-   console.error(error);
-   });
+  /**
+   *
+   * @param {string} module_name
+   * @param {string} id
+   * @param {any} parameters
+   * @returns {Promise<any>}
    */
-
+  getEntry(module_name:string , id:string , parameters = {}):Promise<any>
+  {
+    return this.sugar.getEntry(module_name, id, parameters);
+  }
 
   /**
    *
@@ -53,6 +44,15 @@ export class RestService
   login(username: string, password: string):Promise<any>
   {
     return this.sugar.login(username, password);
+  }
+
+  /**
+   *
+   * @returns {any}
+   */
+  getAuthenticatedUser():any
+  {
+    return this.sugar.getAuthenticatedUser();
   }
 
   /**
