@@ -13,7 +13,6 @@ export class ConfigurationPage implements OnInit
 {
   cfg:any;
   viewIsReady:boolean;
-  canModify:boolean;
 
   constructor(
     public navCtrl: NavController,
@@ -22,12 +21,11 @@ export class ConfigurationPage implements OnInit
   )
   {
     this.viewIsReady = false;
-    this.canModify = false;
   }
 
-  isFormDisabled():any
+  isFormDisabled():boolean
   {
-    return this.canModify ? "false" : "disabled";
+    return !this.configurationService.isUnlocked();
   }
 
   getConfiguration():void {
@@ -39,14 +37,27 @@ export class ConfigurationPage implements OnInit
     });
   }
 
-  onModsToggle(value):void
+  /**
+   * Ask user for unlock code and attempt to unlock the configuration service
+   * @param value
+   */
+  onUnlockConfigForm(value):void
   {
-    let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage, { userId: 8675309 });
+    let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage);
     unlockModal.onDidDismiss(data => {
-      let unlock_code_ok = (_.has(data, "unlock_code") && _.get(data, "unlock_code") == _.get(this.cfg, "unlock_code"));
-      this.canModify = unlock_code_ok;
+      let unlock_code = _.get(data, "unlock_code", "");
+      this.configurationService.unlockWithCode(unlock_code);
     });
     unlockModal.present();
+  }
+
+  /**
+   * Lock the configuration service
+   * @param value
+   */
+  onLockConfigForm(value):void
+  {
+    this.configurationService.unlockWithCode("");
   }
 
   onConfigChange(key, newValue):void

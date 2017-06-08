@@ -8,13 +8,16 @@ import _ from "lodash";
 @Injectable()
 export class ConfigurationService
 {
-  prefix: string = "cfg_";
+  private readonly UNLOCK_CODE: string = "GSI";
 
-  //@todo: do NOT put unlock code into default config/config and provide method to unlock/check edits
+  private readonly prefix: string = "cfg_";
+
+  private is_unlocked:boolean = false;
+
+
   default_config: any = {
     crm_url: 'http://gsi.crm.mekit.it'
     , api_version: 'v4_1'
-    , unlock_code: 'GSI'
   };
 
   constructor(private storage: Storage)
@@ -22,36 +25,19 @@ export class ConfigurationService
   }
 
 
-  /**
-   * Make sure all keys present in the default_config are present in the storage
-   * (Should be called on application initialization)
-   *
-   * @returns {Promise}
-   */
-  setUp(): Promise<any>
+  unlockWithCode(code:string):boolean
   {
-    let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.getConfigObject().then((config) =>
-      {
-        config = _.defaults(config, self.default_config);
-        //console.log("FULL CFG: " + JSON.stringify(config));
-        let setPromises = [];
-        _.each(config, function (v, k)
-        {
-          setPromises.push(self.setConfig(k, v));
-        });
-        Promise.all(setPromises).then(() =>
-        {
-          resolve();
-        });
+    this.is_unlocked = (code === this.UNLOCK_CODE);
+    return this.is_unlocked;
+  }
 
-      }).catch((e) =>
-      {
-        reject(e);
-      });
-    });
+  /**
+   *
+   * @returns {boolean}
+   */
+  isUnlocked():boolean
+  {
+    return this.is_unlocked;
   }
 
   /**
@@ -104,6 +90,11 @@ export class ConfigurationService
    */
   setConfig(key, value): Promise<any>
   {
+    if(!this.isUnlocked())
+    {
+      throw new Error("Configuration service is locked! Unlock first.");
+    }
+
     if(_.isNull(value) || _.isEmpty(value))
     {
       value = _.get(this.default_config, key);
@@ -111,4 +102,36 @@ export class ConfigurationService
     let configKey = this.prefix + key;
     return this.storage.set(configKey, value);
   };
+
+  /**
+   * Makes sure all keys in the default_config are present in the storage
+   * (Should be called on application initialization)
+   *
+   * @returns {Promise}
+   */
+  setUp(): Promise<any>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject)
+    {
+      self.getConfigObject().then((config) =>
+      {
+        config = _.defaults(config, self.default_config);
+        //console.log("FULL CFG: " + JSON.stringify(config));
+        let setPromises = [];
+        _.each(config, function (v, k)
+        {
+          setPromises.push(self.setConfig(k, v));
+        });
+        Promise.all(setPromises).then(() =>
+        {
+          resolve();
+        });
+
+      }).catch((e) =>
+      {
+        reject(e);
+      });
+    });
+  }
 }

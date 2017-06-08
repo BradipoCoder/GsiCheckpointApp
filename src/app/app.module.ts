@@ -7,7 +7,9 @@ import {MyApp} from "./app.component";
 /* Ionic */
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
+import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicStorageModule} from '@ionic/storage';
+
 
 /* Services */
 import {ConfigurationService} from '../services/configuration.service';
@@ -58,6 +60,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
   providers: [
     StatusBar
     , SplashScreen
+    , BarcodeScanner
     , ConfigurationService
     , RestService
     , UserService

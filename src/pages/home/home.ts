@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 import {LoginPage} from "../login/login";
 
@@ -10,22 +11,37 @@ import {LoginPage} from "../login/login";
 })
 export class HomePage
 {
-
+  private lastScannedBarcode:string;
 
   constructor(public navCtrl: NavController
-    , private userService: UserService)
+    , private userService: UserService
+    , private barcodeScanner:BarcodeScanner)
   {
 
   }
 
-  getUserFullName():string
+  scanQR():void
   {
-    return this.userService.getUserFullName();
+    console.log("launching QR CODE reader...");
+
+    this.barcodeScanner.scan().then((barcodeData) =>
+    {
+      this.lastScannedBarcode = JSON.stringify(barcodeData);
+      console.error("Barcode data: " + this.lastScannedBarcode);
+
+    }, (e) => {
+      console.error("Error scanning barcode: " + e);
+    });
   }
 
-  getUserId():string
+  /**
+   *
+   * @param {string} key
+   * @returns {string}
+   */
+  getUserData(key:string):any
   {
-    return this.userService.getUserId();
+    return this.userService.getUserData(key);
   }
 
   /**

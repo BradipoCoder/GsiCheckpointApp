@@ -4,7 +4,7 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-label float-left="">Home</ion-label>
-    <ion-label float-right>{{getUserFullName()}}</ion-label>
+    <ion-label float-right>{{getUserData("full_name")}}</ion-label>
   </ion-navbar>
 </ion-header>
 
@@ -26,11 +26,24 @@
     <ion-grid>
       <ion-row>
         <ion-col>
-          <p>
-            Ciao! Tu sei utente: {{getUserId()}}
-          </p>
+          <h3>
+            <ion-label color="lightest">Ciao {{getUserData("first_name")}}!</ion-label>
+          </h3>
         </ion-col>
       </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <button ion-button (click)="scanQR()">SCAN</button>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <code>{{lastScannedBarcode}}</code>
+        </ion-col>
+      </ion-row>
+
     </ion-grid>
   </div>
 </ng-template>

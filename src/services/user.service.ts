@@ -27,15 +27,22 @@ export class UserService
     return this.authenticated;
   }
 
-
-  getUserFullName(): string
+  /**
+   *
+   * @param {string} key
+   * @returns {any}
+   */
+  getUserData(key:string):any
   {
-    return this.user_data.full_name;
-  }
+    let answer;
+    if(_.has(this.user_data, key))
+    {
+      answer = _.get(this.user_data, key);
+    } else {
+      answer = '';
+    }
 
-  getUserId(): string
-  {
-    return this.user_data.id;
+    return answer;
   }
 
 
@@ -122,8 +129,12 @@ export class UserService
  "user_number_seperator":".","user_decimal_seperator":",","mobile_max_list_entries":null,
  "mobile_max_subpanel_entries":null,"user_currency_name":"Euro","id":"1","module_name":"Users",
  "modified_by_name":"Administrator","created_by_name":"","user_hash":"","system_generated_password":"0",
- "pwd_last_changed":"","authenticate_id":"","sugar_login":"1","first_name":"","last_name":"Administrator",
- "full_name":"Administrator","name":"Administrator","is_admin":"1","external_auth_only":"0","receive_notifications":"1",
+ "pwd_last_changed":"","authenticate_id":"","sugar_login":"1",
+ "first_name":"",
+ "last_name":"Administrator",
+ "full_name":"Administrator",
+ "name":"Administrator",
+ "is_admin":"1","external_auth_only":"0","receive_notifications":"1",
  "description":"","date_entered":"2017-05-12 13:42:51","date_modified":"2017-05-17 07:54:35","modified_user_id":"1",
  "created_by":"","title":"Administrator","photo":"","department":"","phone_home":"","phone_mobile":"",
  "phone_work":"","phone_other":"","phone_fax":"","status":"Active","address_street":"","address_city":"",
