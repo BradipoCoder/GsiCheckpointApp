@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
+import {NavController, LoadingController, ToastController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 
 @Component({
@@ -8,19 +8,36 @@ import {UserService} from '../../services/user.service';
 })
 export class LoginPage
 {
-  private username:string;
-  private password:string;
+  //@todo: clear default login data
+  private username:string = 'admin';
+  private password:string = 'admin';
 
   constructor(public navCtrl: NavController
+    , public loadingCtrl: LoadingController
+    , public toastCtrl: ToastController
     , private userService: UserService)
-  {
-    this.username = "admin";
-    this.password = "admin";
-  }
+  {}
 
   login(): void
   {
-    this.userService.login(this.username, this.password);
+    let loader = this.loadingCtrl.create({
+      content: "Autenticazione in corso...",
+    });
+    loader.present();
+
+
+    this.userService.login(this.username, this.password).then(() => {
+      //console.log("LOGIN OK");
+      loader.dismiss();
+    }, (e) => {
+      let toast = this.toastCtrl.create({
+        message: 'Nome utente o password errati!',
+        duration: 3000,
+        position: 'top'
+      });
+      toast.present();
+      loader.dismiss();
+    });
   }
 
 }

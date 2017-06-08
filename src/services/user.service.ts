@@ -77,30 +77,36 @@ export class UserService
    *
    * @param {string} username
    * @param {string} password
+   *
+   * @returns {Promise<any>}
    */
-  login(username:string, password:string): void
+  login(username:string, password:string): Promise<any>
   {
+    let self = this;
     console.log("Authenticating user: " + username);
-    this.restService.login(username, password).then((res) =>
+    return new Promise(function (resolve, reject)
     {
-      this.user_data = this.restService.getAuthenticatedUser();
-      this.user_data.id =  this.user_data.user_id;
-      return this.restService.getEntry('Users', this.user_data.id);
-    }).then((user_full_data) =>
-    {
-      user_full_data = _.head(user_full_data.entry_list);
-      _.assignIn(this.user_data, user_full_data);
-      //console.log("User#2" + JSON.stringify(this.user_data));
+      self.restService.login(username, password).then((res) =>
+      {
+        self.user_data = self.restService.getAuthenticatedUser();
+        self.user_data.id = self.user_data.user_id;
+        return self.restService.getEntry('Users', self.user_data.id);
+      }).then((user_full_data) =>
+      {
+        user_full_data = _.head(user_full_data.entry_list);
+        _.assignIn(self.user_data, user_full_data);
 
-      //at last
-      this.authenticated = true;
-    }).catch((e) =>
-    {
-      console.log("LOGIN ERROR! " + e);
-      //maybe we should rethrow and login page should trigger a toast message about this
+        //at last
+        self.authenticated = true;
+        resolve();
+      }).catch((e) =>
+      {
+        console.log("LOGIN ERROR! " + e);
+        reject(e);
+      });
+
+      //@todo: should trigger screen lock(loader) until login has completed
     });
-
-    //@todo: should trigger screen lock(loader) until login has completed
   }
 
   /**
