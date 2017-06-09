@@ -37,18 +37,7 @@
             <ion-input [(ngModel)]="cfg.api_version" (ngModelChange)="onConfigChange('api_version', $event)" [disabled]="isFormDisabled()"></ion-input>
           </ion-item>
 
-          <ion-item>
-            <ion-label stacked>Nome utente</ion-label>
-            <ion-input [(ngModel)]="cfg.crm_sync_user" (ngModelChange)="onConfigChange('crm_sync_user', $event)" [disabled]="isFormDisabled()"></ion-input>
-          </ion-item>
-
-          <ion-item>
-            <ion-label stacked>Password</ion-label>
-            <ion-input type="password" [(ngModel)]="cfg.crm_sync_user_password" (ngModelChange)="onConfigChange('crm_sync_user_password', $event)" [disabled]="isFormDisabled()"></ion-input>
-          </ion-item>
-
         </ion-list>
-
 
       </ion-col>
     </ion-row>

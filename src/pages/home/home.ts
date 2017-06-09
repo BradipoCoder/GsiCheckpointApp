@@ -17,7 +17,7 @@ export class HomePage
     , private codeScanService: CodeScanService
     )
   {
-
+    console.log("HOME constructed!");
   }
 
   scanQR():void

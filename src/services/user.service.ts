@@ -12,6 +12,13 @@ export class UserService
   private authenticated: boolean = false;
   private user_data: any = {};
 
+  //@todo: make sure this is disabled before deployment ;)
+  private autologin:any = {
+    autologin: true,
+    autologin_user: 'admin',
+    autologin_pwd: 'admin',
+  };
+
   constructor(private configurationService: ConfigurationService
     , private restService: RestService)
   {}
@@ -112,21 +119,27 @@ export class UserService
   {
     let self = this;
 
+
     return new Promise(function (resolve, reject)
     {
-      let rest_api_url: string, rest_api_version: string;
+      let cfg: any, rest_api_url: string, rest_api_version: string;
 
-      self.configurationService.getConfig("crm_url")
+      self.configurationService.getConfigObject()
         .then((value) =>
         {
-          rest_api_url = value;
-          return self.configurationService.getConfig("api_version")
+          cfg = value;
+          self.restService.initialize(cfg.crm_url, cfg.api_version);
+          if(!_.isUndefined(self.autologin) && !_.isUndefined(self.autologin.autologin) && self.autologin.autologin)
+          {
+            console.warn("EXECUTING AUTOLOGIN!");
+            return self.login(self.autologin.autologin_user, self.autologin.autologin_pwd);
+          } else
+            {
+              resolve();
+            }
         })
-        .then((value) =>
+        .then(() =>
         {
-          rest_api_version = value;
-
-          self.restService.initialize(rest_api_url, rest_api_version);
           resolve();
         })
         .catch((e) =>

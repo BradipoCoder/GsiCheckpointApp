@@ -8,9 +8,8 @@ import {UserService} from '../../services/user.service';
 })
 export class LoginPage
 {
-  //@todo: clear default login data
-  private username:string = 'admin';
-  private password:string = 'admin';
+  private username:string = '';
+  private password:string = '';
 
   constructor(public navCtrl: NavController
     , public loadingCtrl: LoadingController
@@ -22,10 +21,11 @@ export class LoginPage
   {
     let loader = this.loadingCtrl.create({
       content: "Autenticazione in corso...",
+      duration: 5000
     });
     loader.present();
 
-
+    /*
     this.userService.login(this.username, this.password).then(() => {
       //console.log("LOGIN OK");
       loader.dismiss();
@@ -38,6 +38,7 @@ export class LoginPage
       toast.present();
       loader.dismiss();
     });
+    */
   }
 
 }
