@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
+import {RemoteDataService} from '../../services/remote.data.service';
 import {CodeScanService} from '../../services/code.scan.service';
 
 
@@ -15,6 +16,7 @@ export class HomePage
   constructor(public navCtrl: NavController
     , private userService: UserService
     , private codeScanService: CodeScanService
+    , public remoteDataService: RemoteDataService
     )
   {
     console.log("HOME constructed!");

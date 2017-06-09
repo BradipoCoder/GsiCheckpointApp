@@ -11,6 +11,7 @@ import {LogoutPage} from "../pages/logout/logout";
 
 import {ConfigurationService} from '../services/configuration.service';
 import {UserService} from '../services/user.service';
+import {RemoteDataService} from '../services/remote.data.service';
 
 //import _ from "lodash";
 
@@ -33,6 +34,7 @@ export class MyApp
     , public splashScreen: SplashScreen
     , private configurationService: ConfigurationService
     , private userService: UserService
+    , private remoteDataService: RemoteDataService
   )
   {
 
@@ -61,7 +63,9 @@ export class MyApp
         return this.userService.initialize();
     }).then(() => {
       console.log("User service initialized.");
-
+      return this.remoteDataService.initialize();
+    }).then(() => {
+      console.log("RemoteData service initialized.");
       if(!this.platform.is("core")){
         this.statusBar.styleDefault();
         this.splashScreen.hide();

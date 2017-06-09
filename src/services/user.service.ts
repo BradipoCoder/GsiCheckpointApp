@@ -4,7 +4,9 @@
 import {Injectable} from '@angular/core';
 import {ConfigurationService} from './configuration.service';
 import {RestService} from './rest.service';
+import {RemoteDataService} from './remote.data.service';
 import _ from "lodash";
+import md5 from '../../node_modules/blueimp-md5';
 
 @Injectable()
 export class UserService
@@ -13,15 +15,17 @@ export class UserService
   private user_data: any = {};
 
   //@todo: make sure this is disabled before deployment ;)
-  private autologin:any = {
+  private autologin: any = {
     autologin: true,
     autologin_user: 'admin',
     autologin_pwd: 'admin',
   };
 
   constructor(private configurationService: ConfigurationService
-    , private restService: RestService)
-  {}
+    , private restService: RestService
+    , private remoteDataService: RemoteDataService)
+  {
+  }
 
   /**
    *
@@ -37,16 +41,17 @@ export class UserService
    * @param {string} key
    * @returns {any}
    */
-  getUserData(key:string):any
+  getUserData(key: string): any
   {
     let answer;
-    if(_.has(this.user_data, key))
+    if (_.has(this.user_data, key))
     {
       answer = _.get(this.user_data, key);
     } else if (key == '*')
     {
       answer = this.user_data;
-    } else {
+    } else
+    {
       answer = '';
     }
 
@@ -85,7 +90,7 @@ export class UserService
    *
    * @returns {Promise<any>}
    */
-  login(username:string, password:string): Promise<any>
+  login(username: string, password: string): Promise<any>
   {
     let self = this;
     console.log("Authenticating user: " + username);
@@ -100,8 +105,10 @@ export class UserService
       {
         user_full_data = _.head(user_full_data.entry_list);
         _.assignIn(self.user_data, user_full_data);
-
-        //at last
+        //Register user hash
+        return self.remoteDataService.registerUserHash(username, md5(password));
+      }).then(() =>
+      {
         self.authenticated = true;
         resolve();
       }).catch((e) =>
@@ -129,14 +136,14 @@ export class UserService
         {
           cfg = value;
           self.restService.initialize(cfg.crm_url, cfg.api_version);
-          if(!_.isUndefined(self.autologin) && !_.isUndefined(self.autologin.autologin) && self.autologin.autologin)
+          if (!_.isUndefined(self.autologin) && !_.isUndefined(self.autologin.autologin) && self.autologin.autologin)
           {
             console.warn("EXECUTING AUTOLOGIN!");
             return self.login(self.autologin.autologin_user, self.autologin.autologin_pwd);
           } else
-            {
-              resolve();
-            }
+          {
+            resolve();
+          }
         })
         .then(() =>
         {
@@ -176,4 +183,4 @@ export class UserService
  "m_accept_status_fields":"","accept_status_id":"","accept_status_name":"","securitygroup_noninher_fields":"",
  "securitygroup_noninherit_id":"","securitygroup_noninheritable":"","securitygroup_primary_group":""
  }
-*/
+ */

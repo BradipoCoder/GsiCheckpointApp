@@ -14,7 +14,6 @@ export class ConfigurationService
 
   private is_unlocked:boolean = false;
 
-
   default_config: any = {
     crm_url: 'http://gsi.crm.mekit.it'
     , api_version: 'v4_1'

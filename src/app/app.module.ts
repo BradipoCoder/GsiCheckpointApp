@@ -9,6 +9,7 @@ import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicStorageModule} from '@ionic/storage';
+import {Network} from '@ionic-native/network';
 
 
 /* Services */
@@ -67,6 +68,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , UserService
     , RemoteDataService
     , CodeScanService
+    , Network
     , {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

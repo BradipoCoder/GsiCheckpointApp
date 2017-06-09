@@ -5,8 +5,10 @@
     </button>
     <ion-label float-left="">Home</ion-label>
     <ion-label float-right>{{getUserData("full_name")}}</ion-label>
+    <ion-icon float-right name="{{remoteDataService.isNetworkConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>
   </ion-navbar>
 </ion-header>
+
 
 <ion-content>
   <div *ngIf="isUserAuthenticated(); then authenticatedBlock else unknownUserBlock"></div>
