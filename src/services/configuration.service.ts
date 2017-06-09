@@ -117,7 +117,7 @@ export class ConfigurationService
       self.getConfigObject().then((config) =>
       {
         config = _.defaults(config, self.default_config);
-        //console.log("FULL CFG: " + JSON.stringify(config));
+        self.is_unlocked = true;
         let setPromises = [];
         _.each(config, function (v, k)
         {
@@ -125,11 +125,16 @@ export class ConfigurationService
         });
         Promise.all(setPromises).then(() =>
         {
+          self.is_unlocked = false;
           resolve();
+        }).catch((e) =>
+        {
+          self.is_unlocked = false;
+          reject(e);
         });
-
       }).catch((e) =>
       {
+        self.is_unlocked = false;
         reject(e);
       });
     });
