@@ -35,6 +35,7 @@ export class CodeScanService
         {
           reject(new Error("The scanned image is not a QR Code!"));
         }
+
         resolve(barcodeData);
       }, (e) => {
         reject(e);
@@ -50,19 +51,31 @@ export class CodeScanService
   scan(options={}):Promise<any>
   {
     let self = this;
+    let expected = _.has(options, "expect") ? _.get(options, "expect") : "";
+
     return new Promise(function (resolve, reject)
     {
+
+
       if(self.isMobileDevice)
       {
         self.barcodeScanner.scan(options).then((barcodeData) => {
+          if(!_.isEmpty(expected) && expected != barcodeData.text)
+          {
+            reject(new Error("The scanned QR Code is different from what was expected("+expected+")!"));
+          }
           resolve(barcodeData);
         }, (e) => {
           reject(e);
         });
       } else {
-        let expected = _.has(options, "expect") ? _.get(options, "expect") : "";
         console.log("Not a mobile environment - faking scan["+expected+"]...");
-        resolve(self.getFakeQRCode(expected));
+        let barcodeData = self.getFakeQRCode(expected);
+        if(!_.isEmpty(expected) && expected != barcodeData.text)
+        {
+          reject(new Error("The scanned QR Code is different from what was expected("+expected+")!"));
+        }
+        resolve(barcodeData);
       }
     });
   }
