@@ -18,6 +18,8 @@ export class ConfigurationService
   default_config: any = {
     crm_url: 'http://gsi.crm.mekit.it'
     , api_version: 'v4_1'
+    , crm_sync_user: ''
+    , crm_sync_user_password: ''
   };
 
   constructor(private storage: Storage)
@@ -109,9 +111,10 @@ export class ConfigurationService
    *
    * @returns {Promise}
    */
-  setUp(): Promise<any>
+  initialize(): Promise<any>
   {
     let self = this;
+
     return new Promise(function (resolve, reject)
     {
       self.getConfigObject().then((config) =>

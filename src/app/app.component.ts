@@ -10,6 +10,7 @@ import {LogoutPage} from "../pages/logout/logout";
 
 
 import {ConfigurationService} from '../services/configuration.service';
+import {UserService} from '../services/user.service';
 
 //import _ from "lodash";
 
@@ -31,6 +32,7 @@ export class MyApp
     , public statusBar: StatusBar
     , public splashScreen: SplashScreen
     , private configurationService: ConfigurationService
+    , private userService: UserService
   )
   {
 
@@ -42,14 +44,7 @@ export class MyApp
       {title: 'Logout', icon: 'exit', component: LogoutPage}
     ];
 
-    //init services before starting the app
-    this.configurationService.setUp().then(() => {
-
-      this.initializeApp();
-
-    }).catch((e) => {
-      console.log("Setup error: " + e);
-    });
+    this.initializeApp();
 
 
   }
@@ -59,9 +54,20 @@ export class MyApp
     this.platform.ready().then(() =>
     {
       // Okay, so the platform is ready and our plugins are available.
-      // Here you can do any higher level native things you might need.
-      this.statusBar.styleDefault();
-      this.splashScreen.hide();
+      console.log("Platform is ready. Let's go!");
+      return this.configurationService.initialize();
+    }).then(() => {
+        console.log("Configuration service initialized.");
+        return this.userService.initialize();
+    }).then(() => {
+      console.log("User service initialized.");
+
+      if(!this.platform.is("core")){
+        this.statusBar.styleDefault();
+        this.splashScreen.hide();
+      }
+    }).catch((e) => {
+      console.log("App initialization error: " + e);
     });
   }
 
@@ -72,3 +78,4 @@ export class MyApp
     this.nav.setRoot(page.component);
   }
 }
+

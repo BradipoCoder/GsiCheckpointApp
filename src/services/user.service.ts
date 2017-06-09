@@ -14,9 +14,7 @@ export class UserService
 
   constructor(private configurationService: ConfigurationService
     , private restService: RestService)
-  {
-    this.initialize();
-  }
+  {}
 
   /**
    *
@@ -104,31 +102,40 @@ export class UserService
         console.log("LOGIN ERROR! " + e);
         reject(e);
       });
-
-      //@todo: should trigger screen lock(loader) until login has completed
     });
   }
 
   /**
    * initialize the Rest service
    */
-  private initialize(): void
+  initialize(): Promise<any>
   {
-    let rest_api_url: string, rest_api_version: string;
+    let self = this;
 
-    this.configurationService.getConfig("crm_url")
-      .then((value) =>
-      {
-        rest_api_url = value;
-        return this.configurationService.getConfig("api_version")
-      })
-      .then((value) =>
-      {
-        rest_api_version = value;
+    return new Promise(function (resolve, reject)
+    {
+      let rest_api_url: string, rest_api_version: string;
 
-        this.restService.initialize(rest_api_url, rest_api_version);
-      });
+      self.configurationService.getConfig("crm_url")
+        .then((value) =>
+        {
+          rest_api_url = value;
+          return self.configurationService.getConfig("api_version")
+        })
+        .then((value) =>
+        {
+          rest_api_version = value;
+
+          self.restService.initialize(rest_api_url, rest_api_version);
+          resolve();
+        })
+        .catch((e) =>
+        {
+          reject(e);
+        });
+    });
   }
+
 }
 
 
