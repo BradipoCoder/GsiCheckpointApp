@@ -5,7 +5,7 @@
     </button>
     <ion-label float-left="">Home</ion-label>
     <ion-label float-right>{{getUserData("full_name")}}</ion-label>
-    <ion-icon float-right name="{{remoteDataService.isNetworkConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>
+    <ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>
   </ion-navbar>
 </ion-header>
 
@@ -24,37 +24,49 @@
 
 <!--The block to use to show current status-->
 <ng-template #authenticatedBlock>
-  <div>
-    <ion-grid>
-      <ion-row>
-        <ion-col>
-          <h3>
-            <ion-label color="lightest">Ciao {{getUserData("first_name")}}!</ion-label>
-          </h3>
-        </ion-col>
-      </ion-row>
+  <div *ngIf="isUserCheckedIn(); then checkedIn else checkedOut"></div>
+</ng-template>
 
-      <ion-row>
-        <ion-col>
-          <ion-label>User data</ion-label>
-          <code>{{getUserData("*")|json}}</code>
-        </ion-col>
-      </ion-row>
-
-      <ion-row>
-        <ion-col>
-          <ion-label>Last scanned QR Code</ion-label>
-          <code>{{lastScannedBarcode}}</code>
-          <button ion-button (click)="scanQR()">SCAN</button>
-        </ion-col>
-      </ion-row>
-
-    </ion-grid>
-  </div>
+<!-- The block for checked OUT user -->
+<ng-template #checkedOut>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <h3>
+          <ion-label color="lightest">Ciao {{getUserData("first_name")}}!</ion-label>
+        </h3>
+        <p>Scansiona il <strong>QRcode d'ingresso</strong> per iniziare la tua giornata lavorativa.</p>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <pre>{{lastScannedBarcode}}</pre>
+        <button ion-button (click)="scanQRCode('IN')">SCAN</button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ng-template>
 
 
-
+<!-- The block for checked IN user -->
+<ng-template #checkedIn>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <h3>
+          <ion-label color="lightest">Ciao {{getUserData("first_name")}}!</ion-label>
+        </h3>
+        <p>Stai lavorando da 12 ore ;)</p>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <pre>{{lastScannedBarcode}}</pre>
+        <button ion-button (click)="scanQRCode('CHK')">SCAN</button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ng-template>
 
 
 

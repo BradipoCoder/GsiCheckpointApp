@@ -25,7 +25,6 @@ export class LoginPage
     });
     loader.present();
 
-    /*
     this.userService.login(this.username, this.password).then(() => {
       //console.log("LOGIN OK");
       loader.dismiss();
@@ -38,7 +37,7 @@ export class LoginPage
       toast.present();
       loader.dismiss();
     });
-    */
+
   }
 
 }

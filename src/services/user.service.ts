@@ -2,9 +2,9 @@
  * Created by jack on 05/06/17.
  */
 import {Injectable} from '@angular/core';
+import {Storage} from '@ionic/storage';
 import {ConfigurationService} from './configuration.service';
 import {RestService} from './rest.service';
-import {RemoteDataService} from './remote.data.service';
 import _ from "lodash";
 import md5 from '../../node_modules/blueimp-md5';
 
@@ -13,6 +13,7 @@ export class UserService
 {
   private authenticated: boolean = false;
   private user_data: any = {};
+  private readonly prefix: string = "u_";
 
   //@todo: make sure this is disabled before deployment ;)
   private autologin: any = {
@@ -23,7 +24,7 @@ export class UserService
 
   constructor(private configurationService: ConfigurationService
     , private restService: RestService
-    , private remoteDataService: RemoteDataService)
+    , private storage: Storage)
   {
   }
 
@@ -106,7 +107,7 @@ export class UserService
         user_full_data = _.head(user_full_data.entry_list);
         _.assignIn(self.user_data, user_full_data);
         //Register user hash
-        return self.remoteDataService.registerUserHash(username, md5(password));
+        return self.registerUserHash(username, md5(password));
       }).then(() =>
       {
         self.authenticated = true;
@@ -117,6 +118,41 @@ export class UserService
         reject(e);
       });
     });
+  }
+
+  /**
+   * Provide a registered user hash (hashed password)
+   *
+   * @param {string} user
+   * @returns {Promise<any>}
+   */
+  getRegisteredUserHash(user: string): Promise<any>
+  {
+    return this.storage.get(this.getUserHashKey(user));
+  };
+
+  /**
+   * Registers a user hash (hashed password)
+   *
+   * @param {string} user
+   * @param {string} hash
+   * @returns {Promise<any>}
+   */
+  registerUserHash(user: string, hash: string): Promise<any>
+  {
+    let key = this.getUserHashKey(user);
+    console.log("Registering user hash(" + key + "): " + hash);
+    return this.storage.set(key, hash);
+  };
+
+  /**
+   *
+   * @param {string} user
+   * @returns {string}
+   */
+  private getUserHashKey(user: string): string
+  {
+    return this.prefix + '_userhash__' + user;
   }
 
   /**
