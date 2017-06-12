@@ -88,25 +88,34 @@ export class RemoteDataService
   }
 
 
+
+
+  //---------------------------------------------------------------------------------------------------------CHECKKPOINT
+
   /**
    *
-   * @returns {boolean}
+   * @param {any} filter
+   * @returns {array}
    */
-  public getLastOperationType(): string
+  public getCheckpoints(filter = {}): any
   {
-    return this.last_operation_type;
+    return _.filter(this.CHECKPOINS, filter);
   }
 
   /**
    *
-   * @returns {boolean}
+   * @param {any} filter
+   * @returns {any}
    */
-  public isNetworkConnected(): boolean
+  public getCheckpoint(filter = {}): any
   {
-    return this.is_network_connected;
+    return _.find(this.CHECKPOINS, filter);
   }
 
-
+  /**
+   *
+   * @returns {Promise<any>}
+   */
   private loadCheckpoints(): Promise<any>
   {
     let self = this;
@@ -130,6 +139,11 @@ export class RemoteDataService
     });
   }
 
+  //-------------------------------------------------------------------------------------------------------------CHECKIN
+  /**
+   *
+   * @returns {Promise<any>}
+   */
   private findLastInOutOperation(): Promise<any>
   {
     let self = this;
@@ -148,7 +162,8 @@ export class RemoteDataService
         {
           _.each(res.entry_list, function (checkin)
           {
-            let checkpoint: any = _.find(self.CHECKPOINS, {id: checkin.mkt_checkpoint_id_c});
+            //let checkpoint: any = _.find(self.CHECKPOINS, {id: checkin.mkt_checkpoint_id_c});
+            let checkpoint:any = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
             if (!_.isUndefined(checkpoint))
             {
               if (_.includes([RemoteDataService.CHECKPOINT_TYPE_IN, RemoteDataService.CHECKPOINT_TYPE_OUT], checkpoint.type))
@@ -166,6 +181,25 @@ export class RemoteDataService
           reject(e);
         });
     });
+  }
+
+  //----------------------------------------------------------------------------------------------SIMPLE GETTERS/SETTERS
+  /**
+   *
+   * @returns {boolean}
+   */
+  public getLastOperationType(): string
+  {
+    return this.last_operation_type;
+  }
+
+  /**
+   *
+   * @returns {boolean}
+   */
+  public isNetworkConnected(): boolean
+  {
+    return this.is_network_connected;
   }
 
   /**

@@ -7,6 +7,7 @@ import {RemoteDataService} from './remote.data.service';
 import {UserService} from './user.service';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import _ from "lodash";
+import {isEmpty} from "rxjs/operator/isEmpty";
 
 @Injectable()
 export class CodeScanService
@@ -14,7 +15,8 @@ export class CodeScanService
   private isMobileDevice:boolean;
 
   constructor(private barcodeScanner:BarcodeScanner
-  , private platform:Platform )
+  , private platform:Platform
+  , private remoteDataService:RemoteDataService )
   {
     this.isMobileDevice = !this.platform.is("core");
   }
@@ -25,7 +27,7 @@ export class CodeScanService
    * @param {any} options
    * @returns {Promise<any>}
    */
-  scanQR(options={}):Promise<any>
+  public scanQR(options={}):Promise<any>
   {
     let self = this;
     return new Promise(function (resolve, reject)
@@ -45,56 +47,94 @@ export class CodeScanService
 
   /**
    *
-   * @todo: all the 'expected' thing should be based on TYPE and not CODE as it is now!!!
    * now passing: {expected_type:expectedType}
    *
    * @param {any} options
    * @returns {Promise<any>}
    */
-  scan(options={}):Promise<any>
+  public scan(options={}):Promise<any>
   {
     let self = this;
-    let expected_type:string = _.has(options, "expected_type")
-      ? _.get(options, "expected_type").toString()
-      : RemoteDataService.CHECKPOINT_TYPE_CHK;
 
     return new Promise(function (resolve, reject)
     {
       if(self.isMobileDevice)
       {
         self.barcodeScanner.scan(options).then((barcodeData) => {
-          //@todo: need to check with remoteDataServices
-          /*
-          if(!_.isEmpty(expected) && !_.includes(expected, barcodeData.text))
+          try {
+            self.scanCheck(barcodeData, options);
+            resolve(barcodeData);
+          } catch(e)
           {
-            reject(new Error("The scanned QR Code is different from what was expected("+JSON.stringify(expected)+")!"));
-          }*/
-
-          resolve(barcodeData);
+            reject(e);
+          }
         }, (e) => {
           reject(e);
         });
       } else {
-        let barcodeData = self.getFakeQRCode(expected_type);
-        //@todo: need to check with remoteDataServices
-        /*
-        if(!_.isEmpty(expected) && !_.includes(expected, barcodeData.text))
+        let barcodeData = self.getFakeQRCode(options);
+        try {
+          self.scanCheck(barcodeData, options);
+          resolve(barcodeData);
+        } catch(e)
         {
-          reject(new Error("The scanned QR Code is different from what was expected("+JSON.stringify(expected)+")!"));
+          reject(e);
         }
-        */
-        resolve(barcodeData);
       }
     });
   }
 
   /**
    *
-   * @param {string} expected_type
+   * @param {any} barcodeData
+   * @param {any} options
+   * @throws Error
+   */
+  private scanCheck(barcodeData:any, options:any): void
+  {
+    let expected_type:string = _.has(options, "expected_type")
+      ? _.get(options, "expected_type").toString()
+      : "";
+
+    // expected_type must be defined
+    if(_.isEmpty(expected_type))
+    {
+      throw new Error("Expected type is undefined!");
+    }
+
+    // Barcode sanity check
+    if(_.isEmpty(barcodeData) || _.isUndefined(barcodeData.text) || _.isEmpty(barcodeData.text))
+    {
+      throw new Error("Codice scansionato non valido: " + JSON.stringify(barcodeData.text));
+    }
+
+    // Find a matching checkpoint
+    let checkpoint = this.remoteDataService.getCheckpoint({code: barcodeData.text});
+    if(_.isUndefined(checkpoint))
+    {
+      throw new Error("Nessun ambiente corrispondente per il codice scansionato: " + barcodeData.text);
+    }
+    //console.log("MATCHING CP: " + JSON.stringify(checkpoint));
+
+    // Expected type check
+    if(checkpoint.type != expected_type)
+    {
+      throw new Error("Il codice scansionato("+barcodeData.text+") non è del tipo atteso: " + expected_type);
+    }
+  }
+
+  /**
+   *
+   * @param {any} options
    * @returns {{format: string, cancelled: boolean, text: string}}
    */
-  getFakeQRCode(expected_type:string):any
+  getFakeQRCode(options:any):any
   {
+    let expected_type:string = _.has(options, "expected_type")
+      ? _.get(options, "expected_type").toString()
+      : RemoteDataService.CHECKPOINT_TYPE_CHK;
+
+    //let codes = ["MKT-IN", "MKT-OUT", "B35", "C20", "F41", "T40"];
     let allowFakes = [];
     switch (expected_type)
     {
@@ -109,11 +149,9 @@ export class CodeScanService
         break;
     }
 
-    console.log("Not a mobile environment - faking scan with expected type: "+JSON.stringify(allowFakes)+"...");
+    let code = _.sample(allowFakes);
+    console.log("Not mobile - faking("+expected_type+"): "+JSON.stringify(allowFakes)+"...: " + code);
 
-    let codes = ["MKT-IN", "MKT-OUT", "B35", "C20", "F41", "T40"];
-    let allowed = !_.isEmpty(allowFakes) ? _.intersection(codes, allowFakes) : codes;
-    let code = _.sample(allowed);
     return {
       format: 'QR_CODE',
       cancelled: false,
