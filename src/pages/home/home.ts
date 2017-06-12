@@ -33,6 +33,8 @@ export class HomePage  implements OnInit
     this.codeScanService.scanQR({expected_type:expectedType}).then((barcodeData) =>
     {
       this.lastScannedBarcode = JSON.stringify(barcodeData);
+      this.remoteDataService.storeNewCheckin(barcodeData.text);
+
 
     }, (e) => {
       console.error("Error scanning barcode: " + e);

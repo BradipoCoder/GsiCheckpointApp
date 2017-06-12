@@ -86,6 +86,7 @@ export class CodeScanService
   }
 
   /**
+   * @todo:  remoteDataService related checks shoul be moved in storeNewCheckin method
    *
    * @param {any} barcodeData
    * @param {any} options

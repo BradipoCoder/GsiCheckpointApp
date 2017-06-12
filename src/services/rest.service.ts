@@ -12,6 +12,23 @@ export class RestService
   private consumer: any;
 
   /**
+   * Create a relationship between records of two modules
+   * Proxy method
+   *
+   * @param {String}      module_name
+   * @param {String}      id
+   * @param {String}      link_field_name
+   * @param {Array}       related_ids
+   * @param {Object}      parameters
+   *
+   * @return {Promise}
+   */
+  setRelationship(module_name:string, id:string, link_field_name:string, related_ids:any, parameters = {}): Promise<any>
+  {
+    return this.consumer.setRelationship(module_name, id, link_field_name, related_ids, parameters);
+  }
+
+  /**
    *
    * @param {string} module_name
    * @param {array} [id_list]
@@ -47,11 +64,11 @@ export class RestService
   /**
    *
    * @param {string} module_name
-   * @param {string} id
+   * @param {string|boolean} id
    * @param {object} [parameters]
    * @returns {Promise<any>}
    */
-  setEntry(module_name: string, id: string, parameters = {}): Promise<any>
+  setEntry(module_name: string, id: string|boolean, parameters = {}): Promise<any>
   {
     return this.consumer.setEntry(module_name, id, parameters);
   }
