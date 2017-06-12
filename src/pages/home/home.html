@@ -14,37 +14,66 @@
   <div *ngIf="isUserAuthenticated(); then authenticatedBlock else unknownUserBlock"></div>
 </ion-content>
 
+<ion-footer>
+  Footer
+</ion-footer>
+
 <!--The login block for unauthenticated users-->
 <ng-template #unknownUserBlock>
-  <div>
-    <h1>Traccia GSI</h1>
-    <page-login></page-login>
+  <div class="header">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h1>Traccia GSI</h1>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <page-login></page-login>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </div>
 </ng-template>
 
 <!--The block to use to show current status-->
 <ng-template #authenticatedBlock>
   <div *ngIf="isUserCheckedIn(); then checkedIn else checkedOut"></div>
+  <!--<code><strong>USER DATA:</strong>{{getUserData("*")|json}}</code>-->
 </ng-template>
 
 <!-- The block for checked OUT user -->
 <ng-template #checkedOut>
-  <ion-grid>
-    <ion-row>
-      <ion-col>
-        <h3>
-          <ion-label color="lightest">Ciao {{getUserData("first_name")}}!</ion-label>
-        </h3>
-        <p>Scansiona il <strong>QRcode d'ingresso</strong> per iniziare la tua giornata lavorativa.</p>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <pre>{{lastScannedBarcode}}</pre>
-        <button ion-button (click)="scanQRCode('IN')">SCAN</button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <ion-fab bottom right>
+    <button ion-fab mini color="yellow-light" (tap)="scanQRCode('IN')">
+      <ion-icon name="qr-scanner"></ion-icon>
+    </button>
+  </ion-fab>
+
+  <div class="header">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h3>
+            <ion-label color="lightest">Ciao {{getUserData("first_name") || getUserData("name")}}!</ion-label>
+          </h3>
+          <p>Bentornato!</p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="main">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <p>Scansiona il <strong>QRcode d'ingresso</strong> per iniziare la tua giornata lavorativa.</p>
+          <pre>{{lastScannedBarcode}}</pre>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+  </div>
 </ng-template>
 
 

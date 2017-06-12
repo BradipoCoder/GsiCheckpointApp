@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {NavController, LoadingController, ToastController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
+import {RemoteDataService} from '../../services/remote.data.service';
 
 @Component({
   selector: 'page-login',
@@ -12,9 +13,10 @@ export class LoginPage
   private password:string = '';
 
   constructor(public navCtrl: NavController
-    , public loadingCtrl: LoadingController
-    , public toastCtrl: ToastController
-    , private userService: UserService)
+    , private loadingCtrl: LoadingController
+    , private toastCtrl: ToastController
+    , private userService: UserService
+    , private remoteDataService: RemoteDataService)
   {}
 
   login(): void
@@ -27,7 +29,12 @@ export class LoginPage
 
     this.userService.login(this.username, this.password).then(() => {
       //console.log("LOGIN OK");
-      loader.dismiss();
+      this.remoteDataService.initialize().then(() => {
+        loader.dismiss();
+      }, (e) => {
+        console.error(e);
+        loader.dismiss();
+      });
     }, (e) => {
       let toast = this.toastCtrl.create({
         message: 'Nome utente o password errati!',

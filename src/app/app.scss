@@ -1,6 +1,5 @@
 // http://ionicframework.com/docs/v2/theming/
 
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -16,14 +15,15 @@
 // automatically applied to the <body> element in the app.
 
 /* Menu */
-ion-menu{
-  ion-header{}
-  ion-content.content{
+ion-menu {
+  ion-header {
+  }
+  ion-content.content {
     background: color($app-colors, menu-bg);
-    ion-list{
-      button.item{
+    ion-list {
+      button.item {
         background: color($app-colors, menu-bg);
-        ion-icon{
+        ion-icon {
           color: color($colors, darkest);
         }
       }
@@ -32,16 +32,16 @@ ion-menu{
 }
 
 /* Main App content */
-ion-nav{
-  ion-header{
-    ion-navbar{
+ion-nav {
+  ion-header {
+    ion-navbar {
       .bar-button-menutoggle-md ion-icon {
         font-size: 1.6rem;
       }
     }
   }
 
-  ion-content.content{
+  ion-content.content {
     //background-color: map-get($app-colors, app-bg);
     //color: map-get($app-colors, content-color);
 
@@ -50,10 +50,17 @@ ion-nav{
   }
 }
 
-
-code{
-  background: color($colors, dark);
-  color: color($colors, danger);
+code {
+  font-family: "Roboto", "Helvetica Neue", sans-serif;
+  font-size: 11px;
+  background: color($colors, light);
+  color: color($colors, darkest);
   padding: 5px;
-  font-size: 10px;
+  display: inline-block;
+  text-align: left;
+  margin:5px;
+  border: 1px dashed color($colors, yellow-light);
+  strong{
+    display:block;
+  }
 }

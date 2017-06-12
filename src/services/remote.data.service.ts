@@ -236,6 +236,11 @@ export class RemoteDataService
         self.is_network_connected = true;
       }
 
+      if(!self.userService.isAuthenticated())
+      {
+        console.log("UDS - not authenticated");
+        return resolve();
+      }
 
       self.loadCheckpoints().then(() =>
       {

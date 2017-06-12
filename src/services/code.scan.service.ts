@@ -12,6 +12,8 @@ import {isEmpty} from "rxjs/operator/isEmpty";
 @Injectable()
 export class CodeScanService
 {
+  public static readonly BARCODE_TYPE_QR : string    = "QR_CODE";
+
   private isMobileDevice:boolean;
 
   constructor(private barcodeScanner:BarcodeScanner
@@ -33,11 +35,10 @@ export class CodeScanService
     return new Promise(function (resolve, reject)
     {
       self.scan(options).then((barcodeData) => {
-        if(barcodeData.format != 'QR_CODE')
+        if(barcodeData.format != CodeScanService.BARCODE_TYPE_QR)
         {
           reject(new Error("The scanned image is not a QR Code!"));
         }
-
         resolve(barcodeData);
       }, (e) => {
         reject(e);
@@ -153,7 +154,7 @@ export class CodeScanService
     console.log("Not mobile - faking("+expected_type+"): "+JSON.stringify(allowFakes)+"...: " + code);
 
     return {
-      format: 'QR_CODE',
+      format: CodeScanService.BARCODE_TYPE_QR,
       cancelled: false,
       text: code
     }
