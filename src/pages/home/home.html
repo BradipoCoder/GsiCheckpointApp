@@ -20,6 +20,11 @@
 
 <!--The login block for unauthenticated users-->
 <ng-template #unknownUserBlock>
+  <div *ngIf="presentLogoutScreen; then logoutBlock else loginBlock"></div>
+</ng-template>
+
+
+<ng-template #loginBlock>
   <div class="header">
     <ion-grid>
       <ion-row>
@@ -36,10 +41,36 @@
   </div>
 </ng-template>
 
+<ng-template #logoutBlock>
+  <div class="header">
+    <ion-grid text-center>
+      <ion-row>
+        <ion-col>
+          <h1>Arrivederci {{logoutScreenData.name}}</h1>
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <img src="assets/image/face.png">
+        </ion-col>
+      </ion-row>
+      <ion-row>
+        <ion-col>
+          <p>Hai segnalato la tua uscita.</p>
+          <p>Oggi {{logoutScreenData.date}} hai lavorato<br />
+            {{logoutScreenData.duration}}.
+          </p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ng-template>
+
+
+
 <!--The block to use to show current status-->
 <ng-template #authenticatedBlock>
   <div *ngIf="isUserCheckedIn(); then checkedIn else checkedOut"></div>
-  <!--<code><strong>USER DATA:</strong>{{getUserData("*")|json}}</code>-->
 </ng-template>
 
 <!-- The block for checked OUT user -->
@@ -47,7 +78,7 @@
   <div class="header">
     <ion-fab top right class="qr-scan-fab">
       <button ion-fab color="yellow-light" (tap)="scanQRCode('IN')">
-        <ion-icon name="qr-scanner"></ion-icon>
+        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
       </button>
     </ion-fab>
 
@@ -68,11 +99,9 @@
       <ion-row>
         <ion-col>
           <p>Scansiona il <strong>QRcode d'ingresso</strong> per iniziare la tua giornata lavorativa.</p>
-          <pre>{{lastScannedBarcode}}</pre>
         </ion-col>
       </ion-row>
     </ion-grid>
-
   </div>
 </ng-template>
 
@@ -88,7 +117,7 @@
 
     <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
       <button ion-fab mini color="danger" (tap)="scanQRCode('OUT')">
-        <ion-icon name="qr-scanner"></ion-icon>
+        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
       </button>
     </ion-fab>
 
@@ -98,7 +127,7 @@
           <p>Stai lavorando da</p>
           <h3>
             <ion-label color="lightest">
-              {{getUserShiftTime()}}
+              {{shiftTotalDuration}}
             </ion-label>
           </h3>
         </ion-col>
@@ -115,8 +144,8 @@
   </ion-grid>
 
 
-    <ion-grid>
-      <ion-row *ngFor="let checkin of remoteDataService.getCheckins()">
+    <ion-grid class="checkin_list">
+      <ion-row *ngFor="let checkin of remoteDataService.getAllCheckinsReversed()" ngClass="{{checkin.css_class}}">
         <ion-col col-10>
           <div>
             <ion-icon [name]="checkin.icon" item-left></ion-icon>
@@ -128,12 +157,8 @@
             {{checkin.getFormattedTime()}}
           </div>
         </ion-col>
-
       </ion-row>
-
-
     </ion-grid>
-    <pre>{{lastScannedBarcode}}</pre>
   </div>
 </ng-template>
 

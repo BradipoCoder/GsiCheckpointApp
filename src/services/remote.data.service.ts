@@ -171,9 +171,9 @@ export class RemoteDataService
    * @param {any} filter
    * @returns {any}
    */
-  public getCheckpoint(filter = {}): any
+  public getCheckpoint(filter = {}): Checkpoint
   {
-    return _.find(this.CHECKPOINTS, filter);
+    return _.find(this.CHECKPOINTS, filter) as Checkpoint;
   }
 
   /**
@@ -192,15 +192,17 @@ export class RemoteDataService
       })
         .then((res) =>
         {
-          if(!_.isEmpty(res.entry_list))
+          if (!_.isEmpty(res.entry_list))
           {
-            _.each(res.entry_list, function(cp){
+            _.each(res.entry_list, function (cp)
+            {
               self.CHECKPOINTS.push(new Checkpoint(cp.id, cp.type, cp.code, cp.name, cp.description, cp.account_id_c, cp.account_reference));
             });
             console.log("Checkpoints loaded: " + _.size(self.CHECKPOINTS));
             //console.log("Checkpoints#1: " + JSON.stringify(self.CHECKPOINTS));
             resolve();
-          } else {
+          } else
+          {
             throw new Error("No chekpoints available!");
           }
         })
@@ -222,20 +224,26 @@ export class RemoteDataService
    * @param {string} time
    * @param {string} mkt_checkpoint_id_c
    */
-  private registerCheckin(id:string, name:string, type:string, time:string, mkt_checkpoint_id_c:string):void
+  private registerCheckin(id: string, name: string, type: string, time: string, mkt_checkpoint_id_c: string): void
   {
-    let lastCheckin = _.last(this.CHECKINS) as Checkin;
-    let currentCheckin = new Checkin(id, name, type, time, "0", mkt_checkpoint_id_c);
+    let currentCheckin = new Checkin(id, name, type, time, mkt_checkpoint_id_c);
+    currentCheckin.css_class = "row first";
 
-    //now we can calculate and set duration of last checkin
-    if(lastCheckin) {
+    //calculate and set duration of last checkin
+    let lastCheckin = _.last(this.CHECKINS) as Checkin;
+    if (lastCheckin)
+    {
+      lastCheckin.css_class = "row";
+
       let lastCheckinDuration = moment(currentCheckin.time).diff(lastCheckin.time, "minutes");
-      if(lastCheckinDuration < 60) {
+      if (lastCheckinDuration < 60)
+      {
         lastCheckin.duration = lastCheckinDuration + " min";
-      } else {
+      } else
+      {
         let hours = Math.floor(lastCheckinDuration / 60);
         let minutes = lastCheckinDuration - (60 * hours);
-        lastCheckin.duration = hours + " " + (hours>1?"ore":"ora") + " " + minutes + " min";
+        lastCheckin.duration = hours + " " + (hours > 1 ? "ore" : "ora") + " " + minutes + " min";
       }
     }
 
@@ -243,12 +251,42 @@ export class RemoteDataService
   }
 
   /**
-   * Return checkins in chronologically reversed order
+   * Return checkins in chronologically reversed order - this is for home display
+   *
    * @returns {any[]}
    */
-  public getCheckins(): any
+  public getAllCheckinsReversed(): any
   {
-    return _.reverse(this.CHECKINS);
+    return _.reverse(_.clone(this.CHECKINS));
+  }
+
+  /**
+   *
+   * @param {any} filter
+   * @returns {any}
+   */
+  public getCheckins(filter = {}): any
+  {
+    return _.filter(this.CHECKINS, filter);
+  }
+
+  /**
+   *
+   * @param {any} filter
+   * @returns {any}
+   */
+  public getCheckin(filter = {}): Checkin
+  {
+    return _.find(this.CHECKINS, filter) as Checkin;
+  }
+
+  /**
+   *
+   * @returns {any}
+   */
+  public getLastCheckin(): Checkin
+  {
+    return _.last(this.CHECKINS) as Checkin;
   }
 
   /**
@@ -269,20 +307,17 @@ export class RemoteDataService
       let checkPointId = relativeCheckpoint.id;
       let checkinDate = moment().format(RemoteDataService.CRM_DATE_FORMAT);
       let checkinUserId = self.userService.getUserData("id");
+      let checkinName = relativeCheckpoint.name;
       let checkinDescription = '';
 
       let param = {
+        name: checkinName,
         description: checkinDescription,
         checkin_date: checkinDate,
         user_id_c: checkinUserId,
         assigned_user_id: checkinUserId,
         mkt_checkpoint_id_c: checkPointId
       };
-
-      //@todo: find something more meaningful for the name of checkins
-      //let checkinName = md5(JSON.stringify(param));
-      let checkinName = relativeCheckpoint.name;
-      _.set(param, "name", checkinName);
 
       self.setEntry('mkt_Checkin', false, param).then((res) =>
       {
@@ -294,14 +329,14 @@ export class RemoteDataService
 
         newCheckinId = res.id;
 
-        //it could have been an IN/OUT checkin (@todo@ move this to registerCheckin)
+        //register new checkin
+        self.registerCheckin(newCheckinId, checkinName, relativeCheckpoint.type, checkinDate, checkPointId);
+
+        //it could have been an IN/OUT checkin
         if (_.includes([Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT], relativeCheckpoint.type))
         {
           self.last_operation_type = relativeCheckpoint.type;
         }
-
-        //register new checkin
-        self.registerCheckin(newCheckinId, checkinName, relativeCheckpoint.type, checkinDate, checkPointId);
 
         resolve(newCheckinId);
       }).catch((e) =>
@@ -336,12 +371,12 @@ export class RemoteDataService
           let checkpoint: any, time: string;
           //console.log("CHECKINS: " + JSON.stringify(res));
 
-          if(!_.isEmpty(res.entry_list))
+          if (!_.isEmpty(res.entry_list))
           {
-            _.each(res.entry_list, function(checkin)
+            _.each(res.entry_list, function (checkin)
             {
               checkpoint = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
-              if(!_.isUndefined(checkpoint))
+              if (!_.isUndefined(checkpoint))
               {
                 self.registerCheckin(checkin.id, checkin.name, checkpoint.type, checkin.checkin_date, checkin.mkt_checkpoint_id_c);
               }
@@ -473,8 +508,6 @@ export class RemoteDataService
       }).then(() =>
       {
         //
-
-
 
 
         resolve();

@@ -14,19 +14,19 @@ export class Checkin
   public time:Date;
   public duration:string;
   public mkt_checkpoint_id_c:string;
+  //
+  public css_class:string = "row";
 
   constructor(
     id:string,
     name:string,
     type: string,
     time: string,
-    duration: string,
     mkt_checkpoint_id_c:string
   )
   {
     this.id = id;
     this.name = name;
-    this.duration = duration;
     this.mkt_checkpoint_id_c = mkt_checkpoint_id_c;
 
     //time
@@ -48,12 +48,34 @@ export class Checkin
     iconsByType[Checkpoint.TYPE_PAUSE] = 'pause';
     this.icon = _.has(iconsByType, type) ? _.get(iconsByType, type).toString() : 'help';
 
+    //duration
+    this.setDurationFromNow();
+
     //console.log(this);
   }
 
   getFormattedTime(format:string = "H:mm"):string
   {
     return moment(this.time).format(format);
+  }
+
+  setDurationFromNow():void
+  {
+    let checkinDuration = moment().diff(this.time, "seconds");
+
+    let hours = Math.floor(checkinDuration / 60 / 60);
+    let minutes = Math.floor(checkinDuration / 60) - (60 * hours);
+    let seconds = checkinDuration - (60 * 60 * hours) - (60 * minutes);
+
+    let durationStr = '';
+    if (hours)
+    {
+      durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
+    }
+    durationStr += minutes + " min";
+    //durationStr += " " + seconds + "s";
+
+    this.duration = durationStr;
   }
 
 
