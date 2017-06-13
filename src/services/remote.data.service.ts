@@ -224,7 +224,7 @@ export class RemoteDataService
    */
   private registerCheckin(id:string, name:string, type:string, time:string, mkt_checkpoint_id_c:string):void
   {
-    let lastCheckin = <Checkin> _.last(this.CHECKINS);
+    let lastCheckin = _.last(this.CHECKINS) as Checkin;
     let currentCheckin = new Checkin(id, name, type, time, "0", mkt_checkpoint_id_c);
 
     //now we can calculate and set duration of last checkin
@@ -242,9 +242,12 @@ export class RemoteDataService
     this.CHECKINS.push(currentCheckin);
   }
 
+  /**
+   * Return checkins in chronologically reversed order
+   * @returns {any[]}
+   */
   public getCheckins(): any
   {
-
     return _.reverse(this.CHECKINS);
   }
 
