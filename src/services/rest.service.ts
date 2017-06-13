@@ -204,5 +204,6 @@ export class RestService
   initialize(rest_api_url: string, rest_api_version: string): void
   {
     this.consumer = new SugarCrmJsRestConsumer(rest_api_url, rest_api_version);
+    this.consumer.setAxiosConfig("timeout" , 15000);
   }
 }
