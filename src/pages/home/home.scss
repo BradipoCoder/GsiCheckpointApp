@@ -4,10 +4,24 @@ page-home {
     text-align: center;
     ion-grid.grid{width:95%;}
 
+
+
     .header
     {
       background: color($app-colors, app-bg);
       text-align: left;
+
+      ion-fab.qr-scan-fab
+      {
+        top:76px;
+        right: 38px;
+      }
+
+      ion-fab.qr-scan-fab.exit
+      {
+        top:76px;
+        right: 88px;
+      }
     }
 
     .main

@@ -44,13 +44,13 @@
 
 <!-- The block for checked OUT user -->
 <ng-template #checkedOut>
-  <ion-fab bottom right>
-    <button ion-fab mini color="yellow-light" (tap)="scanQRCode('IN')">
-      <ion-icon name="qr-scanner"></ion-icon>
-    </button>
-  </ion-fab>
-
   <div class="header">
+    <ion-fab top right class="qr-scan-fab">
+      <button ion-fab color="yellow-light" (tap)="scanQRCode('IN')">
+        <ion-icon name="qr-scanner"></ion-icon>
+      </button>
+    </ion-fab>
+
     <ion-grid>
       <ion-row>
         <ion-col>
@@ -79,22 +79,62 @@
 
 <!-- The block for checked IN user -->
 <ng-template #checkedIn>
-  <ion-grid>
+  <div class="header">
+    <ion-fab top right class="qr-scan-fab">
+      <button ion-fab color="yellow-light" (tap)="scanQRCode('CHK')">
+        <ion-icon name="qr-scanner"></ion-icon>
+      </button>
+    </ion-fab>
+
+    <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
+      <button ion-fab mini color="danger" (tap)="scanQRCode('OUT')">
+        <ion-icon name="qr-scanner"></ion-icon>
+      </button>
+    </ion-fab>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <p>Stai lavorando da</p>
+          <h3>
+            <ion-label color="lightest">
+              {{getUserShiftTime()}}
+            </ion-label>
+          </h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="main"><ion-grid>
     <ion-row>
       <ion-col>
-        <h3>
-          <ion-label color="lightest">Ciao {{getUserData("first_name")}}!</ion-label>
-        </h3>
-        <p>Stai lavorando da 12 ore ;)</p>
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <pre>{{lastScannedBarcode}}</pre>
-        <button ion-button (click)="scanQRCode('CHK')">SCAN</button>
+        <h5>Scansiona il <strong>QRcode dell'ambiente</strong> da pulire</h5>
       </ion-col>
     </ion-row>
   </ion-grid>
+
+
+    <ion-grid>
+      <ion-row *ngFor="let checkin of remoteDataService.getCheckins()">
+        <ion-col col-10>
+          <div>
+            <ion-icon [name]="checkin.icon" item-left></ion-icon>
+            {{checkin.name}} ({{checkin.duration}})
+          </div>
+        </ion-col>
+        <ion-col col-2 text-right="">
+          <div>
+            {{checkin.getFormattedTime()}}
+          </div>
+        </ion-col>
+
+      </ion-row>
+
+
+    </ion-grid>
+    <pre>{{lastScannedBarcode}}</pre>
+  </div>
 </ng-template>
 
 

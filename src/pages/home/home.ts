@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {NavController, ToastController} from 'ionic-angular';
+import {Platform, NavController, ToastController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {CodeScanService} from '../../services/code.scan.service';
-
+import {Checkpoint} from '../../models/Checkpoint';
+import _ from "lodash";
 
 @Component({
   selector: 'page-home',
@@ -11,13 +12,15 @@ import {CodeScanService} from '../../services/code.scan.service';
 })
 export class HomePage  implements OnInit
 {
+  /**/
   private lastScannedBarcode:string;
 
   constructor(public navCtrl: NavController
+    , private platform:Platform
     , public toastCtrl: ToastController
     , private userService: UserService
     , private codeScanService: CodeScanService
-    , private remoteDataService: RemoteDataService
+    , public remoteDataService: RemoteDataService
     )
   {
     console.log("HOME constructed!");
@@ -32,7 +35,15 @@ export class HomePage  implements OnInit
   {
     this.codeScanService.scanQR({expected_type:expectedType}).then((barcodeData) =>
     {
-      this.lastScannedBarcode = JSON.stringify(barcodeData);
+      //this.lastScannedBarcode = JSON.stringify(barcodeData);
+      let toast = this.toastCtrl.create({
+        message: "Hai scansionato: " +  JSON.stringify(barcodeData),
+        duration: 3000,
+        position: 'top'
+      });
+      toast.present();
+
+
       this.remoteDataService.storeNewCheckin(barcodeData.text);
 
 
@@ -48,6 +59,10 @@ export class HomePage  implements OnInit
   }
 
 
+  getUserShiftTime(): string
+  {
+    return "3 ore";
+  }
 
   /**
    *
@@ -83,7 +98,12 @@ export class HomePage  implements OnInit
    */
   isUserCheckedIn(): boolean
   {
-    return this.remoteDataService.getLastOperationType() == RemoteDataService.CHECKPOINT_TYPE_IN;
+    return this.remoteDataService.getLastOperationType() == Checkpoint.TYPE_IN;
+  }
+
+  isMobileDevice(): boolean
+  {
+    return !this.platform.is("core");
   }
 
   ngOnInit():void

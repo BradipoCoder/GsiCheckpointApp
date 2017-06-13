@@ -6,8 +6,12 @@ import {Platform} from "ionic-angular";
 import {RemoteDataService} from './remote.data.service';
 import {UserService} from './user.service';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
+
+import {Checkpoint} from '../models/Checkpoint';
+
+
 import _ from "lodash";
-import {isEmpty} from "rxjs/operator/isEmpty";
+
 
 @Injectable()
 export class CodeScanService
@@ -134,19 +138,19 @@ export class CodeScanService
   {
     let expected_type:string = _.has(options, "expected_type")
       ? _.get(options, "expected_type").toString()
-      : RemoteDataService.CHECKPOINT_TYPE_CHK;
+      : Checkpoint.TYPE_CHK;
 
     //let codes = ["MKT-IN", "MKT-OUT", "B35", "C20", "F41", "T40"];
     let allowFakes = [];
     switch (expected_type)
     {
-      case RemoteDataService.CHECKPOINT_TYPE_IN:
+      case Checkpoint.TYPE_IN:
         allowFakes = ["MKT-IN"];
         break;
-      case RemoteDataService.CHECKPOINT_TYPE_OUT:
+      case Checkpoint.TYPE_OUT:
         allowFakes = ["MKT-OUT"];
         break;
-      case RemoteDataService.CHECKPOINT_TYPE_CHK:
+      case Checkpoint.TYPE_CHK:
         allowFakes = ["B35", "C20", "F41", "T40"];
         break;
     }
