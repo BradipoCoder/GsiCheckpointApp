@@ -37,11 +37,11 @@ export class HomePage implements OnInit, OnDestroy
 
   /**
    *
-   * @param {string} expectedType
+   * @param {[<string>]} allowedTypes
    */
-  scanQRCode(expectedType: string): void
+  scanQRCode(allowedTypes: any): void
   {
-    this.codeScanService.scanQR({expected_type: expectedType}).then((barcodeData) =>
+    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) =>
     {
       //this.lastScannedBarcode = JSON.stringify(barcodeData);
       let toast = this.toastCtrl.create({

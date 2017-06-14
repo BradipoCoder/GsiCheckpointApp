@@ -52,7 +52,7 @@ export class CodeScanService
 
   /**
    *
-   * now passing: {expected_type:expectedType}
+   * now passing: {allowed_types:[]}
    *
    * @param {any} options
    * @returns {Promise<any>}
@@ -90,7 +90,7 @@ export class CodeScanService
   }
 
   /**
-   * @todo:  remoteDataService related checks shoul be moved in storeNewCheckin method
+   * @todo:  remoteDataService related checks should be moved in storeNewCheckin method
    *
    * @param {any} barcodeData
    * @param {any} options
@@ -98,20 +98,20 @@ export class CodeScanService
    */
   private scanCheck(barcodeData:any, options:any): void
   {
-    let expected_type:string = _.has(options, "expected_type")
-      ? _.get(options, "expected_type").toString()
-      : "";
+    let allowed_types:any = _.has(options, "allowed_types")
+      ? _.get(options, "allowed_types") as any
+      : [];
 
     // expected_type must be defined
-    if(_.isEmpty(expected_type))
+    if(_.isEmpty(allowed_types))
     {
-      throw new Error("Expected type is undefined!");
+      throw new Error("Scan check: Allowed types are not defined!");
     }
 
     // Barcode sanity check
     if(_.isEmpty(barcodeData) || _.isUndefined(barcodeData.text) || _.isEmpty(barcodeData.text))
     {
-      throw new Error("Codice scansionato non valido: " + JSON.stringify(barcodeData.text));
+      throw new Error("Codice scansionato non valido: " + JSON.stringify(barcodeData));
     }
 
     // Find a matching checkpoint
@@ -123,37 +123,32 @@ export class CodeScanService
     //console.log("MATCHING CP: " + JSON.stringify(checkpoint));
 
     // Expected type check
-    if(checkpoint.type != expected_type)
+    if(!_.includes(allowed_types, checkpoint.type))
     {
-      throw new Error("Il codice scansionato("+barcodeData.text+") non è del tipo atteso: " + expected_type);
+      throw new Error("Il codice scansionato("+barcodeData.text+") non è tra i tipi attesi: " + JSON.stringify(allowed_types));
     }
   }
 
   /**
+   * If allowed_types contains more than one type the FIRST type will be used
    *
    * @param {any} options
    * @returns {{format: string, cancelled: boolean, text: string}}
    */
   getFakeQRCode(options:any):any
   {
-    let expected_type:string = _.has(options, "expected_type")
-      ? _.get(options, "expected_type").toString()
-      : Checkpoint.TYPE_CHK;
+    let allowed_types:any = _.has(options, "allowed_types")
+      ? _.get(options, "allowed_types") as any
+      : [Checkpoint.TYPE_CHK];
+    let expected_type = _.first(allowed_types) as string;
 
-    //let codes = ["MKT-IN", "MKT-OUT", "B35", "C20", "F41", "T40"];
-    let allowFakes = [];
-    switch (expected_type)
-    {
-      case Checkpoint.TYPE_IN:
-        allowFakes = ["MKT-IN"];
-        break;
-      case Checkpoint.TYPE_OUT:
-        allowFakes = ["MKT-OUT"];
-        break;
-      case Checkpoint.TYPE_CHK:
-        allowFakes = ["B35", "C20", "F41", "T40"];
-        break;
-    }
+    let codes:any = [];
+    codes[Checkpoint.TYPE_IN] = ["GSI-IN"];
+    codes[Checkpoint.TYPE_OUT] = ["GSI-OUT"];
+    codes[Checkpoint.TYPE_CHK] = ["B35", "C20", "F41", "T40"];
+
+    let allowFakes = codes[expected_type];
+
 
     let code = _.sample(allowFakes);
     console.log("Not mobile - faking("+expected_type+"): "+JSON.stringify(allowFakes)+"...: " + code);

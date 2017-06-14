@@ -77,7 +77,7 @@
 <ng-template #checkedOut>
   <div class="header">
     <ion-fab top right class="qr-scan-fab">
-      <button ion-fab color="yellow-light" (tap)="scanQRCode('IN')">
+      <button ion-fab color="yellow-light" (tap)="scanQRCode(['IN'])">
         <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
       </button>
     </ion-fab>
@@ -110,13 +110,13 @@
 <ng-template #checkedIn>
   <div class="header">
     <ion-fab top right class="qr-scan-fab">
-      <button ion-fab color="yellow-light" (tap)="scanQRCode('CHK')">
-        <ion-icon name="qr-scanner"></ion-icon>
+      <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
+        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
       </button>
     </ion-fab>
 
     <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
-      <button ion-fab mini color="danger" (tap)="scanQRCode('OUT')">
+      <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
         <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
       </button>
     </ion-fab>
@@ -154,7 +154,7 @@
         </ion-col>
         <ion-col col-2 text-right="">
           <div>
-            {{checkin.getFormattedTime("YYYY-MM-DD HH:mm:ss")}}
+            {{checkin.getFormattedTime()}}
           </div>
         </ion-col>
       </ion-row>
