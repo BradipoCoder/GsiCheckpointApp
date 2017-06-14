@@ -19,6 +19,15 @@ page-home {
         top: 76px;
         right: 88px;
       }
+
+      &.loginBlock{
+        color: color($colors, lightest);
+        ion-img.logo-trace
+        {
+          background-color: color($app-colors, app-bg);
+        }
+      }
+
       &.logoutBlock{
         color: color($colors, lightest);
       }
