@@ -19,6 +19,9 @@ page-home {
         top: 76px;
         right: 88px;
       }
+      &.logoutBlock{
+        color: color($colors, lightest);
+      }
     }
 
     .main {
@@ -32,6 +35,25 @@ page-home {
         ion-row.first {
           background: color($colors, green-light);
         }
+      }
+    }
+
+    /*Generic*/
+    .user-avatar-wrapper
+    {
+      width:100px;
+      height:100px;
+      margin: 25px auto;
+      overflow: hidden;
+      border-radius:50%;
+      position: relative;
+      background-color: color($colors, lightest);
+      border: 5px solid color($colors, lightest);
+      img{
+        position: absolute;
+        top:50%;
+        left:50%;
+        transform: translate(-50%,-50%)
       }
     }
   }

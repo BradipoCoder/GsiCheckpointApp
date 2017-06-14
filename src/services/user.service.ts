@@ -17,7 +17,7 @@ export class UserService
 
   //@todo: make sure this is disabled before deployment ;)
   private autologin: any = {
-    autologin: true,
+    autologin: false,
     autologin_user: 'admin',
     autologin_pwd: 'admin',
   };
@@ -25,8 +25,7 @@ export class UserService
   constructor(private configurationService: ConfigurationService
     , private restService: RestService
     , private storage: Storage)
-  {
-  }
+  {  }
 
   /**
    *
@@ -162,10 +161,9 @@ export class UserService
   {
     let self = this;
 
-
     return new Promise(function (resolve, reject)
     {
-      let cfg: any, rest_api_url: string, rest_api_version: string;
+      let cfg: any;
 
       self.configurationService.getConfigObject()
         .then((value) =>

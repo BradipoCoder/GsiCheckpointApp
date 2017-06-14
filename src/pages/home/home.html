@@ -4,8 +4,8 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-label float-left="">Home</ion-label>
-    <ion-label float-right>{{getUserData("full_name")}}</ion-label>
-    <ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>
+    <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
+    <!--<ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>-->
   </ion-navbar>
 </ion-header>
 
@@ -42,8 +42,15 @@
 </ng-template>
 
 <ng-template #logoutBlock>
-  <div class="header">
+  <div class="header logoutBlock">
     <ion-grid text-center>
+      <ion-row>
+        <ion-col>
+          <div class="user-avatar-wrapper">
+            <img [src]="logoutScreenData.img_url">
+          </div>
+        </ion-col>
+      </ion-row>
       <ion-row>
         <ion-col>
           <h1>Arrivederci {{logoutScreenData.name}}</h1>
@@ -51,15 +58,8 @@
       </ion-row>
       <ion-row>
         <ion-col>
-          <img src="assets/image/face.png">
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <p>Hai segnalato la tua uscita.</p>
-          <p>Oggi {{logoutScreenData.date}} hai lavorato<br />
-            {{logoutScreenData.duration}}.
-          </p>
+          <ion-label color="darkest">Hai segnalato la tua uscita.</ion-label>
+          <ion-label>Oggi {{logoutScreenData.date}} hai lavorato<br />{{logoutScreenData.duration}}</ion-label>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -86,7 +86,7 @@
       <ion-row>
         <ion-col>
           <h3>
-            <ion-label color="lightest">Ciao {{getUserData("first_name") || getUserData("name")}}!</ion-label>
+            <ion-label color="lightest">Ciao {{userService.getUserData("first_name") || userService.getUserData("name")}}!</ion-label>
           </h3>
           <p>Bentornato!</p>
         </ion-col>
@@ -154,7 +154,7 @@
         </ion-col>
         <ion-col col-2 text-right="">
           <div>
-            {{checkin.getFormattedTime()}}
+            {{checkin.getFormattedTime("YYYY-MM-DD HH:mm:ss")}}
           </div>
         </ion-col>
       </ion-row>

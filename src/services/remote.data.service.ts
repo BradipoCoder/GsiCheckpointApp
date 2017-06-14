@@ -194,6 +194,7 @@ export class RemoteDataService
         {
           if (!_.isEmpty(res.entry_list))
           {
+            self.CHECKPOINTS = [];
             _.each(res.entry_list, function (cp)
             {
               self.CHECKPOINTS.push(new Checkpoint(cp.id, cp.type, cp.code, cp.name, cp.description, cp.account_id_c, cp.account_reference));
@@ -333,12 +334,23 @@ export class RemoteDataService
         self.registerCheckin(newCheckinId, checkinName, relativeCheckpoint.type, checkinDate, checkPointId);
 
         //it could have been an IN/OUT checkin
-        if (_.includes([Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT], relativeCheckpoint.type))
+        // if (_.includes([Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT], relativeCheckpoint.type))
+        // {
+        //   self.last_operation_type = relativeCheckpoint.type;
+        // }
+        if (relativeCheckpoint.type == Checkpoint.TYPE_OUT)
         {
           self.last_operation_type = relativeCheckpoint.type;
+          resolve(newCheckinId);
+        } else if (relativeCheckpoint.type == Checkpoint.TYPE_IN)
+        {
+          self.initialize().then(() => {
+            resolve(newCheckinId);
+          });
+        } else {
+          resolve(newCheckinId);
         }
 
-        resolve(newCheckinId);
       }).catch((e) =>
       {
         console.log("CHECKIN REGISTRATION ERROR: " + JSON.stringify(e));
@@ -373,6 +385,7 @@ export class RemoteDataService
 
           if (!_.isEmpty(res.entry_list))
           {
+            self.CHECKINS = [];
             _.each(res.entry_list, function (checkin)
             {
               checkpoint = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
@@ -469,6 +482,13 @@ export class RemoteDataService
 
     return new Promise(function (resolve, reject)
     {
+      //reset
+      self.last_operation_type = Checkpoint.TYPE_OUT;
+      self.last_operation_date = '';
+      self.is_network_connected = false;
+      self.CHECKPOINTS = [];
+      self.CHECKINS = [];
+
       //set network state and listen to changes
       if (!self.platform.is("core"))
       {
@@ -493,7 +513,7 @@ export class RemoteDataService
 
       if (!self.userService.isAuthenticated())
       {
-        console.log("UDS - not authenticated");
+        console.log("RDS - not authenticated.");
         return resolve();
       }
 
@@ -507,9 +527,7 @@ export class RemoteDataService
         return self.loadCheckins();
       }).then(() =>
       {
-        //
-
-
+        //READY
         resolve();
       }).catch((e) =>
       {

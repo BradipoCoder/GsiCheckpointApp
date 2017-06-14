@@ -20,18 +20,20 @@ export class HomePage implements OnInit, OnDestroy
   private presentLogoutScreen:boolean = false;
   private logoutScreenData:any = {
     name: "Andrea",
-    img_url: "assets/image/face.png",
-    date: "31 maggio",
+    img_url: "assets/image/user.png",
+    date: "14 giugno",
     duration: "6 ore 22 min"
   };
+
 
   constructor(public navCtrl: NavController
     , private platform: Platform
     , public toastCtrl: ToastController
-    , private userService: UserService
-    , private codeScanService: CodeScanService
+    , public userService: UserService
+    , public codeScanService: CodeScanService
     , public remoteDataService: RemoteDataService)
-  {/**/}
+  {
+  }
 
   /**
    *
@@ -54,7 +56,12 @@ export class HomePage implements OnInit, OnDestroy
         {
           //user has just registered the EXIT checkin code
 
-          // 1) present logged-out screen
+          // 1) store user data (before logout) present logged-out screen
+          this.logoutScreenData.name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
+          //this.logoutScreenData.img_url = this.userService.getUserData("img_url") || 'assets/image/user.png';
+          moment.locale("it");
+          this.logoutScreenData.date = moment().format('D MMMM');
+          this.logoutScreenData.duration = this.shiftTotalDuration;
           this.presentLogoutScreen = true;
 
           // 2) start timeout to hide logged-out screen
@@ -64,13 +71,14 @@ export class HomePage implements OnInit, OnDestroy
 
           // 3) log out user
           this.userService.logout().then(() => {
-            console.log("User is now logged out...");
+            console.log("User is now logged out.");
+            //reinitialize remote data
+            return this.remoteDataService.initialize();
+          }).then(() => {
+            console.log("Remote data service was reset.");
+            //DONE
           });
-
         }
-
-
-
       }).catch((e) => {
         console.error("Barcode registration error: " + e);
         let toast = this.toastCtrl.create({
@@ -90,16 +98,6 @@ export class HomePage implements OnInit, OnDestroy
       });
       toast.present();
     });
-  }
-
-  /**
-   *
-   * @param {string} key
-   * @returns {string}
-   */
-  getUserData(key: string): any
-  {
-    return this.userService.getUserData(key);
   }
 
   /**
