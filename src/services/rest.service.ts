@@ -4,6 +4,7 @@
  * through which to interact with remote end.
  */
 import {Injectable} from '@angular/core';
+import SugarCrmJsRestConsumer from "../../node_modules/sugarcrm-js-rest-consumer";
 
 @Injectable()
 export class RestService
@@ -194,10 +195,14 @@ export class RestService
   }
 
   /**
-   * @param {any} consumer
+   * @todo: allow to define other consumers
+   *
+   * @param {string} rest_api_url
+   * @param {string} rest_api_version
    */
-  protected _initialize(consumer: any): void
+  initialize(rest_api_url: string, rest_api_version: string): void
   {
-    this.consumer = consumer;
+    this.consumer = new SugarCrmJsRestConsumer(rest_api_url, rest_api_version);
+    this.consumer.setAxiosConfig("timeout" , 15000);
   }
 }
