@@ -8,7 +8,7 @@
  */
 import {Injectable} from '@angular/core';
 import {Platform} from "ionic-angular";
-//import {Storage} from '@ionic/storage';
+
 import {Network} from '@ionic-native/network';
 import {OfflineCapableRestService} from './offline.capable.rest.service';
 import {UserService} from './user.service';
@@ -26,14 +26,10 @@ export class RemoteDataService
 {
   public static readonly CRM_DATE_FORMAT: string = "YYYY-MM-DD HH:mm:ss";
 
-
   private last_operation_type: string = Checkpoint.TYPE_OUT;
   private last_operation_date: string;
 
-
   private is_network_connected: boolean = false;
-
-  private readonly prefix: string = "d_";
 
   private CHECKPOINTS: any = [];
 
@@ -42,7 +38,6 @@ export class RemoteDataService
 
   constructor(private offlineCapableRestService: OfflineCapableRestService
     , private userService: UserService
-    /*, private storage: Storage*/
     , private network: Network
     , private platform: Platform)
   {
@@ -427,7 +422,6 @@ export class RemoteDataService
       })
         .then((res) =>
         {
-          console.log(res);
           _.each(res.entry_list, function (checkin)
           {
             let checkpoint: any = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
