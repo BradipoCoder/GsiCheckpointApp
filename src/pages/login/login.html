@@ -1,9 +1,9 @@
-<ion-grid>
+<ion-grid margin-top>
   <ion-row>
     <ion-col>
-      <p>
+      <ion-label color="darkest">
         Effettua il login per iniziare
-      </p>
+      </ion-label>
       <ion-list>
         <ion-item>
           <ion-label stacked>Nome utente</ion-label>
@@ -14,7 +14,7 @@
           <ion-input [(ngModel)]="password" type="password"></ion-input>
         </ion-item>
         <ion-item text-center>
-          <button ion-button outline color="lightest" (click)="login()">
+          <button ion-button large margin-top color="lightest" (click)="login()">
             INIZIA
           </button>
         </ion-item>

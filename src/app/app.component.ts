@@ -41,9 +41,9 @@ export class MyApp
     // Main menu items
     this.pages = [
       {title: 'Home', icon: 'home', component: HomePage},
-      {title: 'Configuration', icon: 'hammer', component: ConfigurationPage},
-      {title: 'Info', icon: 'information-circle', component: InfoPage},
-      {title: 'Logout', icon: 'exit', component: LogoutPage}
+      {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage},
+      /*{title: 'Informazioni', icon: 'information-circle', component: InfoPage},*/
+      {title: 'Esci', icon: 'power', component: LogoutPage}
     ];
 
     this.initializeApp();

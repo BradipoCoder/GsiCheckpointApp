@@ -3,7 +3,7 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>GSI Checkpoint - CFG</ion-title>
+    <ion-title float-left>Configurazione</ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -11,10 +11,6 @@
   <ion-grid *ngIf="viewIsReady">
     <ion-row>
       <ion-col>
-        <h1>
-          Configuration
-        </h1>
-
         <!--Lock|Unlock buttons-->
         <button *ngIf="isFormDisabled()" ion-button float-right icon-left (click)="onUnlockConfigForm()">
           <ion-icon name="unlock"></ion-icon>
@@ -39,13 +35,6 @@
 
         </ion-list>
 
-      </ion-col>
-    </ion-row>
-    <ion-row>
-      <ion-col>
-        <hr />
-        <code>{{cfg|json}}</code>
-        <hr />
       </ion-col>
     </ion-row>
   </ion-grid>

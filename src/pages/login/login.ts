@@ -9,8 +9,8 @@ import {RemoteDataService} from '../../services/remote.data.service';
 })
 export class LoginPage
 {
-  private username:string = 'admin';
-  private password:string = 'admin';
+  private username:string = '';
+  private password:string = '';
 
   constructor(public navCtrl: NavController
     , private loadingCtrl: LoadingController

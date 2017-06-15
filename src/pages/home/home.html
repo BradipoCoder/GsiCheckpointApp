@@ -3,11 +3,12 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-label float-left="">Home</ion-label>
+    <ion-title float-left>Home</ion-title>
     <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
     <!--<ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>-->
   </ion-navbar>
 </ion-header>
+
 
 
 <div *ngIf="isUserAuthenticated(); then authenticatedBlock else unknownUserBlock"></div>
@@ -32,7 +33,7 @@
 
 <ng-template #loginBlock>
   <ion-content>
-    <div class="header loginBlock" text-center>
+    <div class="header loginBlock" margin-top text-center>
       <ion-img src="assets/image/logo-traccia.png" class="logo-trace" width="228" height="128"></ion-img>
       <page-login></page-login>
     </div>
@@ -75,7 +76,7 @@
   <div *ngIf="isUserCheckedIn(); then checkedIn else checkedOut"></div>
 
   <ion-footer>
-    <div>FOOTER (AUTH USER)</div>
+    <div></div>
   </ion-footer>
 </ng-template>
 

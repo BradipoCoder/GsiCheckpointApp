@@ -19,7 +19,7 @@ export class UserService
   private autologin: any = {
     autologin: false,
     autologin_user: 'admin',
-    autologin_pwd: '',
+    autologin_pwd: 'admin',
   };
 
   constructor(private configurationService: ConfigurationService

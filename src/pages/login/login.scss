@@ -1,1 +1,31 @@
-page-login {}
+page-login {
+  ion-list{
+
+    ion-item.item{
+      background: color($colors, green-light);
+
+      .input-wrapper{
+        ion-label{
+          color: color($colors, lightest);
+        }
+        ion-input{
+          color: color($colors, lightest);
+        }
+      }
+
+      &.item-input{
+        .item-inner{
+          /*border: none !important;*/
+          box-shadow: none !important;
+          border-bottom: 1px solid color($colors, lightest) !important;
+        }
+      }
+
+      &.input-has-focus{
+        ion-label{
+          color: color($colors, darkest) !important;
+        }
+      }
+    }
+  }
+}

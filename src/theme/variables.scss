@@ -37,30 +37,31 @@ $colors: (
 
 // Ideally, we should use app-colors all around the application
 $app-colors: (
-  app-bg: color($colors, primary),
+  app-bg: color($colors, green-light),
   menu-bg: color($colors, green-light),
-  header-bg: color($colors, primary),
+  header-bg: color($colors, green-light),
   content-color: color($colors, darkest),
 
 );
 
+
 // Variable overrides
 // --------------------------------------------------
 $toolbar-background: color($app-colors, header-bg);
-$toolbar-md-title-font-size: 1.4rem;
-$toolbar-md-height: 32px;
-
-$list-background-color: color($colors, green-light);
-
-/*$item-md-divider-background: #ff00ff;
-$item-md-divider-color: #ff00ff;*/
-
-$text-input-highlight-color-valid: color($colors, green-dark);
-$text-input-highlight-color-invalid: color($colors, danger);
-
-
-$label-md-text-color: color($colors, lightest);
-$label-md-text-color-focused: color($colors, lightest);
+//$toolbar-md-title-font-size: 1.4rem;
+//$toolbar-md-height: 32px;
+//
+//$list-background-color: color($colors, green-light);
+//
+//$item-md-divider-background: #ff00ff;
+//$item-md-divider-color: #ff00ff;
+//
+//$text-input-highlight-color-valid: color($colors, green-dark);
+//$text-input-highlight-color-invalid: color($colors, danger);
+//
+//
+//$label-md-text-color: color($colors, lightest);
+//$label-md-text-color-focused: color($colors, lightest);
 
 
 

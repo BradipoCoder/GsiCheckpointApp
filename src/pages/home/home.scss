@@ -1,6 +1,6 @@
 page-home {
   ion-content.content {
-    background: color($colors, lightest);
+    //background: color($colors, lightest);
     text-align: center;
     ion-grid.grid {
       width: 95%;
@@ -47,23 +47,5 @@ page-home {
       }
     }
 
-    /*Generic*/
-    .user-avatar-wrapper
-    {
-      width:100px;
-      height:100px;
-      margin: 25px auto;
-      overflow: hidden;
-      border-radius:50%;
-      position: relative;
-      background-color: color($colors, lightest);
-      border: 5px solid color($colors, lightest);
-      img{
-        position: absolute;
-        top:50%;
-        left:50%;
-        transform: translate(-50%,-50%)
-      }
-    }
   }
 }
