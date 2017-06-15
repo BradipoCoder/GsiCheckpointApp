@@ -14,7 +14,7 @@ import {Network} from '@ionic-native/network';
 
 /* Services */
 import {ConfigurationService} from '../services/configuration.service';
-import {RestService} from '../services/rest.service';
+import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
 import {CodeScanService} from '../services/code.scan.service';
@@ -59,7 +59,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , SplashScreen
     , BarcodeScanner
     , ConfigurationService
-    , RestService
+    , OfflineCapableRestService
     , UserService
     , RemoteDataService
     , CodeScanService
@@ -69,3 +69,4 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
 })
 export class AppModule
 {}
+
