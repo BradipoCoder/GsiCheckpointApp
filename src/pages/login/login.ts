@@ -1,15 +1,16 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {NavController, LoadingController, ToastController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
+import _ from "lodash";
 
 @Component({
   selector: 'page-login',
   templateUrl: 'login.html'
 })
-export class LoginPage
+export class LoginPage implements OnInit
 {
-  private username:string = '';
+  private username:string = 'admin';
   private password:string = '';
 
   constructor(public navCtrl: NavController
@@ -17,7 +18,7 @@ export class LoginPage
     , private toastCtrl: ToastController
     , private userService: UserService
     , private remoteDataService: RemoteDataService)
-  {}
+  {/**/}
 
   login(): void
   {
@@ -31,6 +32,7 @@ export class LoginPage
       //console.log("LOGIN OK");
       this.remoteDataService.initialize().then(() => {
         loader.dismiss();
+        this.navCtrl.resize();
       }, (e) => {
         console.error(e);
         loader.dismiss();
@@ -47,4 +49,20 @@ export class LoginPage
 
   }
 
+  ngOnInit():void
+  {
+
+    if(!_.isEmpty(this.username) && !_.isEmpty(this.password)) {
+      console.log("AUTOLOGIN[user: "+this.username+"]...");
+      let chkInt = setInterval(function(self){
+        if(self.userService.is_initialized)
+        {
+          clearInterval(chkInt);
+          chkInt = null;
+          console.log("AUTOLOGIN READY");
+          self.login();
+        }
+      }, 1000, this);
+    }
+  }
 }

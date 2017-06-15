@@ -1,25 +1,23 @@
-<ion-header>
-  <ion-navbar>
-    <button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
-    </button>
-    <ion-title float-left>Home</ion-title>
-    <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
-    <!--<ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>-->
-  </ion-navbar>
-</ion-header>
-
-
-
+<!-- IS USER AUTHENTICATED -->
 <div *ngIf="isUserAuthenticated(); then authenticatedBlock else unknownUserBlock"></div>
-
-
-
 
 
 <!--The login block for unauthenticated users-->
 <ng-template #unknownUserBlock>
-  <div *ngIf="presentLogoutScreen; then logoutBlock else loginBlock"></div>
+  <ion-header>
+    <ion-navbar>
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+      <ion-title float-left>Home</ion-title>
+      <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
+      <!--<ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>-->
+    </ion-navbar>
+  </ion-header>
+
+  <ion-content class="logged-out">
+    <div *ngIf="presentLogoutScreen; then logoutBlock else loginBlock"></div>
+  </ion-content>
 
   <ion-footer>
     <div text-right float-right>
@@ -32,16 +30,13 @@
 
 
 <ng-template #loginBlock>
-  <ion-content>
     <div class="header loginBlock" margin-top text-center>
-      <ion-img src="assets/image/logo-traccia.png" class="logo-trace" width="228" height="128"></ion-img>
+      <img src="assets/image/logo-traccia.png" class="logo-trace" width="228" height="128" />
       <page-login></page-login>
     </div>
-  </ion-content>
 </ng-template>
 
 <ng-template #logoutBlock>
-  <ion-content>
     <div class="header logoutBlock">
       <ion-grid text-center>
         <ion-row>
@@ -64,7 +59,6 @@
         </ion-row>
       </ion-grid>
     </div>
-  </ion-content>
 </ng-template>
 
 
@@ -73,7 +67,20 @@
 
 <!--The block to use to show current status-->
 <ng-template #authenticatedBlock>
-  <div *ngIf="isUserCheckedIn(); then checkedIn else checkedOut"></div>
+  <ion-header>
+    <ion-navbar>
+      <button ion-button menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+      <ion-title float-left>Home</ion-title>
+      <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
+      <!--<ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>-->
+    </ion-navbar>
+  </ion-header>
+
+  <ion-content class="logged-in checked--in--out">
+    <div *ngIf="isUserCheckedIn(); then checkedIn else checkedOut"></div>
+  </ion-content>
 
   <ion-footer>
     <div></div>
@@ -82,7 +89,7 @@
 
 <!-- The block for checked OUT user -->
 <ng-template #checkedOut>
-  <ion-content class="logged-in checked-out">
+
     <div class="header">
       <ion-fab top right class="qr-scan-fab">
         <button ion-fab color="yellow-light" (tap)="scanQRCode(['IN'])">
@@ -113,13 +120,13 @@
         </ion-row>
       </ion-grid>
     </div>
-  </ion-content>
+
 </ng-template>
 
 
 <!-- The block for checked IN user -->
 <ng-template #checkedIn>
-  <ion-content class="logged-in checked-in">
+
     <div class="header">
       <ion-fab top right class="qr-scan-fab">
         <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
@@ -173,7 +180,7 @@
         </ion-row>
       </ion-grid>
     </div>
-  </ion-content>
+
 </ng-template>
 
 

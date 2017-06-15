@@ -8,7 +8,7 @@ import _ from "lodash";
 @Injectable()
 export class ConfigurationService
 {
-  private readonly UNLOCK_CODE: string = "GSI";
+  private readonly UNLOCK_CODE: string = "MEKIT2017";
 
   private readonly prefix: string = "cfg_";
 

@@ -15,12 +15,8 @@ export class UserService
   private user_data: any = {};
   private readonly prefix: string = "u_";
 
-  //@todo: make sure this is disabled before deployment ;)
-  private autologin: any = {
-    autologin: false,
-    autologin_user: 'admin',
-    autologin_pwd: 'admin',
-  };
+  public is_initialized = false;
+
 
   constructor(private configurationService: ConfigurationService
     , private restService: RestService
@@ -77,6 +73,7 @@ export class UserService
       {
         console.log("LOGOUT ERROR! " + e);
         self.authenticated = false;
+        self.is_initialized = false;
         self.user_data = {};
         resolve();
       });
@@ -160,6 +157,7 @@ export class UserService
   initialize(): Promise<any>
   {
     let self = this;
+    self.is_initialized = false;
 
     return new Promise(function (resolve, reject)
     {
@@ -170,17 +168,7 @@ export class UserService
         {
           cfg = value;
           self.restService.initialize(cfg.crm_url, cfg.api_version);
-          if (!_.isUndefined(self.autologin) && !_.isUndefined(self.autologin.autologin) && self.autologin.autologin)
-          {
-            console.warn("EXECUTING AUTOLOGIN!");
-            return self.login(self.autologin.autologin_user, self.autologin.autologin_pwd);
-          } else
-          {
-            resolve();
-          }
-        })
-        .then(() =>
-        {
+          self.is_initialized = true;
           resolve();
         })
         .catch((e) =>

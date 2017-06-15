@@ -44,18 +44,11 @@ export class HomePage implements OnInit, OnDestroy
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) =>
     {
       //this.lastScannedBarcode = JSON.stringify(barcodeData);
-      let toast = this.toastCtrl.create({
-        message: "Hai scansionato: " + JSON.stringify(barcodeData),
-        duration: 3000,
-        position: 'top'
-      });
-      toast.present();
-      this.remoteDataService.storeNewCheckin(barcodeData.text).then((newBarcodeId) => {
+      this.remoteDataService.storeNewCheckin(barcodeData.text).then((newCheckinId) => {
 
+        //user has just registered the EXIT checkin code
         if(!this.isUserCheckedIn())
         {
-          //user has just registered the EXIT checkin code
-
           // 1) store user data (before logout) present logged-out screen
           this.logoutScreenData.name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
           //this.logoutScreenData.img_url = this.userService.getUserData("img_url") || 'assets/image/user.png';
@@ -78,9 +71,19 @@ export class HomePage implements OnInit, OnDestroy
             console.log("Remote data service was reset.");
             //DONE
           });
+        } else {
+          let checkin = this.remoteDataService.getCheckin({id: newCheckinId});
+
+          let toast = this.toastCtrl.create({
+            message: checkin.name,
+            duration: 3000,
+            position: 'bottom'
+          });
+          toast.present();
+
         }
       }).catch((e) => {
-        console.error("Barcode registration error: " + e);
+        console.error("Errore registrazione: " + e);
         let toast = this.toastCtrl.create({
           message: e,
           duration: 3000,
@@ -90,7 +93,7 @@ export class HomePage implements OnInit, OnDestroy
       });
     }, (e) =>
     {
-      console.error("Error scanning barcode: " + e);
+      console.error("Errore scansione codice: " + e);
       let toast = this.toastCtrl.create({
         message: e,
         duration: 3000,

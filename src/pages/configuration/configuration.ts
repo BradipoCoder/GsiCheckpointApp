@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {NavController, ModalController} from 'ionic-angular';
+import {NavController, ModalController, ToastController} from 'ionic-angular';
 import {ConfigurationService} from '../../services/configuration.service';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
 import _ from "lodash";
@@ -16,6 +16,7 @@ export class ConfigurationPage implements OnInit
 
   constructor(
     public navCtrl: NavController,
+    private toastCtrl: ToastController,
     public modalCtrl: ModalController,
     private configurationService:ConfigurationService
   )
@@ -47,6 +48,14 @@ export class ConfigurationPage implements OnInit
     unlockModal.onDidDismiss(data => {
       let unlock_code = _.get(data, "unlock_code", "");
       this.configurationService.unlockWithCode(unlock_code);
+      if(!this.configurationService.isUnlocked()) {
+        let toast = this.toastCtrl.create({
+          message: 'Codice sblocco errato!',
+          duration: 3000,
+          position: 'top'
+        });
+        toast.present();
+      }
     });
     unlockModal.present();
   }

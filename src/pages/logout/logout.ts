@@ -19,8 +19,8 @@ export class LogoutPage
   {
     this.userService.logout().then(() => {
       console.log("Now logged out");
-      this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
+      this.navCtrl.push(HomePage);
     });
 
 
