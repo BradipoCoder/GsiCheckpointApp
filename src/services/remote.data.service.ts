@@ -10,7 +10,7 @@ import {Injectable} from '@angular/core';
 import {Platform} from "ionic-angular";
 import {Storage} from '@ionic/storage';
 import {Network} from '@ionic-native/network';
-import {RestService} from './rest.service';
+import {OfflineCapableRestService} from './offline.capable.rest.service';
 import {UserService} from './user.service';
 
 import {Checkpoint} from '../models/Checkpoint';
@@ -40,7 +40,7 @@ export class RemoteDataService
   private CHECKINS: any = [];
 
 
-  constructor(private restService: RestService
+  constructor(private offlineCapableRestService: OfflineCapableRestService
     , private userService: UserService
     , private storage: Storage
     , private network: Network
@@ -67,7 +67,7 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.restService.setRelationship(module_name, id, link_field_name, related_ids, parameters)
+      self.offlineCapableRestService.setRelationship(module_name, id, link_field_name, related_ids, parameters)
         .then((res) =>
         {
           //do something with res
@@ -92,7 +92,7 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.restService.setEntry(module_name, id, parameters)
+      self.offlineCapableRestService.setEntry(module_name, id, parameters)
         .then((res) =>
         {
           //do something with res
@@ -116,7 +116,7 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.restService.getEntries(module_name, parameters)
+      self.offlineCapableRestService.getEntries(module_name, parameters)
         .then((res) =>
         {
           //do something with res
@@ -140,7 +140,7 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.restService.getEntryList(module_name, parameters)
+      self.offlineCapableRestService.getEntryList(module_name, parameters)
         .then((res) =>
         {
           //do something with res

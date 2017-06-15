@@ -4,7 +4,7 @@
 import {Injectable} from '@angular/core';
 import {Storage} from '@ionic/storage';
 import {ConfigurationService} from './configuration.service';
-import {RestService} from './rest.service';
+import {OfflineCapableRestService} from './offline.capable.rest.service';
 import _ from "lodash";
 import md5 from '../../node_modules/blueimp-md5';
 
@@ -19,7 +19,7 @@ export class UserService
 
 
   constructor(private configurationService: ConfigurationService
-    , private restService: RestService
+    , private offlineCapableRestService: OfflineCapableRestService
     , private storage: Storage)
   {  }
 
@@ -64,7 +64,7 @@ export class UserService
     console.log("Logging out...");
     return new Promise(function (resolve)
     {
-      self.restService.logout().then(() =>
+      self.offlineCapableRestService.logout().then(() =>
       {
         self.authenticated = false;
         self.user_data = {};
@@ -93,11 +93,11 @@ export class UserService
     console.log("Authenticating user: " + username);
     return new Promise(function (resolve, reject)
     {
-      self.restService.login(username, password).then((res) =>
+      self.offlineCapableRestService.login(username, password).then((res) =>
       {
-        self.user_data = self.restService.getAuthenticatedUser();
+        self.user_data = self.offlineCapableRestService.getAuthenticatedUser();
         self.user_data.id = self.user_data.user_id;
-        return self.restService.getEntry('Users', self.user_data.id);
+        return self.offlineCapableRestService.getEntry('Users', self.user_data.id);
       }).then((user_full_data) =>
       {
         user_full_data = _.head(user_full_data.entry_list);
@@ -167,7 +167,7 @@ export class UserService
         .then((value) =>
         {
           cfg = value;
-          self.restService.initialize(cfg.crm_url, cfg.api_version);
+          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
           self.is_initialized = true;
           resolve();
         })
