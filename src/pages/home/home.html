@@ -82,7 +82,7 @@
 
 <!-- The block for checked OUT user -->
 <ng-template #checkedOut>
-  <ion-content>
+  <ion-content class="logged-in checked-out">
     <div class="header">
       <ion-fab top right class="qr-scan-fab">
         <button ion-fab color="yellow-light" (tap)="scanQRCode(['IN'])">
@@ -119,7 +119,7 @@
 
 <!-- The block for checked IN user -->
 <ng-template #checkedIn>
-  <ion-content>
+  <ion-content class="logged-in checked-in">
     <div class="header">
       <ion-fab top right class="qr-scan-fab">
         <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">

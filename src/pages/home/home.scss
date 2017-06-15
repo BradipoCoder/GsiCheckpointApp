@@ -1,5 +1,11 @@
 page-home {
   ion-content.content {
+    &.logged-in{
+      background: color($colors, lightest);
+    }
+    &.logged-out{
+
+    }
     //background: color($colors, lightest);
     text-align: center;
     ion-grid.grid {
