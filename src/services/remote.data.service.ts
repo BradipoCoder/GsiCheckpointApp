@@ -374,7 +374,8 @@ export class RemoteDataService
     {
       self.getEntryList('mkt_Checkin', {
         select_fields: ["id", "mkt_checkpoint_id_c", "checkin_date", "name"],
-        query: 'user_id_c = ' + current_user_id + ' AND checkin_date >= "' + self.last_operation_date + '"',
+        /*query: 'user_id_c = ' + current_user_id + ' AND checkin_date >= "' + self.last_operation_date + '"',*/
+        query: 'checkin_date >= "' + self.last_operation_date + '"',
         order_by: 'checkin_date ASC',
         max_results: 50
       })
@@ -419,12 +420,13 @@ export class RemoteDataService
     {
       self.getEntryList('mkt_Checkin', {
         select_fields: ["id", "mkt_checkpoint_id_c", "checkin_date"],
-        query: 'user_id_c = ' + current_user_id,
+        /*query: "assigned_user_id = " + current_user_id,*/
         order_by: 'checkin_date DESC',
         max_results: 50
       })
         .then((res) =>
         {
+          console.log(res);
           _.each(res.entry_list, function (checkin)
           {
             let checkpoint: any = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});

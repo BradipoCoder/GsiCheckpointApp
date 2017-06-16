@@ -10,8 +10,8 @@ import _ from "lodash";
 })
 export class LoginPage implements OnInit
 {
-  private username:string = 'admin';
-  private password:string = '';
+  private username:string = 'user2';
+  private password:string = 'user2';
 
   constructor(public navCtrl: NavController
     , private loadingCtrl: LoadingController
