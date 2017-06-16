@@ -10,24 +10,42 @@
  *
  */
 import {Injectable} from '@angular/core';
-import {Storage} from '@ionic/storage';
+import {Platform} from "ionic-angular";
+import {Network} from '@ionic-native/network';
 import {RestService} from "./rest.service";
+import PouchDB from "pouchdb";
+import _ from "lodash";
+import Rx from "rxjs/Rx";
+import {Observable} from "rxjs/Observable";
+import {Subject} from "rxjs/Subject";
+
 
 @Injectable()
 export class OfflineCapableRestService extends RestService
 {
-  private is_network_connected: boolean = false;
+  private is_network_connected: boolean;
+  private networkStateEventStream: Subject<boolean> = new Rx.Subject();
+  public networkConnectedObservable: Observable<boolean> = Rx.Observable.create(e => this.networkStateEventStream = e);
 
-  private readonly prefix: string = "d_";
 
-
-  constructor(private storage: Storage)
+  constructor(private platform: Platform, private network: Network)
   {
     super();
   }
 
 
-
+  /**
+   *
+   * @returns {boolean}
+   */
+  public setIsNetworkConnected(is_connected: boolean): void
+  {
+    if (this.is_network_connected !== is_connected)
+    {
+      this.is_network_connected = is_connected;
+      this.networkStateEventStream.next(is_connected);
+    }
+  }
 
   /**
    * @param {string} rest_api_url
@@ -36,5 +54,26 @@ export class OfflineCapableRestService extends RestService
   initialize(rest_api_url: string, rest_api_version: string): void
   {
     super.initialize(rest_api_url, rest_api_version);
+
+
+    /* Subsribe to network and observe connection/disconnection */
+    this.platform.ready().then(() =>
+    {
+      let conn = true;
+      if (!this.platform.is("core"))
+      {
+        conn = !_.includes(['unknown', 'none'], this.network.type);
+        this.network.onConnect().subscribe(() =>
+        {
+          this.setIsNetworkConnected(true);
+        });
+
+        this.network.onDisconnect().subscribe(() =>
+        {
+          this.setIsNetworkConnected(false);
+        });
+      }
+      this.setIsNetworkConnected(conn);
+    });
   }
 }

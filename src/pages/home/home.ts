@@ -1,7 +1,9 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {Platform, NavController, ToastController} from 'ionic-angular';
+import {Network} from '@ionic-native/network';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
+import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
 import {CodeScanService} from '../../services/code.scan.service';
 import {Checkpoint} from '../../models/Checkpoint';
 import {ConfigurationPage} from '../configuration/configuration';
@@ -15,8 +17,9 @@ import * as moment from 'moment';
 })
 export class HomePage implements OnInit, OnDestroy
 {
-  private autoUpdateInterval = null;
-  private shiftTotalDuration: string = "...";
+  public is_network_connected:boolean;
+
+  private shiftTotalDuration: string = "";
 
   private presentLogoutScreen:boolean = false;
   private logoutScreenData:any = {
@@ -29,10 +32,12 @@ export class HomePage implements OnInit, OnDestroy
 
   constructor(public navCtrl: NavController
     , private platform: Platform
+    , private network: Network
     , public toastCtrl: ToastController
     , public userService: UserService
     , public codeScanService: CodeScanService
-    , public remoteDataService: RemoteDataService)
+    , public remoteDataService: RemoteDataService
+    , public offlineCapableRestService: OfflineCapableRestService)
   {
   }
 
@@ -122,11 +127,12 @@ export class HomePage implements OnInit, OnDestroy
   /**
    *
    * @returns {boolean}
-   */
+
   isConnected(): boolean
   {
-    return this.remoteDataService.isNetworkConnected();
-  }
+    return this.offlineCapableRestService.isNetworkConnected();
+  }*/
+
 
   /**
    *
@@ -191,28 +197,41 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
-   * Called in a setInteval
+   * Auto-self-calling function
    * @param {HomePage} self
    */
   private autoUpdateIntevalExecution(self: HomePage): void
   {
     self.recalculateShiftTotalDuration(self);
     self.recalculateLastCheckinDuration(self);
+    setTimeout(self.autoUpdateIntevalExecution, 5000, self);
+  }
+
+  protected fakeNetworkStateChange()
+  {
+    this.offlineCapableRestService.setIsNetworkConnected(this.is_network_connected);
   }
 
   //------------------------------------------------------------------------------------------------------INIT & DESTROY
   ngOnInit(): void
   {
-    console.log("HP ngINIT!");
-    if (_.isNull(this.autoUpdateInterval))
-    {
-      this.autoUpdateInterval = setInterval(this.autoUpdateIntevalExecution, (5 * 1000), this);
-    }
+    console.log("HP ngOnInit!");
+    let self = this;
+
+    this.autoUpdateIntevalExecution(this);
+
+
+    this.offlineCapableRestService.networkConnectedObservable.subscribe(
+      function (is_network_connected)
+      {
+        console.log('Connection state: ' + is_network_connected);
+        self.is_network_connected = is_network_connected;
+      });
   }
+
 
   ngOnDestroy(): void
   {
-    clearInterval(this.autoUpdateInterval);
-    this.autoUpdateInterval = null;
+    console.log("HP ngOnDestroy!");
   }
 }
