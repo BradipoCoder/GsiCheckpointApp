@@ -1,5 +1,5 @@
 {
-    "name": "Traccia con Mekit",
+    "name": "traccia_con_mekit",
     "description": "Traccia con Mekit",
     "version": "0.0.3",
     "author": "Mekit",
@@ -27,8 +27,6 @@
         "@ionic-native/splash-screen": "3.7.0",
         "@ionic-native/status-bar": "3.7.0",
         "@ionic/storage": "^2.0.1",
-        "@types/axios": "^0.14.0",
-        "@types/lodash": "^4.14.65",
         "axios": "^0.16.1",
         "bluebird": "^3.5.0",
         "blueimp-md5": "^2.7.0",
@@ -48,6 +46,7 @@
         "lodash": "^4.17.4",
         "moment": "^2.18.1",
         "phonegap-plugin-barcodescanner": "^6.0.6",
+        "pouchdb": "^6.2.0",
         "qs": "^6.4.0",
         "rxjs": "5.1.1",
         "sugarcrm-js-rest-consumer": "^1.0.0",
@@ -59,6 +58,8 @@
         "@ionic/app-scripts": "1.3.7",
         "@ionic/cli-plugin-cordova": "^1.3.0",
         "@ionic/cli-plugin-ionic-angular": "^1.3.0",
+        "@types/axios": "^0.14.0",
+        "@types/lodash": "^4.14.65",
         "typescript": "2.2.1"
     },
     "cordova": {

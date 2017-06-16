@@ -11,7 +11,7 @@
       </button>
       <ion-title float-left>Home</ion-title>
       <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
-      <!--<ion-icon float-right name="{{isConnected() ? 'cloud' : 'thunderstorm'}}"></ion-icon>-->
+      <ion-icon float-right name="{{is_network_connected ? 'cloud' : 'thunderstorm'}}"></ion-icon>
     </ion-navbar>
   </ion-header>
 
@@ -20,6 +20,14 @@
   </ion-content>
 
   <ion-footer>
+
+    <div text-left float-left *ngIf="!isMobileDevice()">
+      <ion-label>
+        <ion-checkbox color="dark" [(ngModel)]="is_network_connected" (ionChange)="fakeNetworkStateChange()"></ion-checkbox>
+        NETWORK
+      </ion-label>
+    </div>
+
     <div text-right float-right>
       <img class="footer-logo" src="assets/image/logo-gsi.png" class="logo-trace" width="165" height="50" />
     </div>

@@ -8,8 +8,8 @@
  */
 import {Injectable} from '@angular/core';
 import {Platform} from "ionic-angular";
-
 import {Network} from '@ionic-native/network';
+
 import {OfflineCapableRestService} from './offline.capable.rest.service';
 import {UserService} from './user.service';
 
@@ -28,8 +28,6 @@ export class RemoteDataService
 
   private last_operation_type: string = Checkpoint.TYPE_OUT;
   private last_operation_date: string;
-
-  private is_network_connected: boolean = false;
 
   private CHECKPOINTS: any = [];
 
@@ -457,15 +455,6 @@ export class RemoteDataService
   }
 
   /**
-   *
-   * @returns {boolean}
-   */
-  public isNetworkConnected(): boolean
-  {
-    return this.is_network_connected;
-  }
-
-  /**
    * Makes sure all keys in the default_config are present in the storage
    * (Should be called on application initialization)
    *
@@ -480,31 +469,8 @@ export class RemoteDataService
       //reset
       self.last_operation_type = Checkpoint.TYPE_OUT;
       self.last_operation_date = '';
-      self.is_network_connected = false;
       self.CHECKPOINTS = [];
       self.CHECKINS = [];
-
-      //set network state and listen to changes
-      if (!self.platform.is("core"))
-      {
-        self.network.onConnect().subscribe(() =>
-        {
-          self.is_network_connected = true;
-        });
-
-        self.network.onDisconnect().subscribe(() =>
-        {
-          console.log('Network disconnected!');
-          self.is_network_connected = false;
-        });
-
-        // The `type` property will return one of the following connection types: `unknown`, `ethernet`, `wifi`, `2g`, `3g`, `4g`, `cellular`, `none`
-        self.is_network_connected = (self.network.type != 'none');
-
-      } else
-      {
-        self.is_network_connected = true;
-      }
 
       if (!self.userService.isAuthenticated())
       {
