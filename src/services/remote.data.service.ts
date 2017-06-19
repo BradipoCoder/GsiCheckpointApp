@@ -189,6 +189,7 @@ export class RemoteDataService
       self.getEntryList('mkt_Checkpoint', {
         select_fields: ["id", "type", "code", "name", "description", "account_id_c", "account_reference"],
         order_by: 'account_id_c ASC',
+        max_results: 999
       })
         .then((res) =>
         {
@@ -377,7 +378,7 @@ export class RemoteDataService
         /*query: 'user_id_c = ' + current_user_id + ' AND checkin_date >= "' + self.last_operation_date + '"',*/
         query: 'checkin_date >= "' + self.last_operation_date + '"',
         order_by: 'checkin_date ASC',
-        max_results: 50
+        max_results: 100
       })
         .then((res) =>
         {
