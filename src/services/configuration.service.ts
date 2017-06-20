@@ -58,7 +58,8 @@ export class ConfigurationService
       self.db.allDocs({include_docs: true, descending: true})
         .then((res) =>
         {
-          _.each(res.rows, function(row) {
+          _.each(res.rows, function (row)
+          {
             let key = row.key;
             answer[key] = row.doc.cfg_value;
           });
@@ -124,16 +125,27 @@ export class ConfigurationService
 
       self.db.get(key).then((doc) =>
       {
-        if(skip_if_exists || doc.cfg_value == value) {
+        if (skip_if_exists || doc.cfg_value == value)
+        {
           resolve();
-        } else {
+        } else
+        {
           self.db.put({
             _id: key,
             _rev: doc._rev,
             cfg_value: value
-          }).then(() =>
+          }).then((res) =>
           {
-            resolve();
+            if (!_.isUndefined(res.ok) && res.ok)
+            {
+              resolve(value);
+            } else
+            {
+              return reject(new Error("Configuration service put operation failed."));
+            }
+          }).catch((e) =>
+          {
+            reject(e);
           });
         }
       }).catch(() =>
@@ -142,9 +154,18 @@ export class ConfigurationService
         self.db.put({
           _id: key,
           cfg_value: value
-        }).then(() =>
+        }).then((res) =>
         {
-          resolve();
+          if (!_.isUndefined(res.ok) && res.ok)
+          {
+            resolve(value);
+          } else
+          {
+            return reject(new Error("Configuration service put operation failed."));
+          }
+        }).catch((e) =>
+        {
+          reject(e);
         });
       });
     });

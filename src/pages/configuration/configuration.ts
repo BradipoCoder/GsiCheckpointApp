@@ -1,7 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {NavController, ModalController, ToastController} from 'ionic-angular';
 import {ConfigurationService} from '../../services/configuration.service';
+import {UserService} from '../../services/user.service';
+import {RemoteDataService} from '../../services/remote.data.service';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
+import MekitTracerApp from '../../app/app.component';
+import {HomePage} from "../home/home";
 import _ from "lodash";
 
 
@@ -18,7 +22,9 @@ export class ConfigurationPage implements OnInit
     public navCtrl: NavController,
     private toastCtrl: ToastController,
     public modalCtrl: ModalController,
-    private configurationService:ConfigurationService
+    private configurationService:ConfigurationService,
+    private userService:UserService,
+    private remoteDataService: RemoteDataService
   )
   {
     this.viewIsReady = false;
@@ -60,6 +66,25 @@ export class ConfigurationPage implements OnInit
     unlockModal.present();
   }
 
+  resetApplication():void
+  {
+    this.configurationService.unlockWithCode("");//block it
+    this.userService.logout().then(() => {
+      console.log("User is now logged out.");
+      return this.userService.initialize();
+    }).then(() =>
+    {
+      console.log("User service initialized.");
+      return this.remoteDataService.initialize();
+    }).then(() =>
+    {
+      console.log("RemoteData service initialized.");
+      console.log("APPLICATION RESET OK");
+      this.navCtrl.push(HomePage);
+      this.navCtrl.setRoot(HomePage);
+    });
+  }
+
   /**
    * Lock the configuration service
    * @param value
@@ -79,6 +104,7 @@ export class ConfigurationPage implements OnInit
 
   ngOnInit():void
   {
+    console.log("CONFINIT");
     this.getConfiguration();
   }
 

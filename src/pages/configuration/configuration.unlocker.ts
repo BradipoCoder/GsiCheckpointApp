@@ -10,12 +10,10 @@ import {ViewController} from 'ionic-angular';
 })
 export class ConfigurationUnlockerPage
 {
-  unlock_code:string;
+  unlock_code:string = "";
 
   constructor(public viewCtrl: ViewController)
-  {
-    this.unlock_code = "";
-  }
+  {}
 
   dismiss() {
     let data = { unlock_code: this.unlock_code };

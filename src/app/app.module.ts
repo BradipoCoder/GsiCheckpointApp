@@ -2,7 +2,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {ErrorHandler, NgModule} from "@angular/core";
 import {FormsModule} from '@angular/forms';
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
-import {MyApp} from "./app.component";
+import {MekitTracerApp} from "./app.component";
 
 /* Ionic */
 import {StatusBar} from "@ionic-native/status-bar";
@@ -31,7 +31,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
 
 @NgModule({
   declarations: [
-    MyApp
+    MekitTracerApp
     , HomePage
     , InfoPage
     , LoginPage
@@ -42,11 +42,11 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
   imports: [
     BrowserModule
     , FormsModule
-    , IonicModule.forRoot(MyApp)
+    , IonicModule.forRoot(MekitTracerApp)
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp
+    MekitTracerApp
     , HomePage
     , InfoPage
     , LoginPage
