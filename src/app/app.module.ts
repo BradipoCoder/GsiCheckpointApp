@@ -8,7 +8,6 @@ import {MekitTracerApp} from "./app.component";
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-/*import {IonicStorageModule} from '@ionic/storage';*/
 import {Network} from '@ionic-native/network';
 
 
@@ -69,4 +68,3 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
 })
 export class AppModule
 {}
-

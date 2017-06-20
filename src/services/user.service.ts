@@ -2,7 +2,6 @@
  * Created by jack on 05/06/17.
  */
 import {Injectable} from '@angular/core';
-import {Storage} from '@ionic/storage';
 import {ConfigurationService} from './configuration.service';
 import {OfflineCapableRestService} from './offline.capable.rest.service';
 import _ from "lodash";
@@ -19,8 +18,7 @@ export class UserService
 
 
   constructor(private configurationService: ConfigurationService
-    , private offlineCapableRestService: OfflineCapableRestService
-    , private storage: Storage)
+    , private offlineCapableRestService: OfflineCapableRestService)
   {  }
 
   /**
@@ -165,8 +163,6 @@ export class UserService
       self.configurationService.getConfigObject()
         .then((cfg) =>
         {
-          self.restService.initialize(cfg.crm_url, cfg.api_version);
-          cfg = value;
           self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
           self.is_initialized = true;
           if (!(_.isEmpty(cfg.crm_username) && _.isEmpty(cfg.crm_password)))
