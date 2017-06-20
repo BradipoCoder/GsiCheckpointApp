@@ -42,8 +42,6 @@ export class MekitTracerApp
     ];
 
     this.initializeApp();
-
-
   }
 
   initializeApp()

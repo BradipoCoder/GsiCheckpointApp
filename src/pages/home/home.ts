@@ -4,6 +4,7 @@ import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {CodeScanService} from '../../services/code.scan.service';
 import {Checkpoint} from '../../models/Checkpoint';
+import {ConfigurationPage} from '../configuration/configuration';
 import {Checkin} from '../../models/Checkin';
 import _ from "lodash";
 import * as moment from 'moment';
@@ -101,6 +102,12 @@ export class HomePage implements OnInit, OnDestroy
       });
       toast.present();
     });
+  }
+
+  goToConfigurationPage(): void
+  {
+    this.navCtrl.push(ConfigurationPage);
+    this.navCtrl.setRoot(ConfigurationPage);
   }
 
   /**

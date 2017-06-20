@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {NavController, ModalController, ToastController} from 'ionic-angular';
+import {NavController, ModalController, ToastController, LoadingController} from 'ionic-angular';
 import {ConfigurationService} from '../../services/configuration.service';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
@@ -19,12 +19,13 @@ export class ConfigurationPage implements OnInit
   viewIsReady:boolean;
 
   constructor(
-    public navCtrl: NavController,
-    private toastCtrl: ToastController,
-    public modalCtrl: ModalController,
-    private configurationService:ConfigurationService,
-    private userService:UserService,
-    private remoteDataService: RemoteDataService
+    public navCtrl: NavController
+    , private toastCtrl: ToastController
+    , public modalCtrl: ModalController
+    , private loadingCtrl: LoadingController
+    , private configurationService:ConfigurationService
+    , private userService:UserService
+    , private remoteDataService: RemoteDataService
   )
   {
     this.viewIsReady = false;
@@ -50,7 +51,7 @@ export class ConfigurationPage implements OnInit
    */
   onUnlockConfigForm(value):void
   {
-    let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage);
+    let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage, false, {});
     unlockModal.onDidDismiss(data => {
       let unlock_code = _.get(data, "unlock_code", "");
       this.configurationService.unlockWithCode(unlock_code);
@@ -68,6 +69,12 @@ export class ConfigurationPage implements OnInit
 
   resetApplication():void
   {
+    let loader = this.loadingCtrl.create({
+      content: "Elaborazione in corso...",
+      duration: 30000
+    });
+    loader.present();
+
     this.configurationService.unlockWithCode("");//block it
     this.userService.logout().then(() => {
       console.log("User is now logged out.");
@@ -82,6 +89,9 @@ export class ConfigurationPage implements OnInit
       console.log("APPLICATION RESET OK");
       this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
+      loader.dismiss();
+    }).catch((e) => {
+      loader.dismiss();
     });
   }
 

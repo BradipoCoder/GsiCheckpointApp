@@ -20,7 +20,8 @@ export class UserService
 
   constructor(private configurationService: ConfigurationService
     , private restService: RestService)
-  {  }
+  {
+  }
 
   /**
    *
@@ -116,17 +117,16 @@ export class UserService
   }
 
 
-
   /**
    * Provide a registered user hash (hashed password)
    *
    * @param {string} user
    * @returns {Promise<any>}
 
-  getRegisteredUserHash(user: string): Promise<any>
-  {
-    return this.storage.get(this.getUserHashKey(user));
-  };*/
+   getRegisteredUserHash(user: string): Promise<any>
+   {
+     return this.storage.get(this.getUserHashKey(user));
+   };*/
 
   /**
    * Registers a user hash (hashed password)
@@ -135,12 +135,12 @@ export class UserService
    * @param {string} hash
    * @returns {Promise<any>}
 
-  registerUserHash(user: string, hash: string): Promise<any>
-  {
-    let key = this.getUserHashKey(user);
-    console.log("Registering user hash(" + key + "): " + hash);
-    return this.storage.set(key, hash);
-  };*/
+   registerUserHash(user: string, hash: string): Promise<any>
+   {
+     let key = this.getUserHashKey(user);
+     console.log("Registering user hash(" + key + "): " + hash);
+     return this.storage.set(key, hash);
+   };*/
 
   /**
    *
@@ -162,15 +162,27 @@ export class UserService
 
     return new Promise(function (resolve, reject)
     {
-      let cfg: any;
-
       self.configurationService.getConfigObject()
-        .then((value) =>
+        .then((cfg) =>
         {
-          cfg = value;
           self.restService.initialize(cfg.crm_url, cfg.api_version);
           self.is_initialized = true;
-          resolve();
+          if (!(_.isEmpty(cfg.crm_username) && _.isEmpty(cfg.crm_password)))
+          {
+            console.log("AUTOLOGIN("+cfg.crm_username+")...");
+            self.login(cfg.crm_username, cfg.crm_password).then(() =>
+            {
+              resolve();
+            }).catch((e) =>
+            {
+              console.warn("Autologin failed - configuration is wrong?! " + e);
+              resolve();
+            });
+          } else
+          {
+            console.warn("Configuration is incomplete!");
+            resolve();
+          }
         })
         .catch((e) =>
         {

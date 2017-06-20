@@ -33,6 +33,18 @@
     <div class="header loginBlock" margin-top text-center>
       <img src="assets/image/logo-traccia.png" class="logo-trace" width="228" height="128" />
     </div>
+  <ion-grid margin-top>
+    <ion-row>
+      <ion-col>
+        <ion-label color="darkest">
+          Per iniziare ad usare l'applicazione completa la configurazione.
+        </ion-label>
+        <button ion-button large margin-top color="yellow-light" (click)="goToConfigurationPage()">
+          Configura
+        </button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ng-template>
 
 <ng-template #logoutBlock>
