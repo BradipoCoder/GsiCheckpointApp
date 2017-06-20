@@ -12,7 +12,7 @@
     <ion-row>
       <ion-col>
         <!--Lock|Unlock buttons-->
-        <button *ngIf="isFormDisabled()" ion-button float-right icon-left (click)="onUnlockConfigForm()">
+        <button *ngIf="isFormDisabled()" ion-button float-right icon-left (click)="onUnlockConfigForm()" color="danger">
           <ion-icon name="unlock"></ion-icon>
           <ion-label>Sblocca</ion-label>
         </button>
@@ -23,20 +23,41 @@
 
         <ion-list>
 
+          <ion-list-header>Applicazione</ion-list-header>
           <ion-item>
-            <ion-label stacked>CRM Url</ion-label>
+            <ion-label stacked>Url applicazione</ion-label>
             <ion-input [(ngModel)]="cfg.crm_url" (ngModelChange)="onConfigChange('crm_url', $event)" [disabled]="isFormDisabled()"></ion-input>
           </ion-item>
 
           <ion-item>
-            <ion-label stacked>CRM Rest API version</ion-label>
+            <ion-label stacked>Versione Rest API</ion-label>
             <ion-input [(ngModel)]="cfg.api_version" (ngModelChange)="onConfigChange('api_version', $event)" [disabled]="isFormDisabled()"></ion-input>
+          </ion-item>
+
+          <ion-list-header>Utente</ion-list-header>
+          <ion-item>
+            <ion-label stacked>Nome utente</ion-label>
+            <ion-input [(ngModel)]="cfg.crm_username" (ngModelChange)="onConfigChange('crm_username', $event)" [disabled]="isFormDisabled()"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label stacked>Password</ion-label>
+            <ion-input type="password" [(ngModel)]="cfg.crm_password" (ngModelChange)="onConfigChange('crm_password', $event)" [disabled]="isFormDisabled()"></ion-input>
           </ion-item>
 
         </ion-list>
 
       </ion-col>
     </ion-row>
+
+    <ion-row *ngIf="!isFormDisabled()">
+      <ion-col text-md-center>
+        <button ion-button icon-left (click)="onUnlockConfigForm()" color="dark">
+          <ion-icon name="unlock"></ion-icon>
+          <ion-label>Ricarica applicazione</ion-label>
+        </button>
+      </ion-col>
+    </ion-row>
+
   </ion-grid>
 </ion-content>
 

@@ -1,1 +1,10 @@
-page-configuration {}
+page-configuration {
+  ion-content.content{
+    background: color($colors, lightest);
+    ion-list-header{
+      border-top:none;
+      font-size: 1.8rem;
+      background: color($colors, yellow-light);
+    }
+  }
+}

@@ -8,7 +8,7 @@ import _ from "lodash";
 @Injectable()
 export class ConfigurationService
 {
-  private readonly UNLOCK_CODE: string = "MEKIT2017";
+  private readonly UNLOCK_CODE: string = "MKT";
 
   private readonly prefix: string = "cfg_";
 
@@ -17,6 +17,8 @@ export class ConfigurationService
   default_config: any = {
     crm_url: 'http://gsi.crm.mekit.it'
     , api_version: 'v4_1'
+    , crm_username: ''
+    , crm_password: ''
   };
 
   constructor(private storage: Storage)
