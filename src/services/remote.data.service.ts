@@ -8,7 +8,7 @@
  */
 import {Injectable} from '@angular/core';
 import {Platform} from "ionic-angular";
-import {Storage} from '@ionic/storage';
+//import {Storage} from '@ionic/storage';
 import {Network} from '@ionic-native/network';
 import {RestService} from './rest.service';
 import {UserService} from './user.service';
@@ -42,7 +42,7 @@ export class RemoteDataService
 
   constructor(private restService: RestService
     , private userService: UserService
-    , private storage: Storage
+    /*, private storage: Storage*/
     , private network: Network
     , private platform: Platform)
   {

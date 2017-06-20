@@ -8,7 +8,7 @@ import {MyApp} from "./app.component";
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-import {IonicStorageModule} from '@ionic/storage';
+/*import {IonicStorageModule} from '@ionic/storage';*/
 import {Network} from '@ionic-native/network';
 
 
@@ -43,11 +43,6 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     BrowserModule
     , FormsModule
     , IonicModule.forRoot(MyApp)
-    , IonicStorageModule.forRoot(
-      {
-        name: '__mydb',
-        driverOrder: ['indexeddb', 'sqlite', 'websql']
-      })
   ],
   bootstrap: [IonicApp],
   entryComponents: [

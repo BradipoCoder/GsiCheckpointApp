@@ -2,17 +2,19 @@
  * Created by jack on 05/06/17.
  */
 import {Injectable} from '@angular/core';
-import {Storage} from '@ionic/storage';
+import PouchDB from "pouchdb";
 import _ from "lodash";
 
 @Injectable()
 export class ConfigurationService
 {
+  private db: any;
+
   private readonly UNLOCK_CODE: string = "MKT";
 
   private readonly prefix: string = "cfg_";
 
-  private is_unlocked:boolean = false;
+  private is_unlocked: boolean = false;
 
   default_config: any = {
     crm_url: 'http://gsi.crm.mekit.it'
@@ -21,12 +23,12 @@ export class ConfigurationService
     , crm_password: ''
   };
 
-  constructor(private storage: Storage)
+  constructor()
   {
   }
 
 
-  unlockWithCode(code:string):boolean
+  unlockWithCode(code: string): boolean
   {
     this.is_unlocked = (code === this.UNLOCK_CODE);
     return this.is_unlocked;
@@ -36,7 +38,7 @@ export class ConfigurationService
    *
    * @returns {boolean}
    */
-  isUnlocked():boolean
+  isUnlocked(): boolean
   {
     return this.is_unlocked;
   }
@@ -53,20 +55,19 @@ export class ConfigurationService
 
     return new Promise(function (resolve, reject)
     {
-      self.storage.forEach(function (value, key)
-      {
-        if (_.startsWith(key, self.prefix))
+      self.db.allDocs({include_docs: true, descending: true})
+        .then((res) =>
         {
-          let configKey = _.replace(key, self.prefix, "");
-          _.set(answer, configKey, value);
-        }
-      }).then(() =>
-      {
-        resolve(answer);
-      }).catch((e) =>
-      {
-        reject(e);
-      });
+          _.each(res.rows, function(row) {
+            let key = row.key;
+            answer[key] = row.doc.cfg_value;
+          });
+          resolve(answer);
+        })
+        .catch((e) =>
+        {
+          reject(e);
+        });
     });
   };
 
@@ -78,8 +79,23 @@ export class ConfigurationService
    */
   getConfig(key): Promise<any>
   {
-    let configKey = this.prefix + key;
-    return this.storage.get(configKey);
+    let answer = null;
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      self.db.get(key).then((doc) =>
+      {
+        if (!_.isUndefined(doc.cfg_value))
+        {
+          answer = doc.cfg_value;
+        }
+        resolve(answer);
+      }).catch((e) =>
+      {
+        reject(e);
+      });
+    });
   };
 
   /**
@@ -87,21 +103,51 @@ export class ConfigurationService
    *
    * @param {string} key
    * @param {any} value
+   * @param {boolean} skip_if_exists
    * @returns {Promise<any>}
    */
-  setConfig(key, value): Promise<any>
+  setConfig(key, value, skip_if_exists = false): Promise<any>
   {
-    if(!this.isUnlocked())
-    {
-      throw new Error("Configuration service is locked! Unlock first.");
-    }
+    let self = this;
 
-    if(_.isNull(value) || _.isEmpty(value))
+    return new Promise(function (resolve, reject)
     {
-      value = _.get(this.default_config, key);
-    }
-    let configKey = this.prefix + key;
-    return this.storage.set(configKey, value);
+      if (!self.isUnlocked())
+      {
+        return reject(new Error("Configuration service is locked! Unlock first."));
+      }
+
+      if (_.isNull(value) || _.isEmpty(value))
+      {
+        value = _.get(self.default_config, key);
+      }
+
+      self.db.get(key).then((doc) =>
+      {
+        if(skip_if_exists || doc.cfg_value == value) {
+          resolve();
+        } else {
+          self.db.put({
+            _id: key,
+            _rev: doc._rev,
+            cfg_value: value
+          }).then(() =>
+          {
+            resolve();
+          });
+        }
+      }).catch(() =>
+      {
+        //doc is not there - make a new one
+        self.db.put({
+          _id: key,
+          cfg_value: value
+        }).then(() =>
+        {
+          resolve();
+        });
+      });
+    });
   };
 
   /**
@@ -116,24 +162,19 @@ export class ConfigurationService
 
     return new Promise(function (resolve, reject)
     {
-      self.getConfigObject().then((config) =>
+      self.db = new PouchDB('configuration');
+
+      self.is_unlocked = true;
+      let setPromises = [];
+      _.each(self.default_config, function (v, k)
       {
-        config = _.defaults(config, self.default_config);
-        self.is_unlocked = true;
-        let setPromises = [];
-        _.each(config, function (v, k)
-        {
-          setPromises.push(self.setConfig(k, v));
-        });
-        Promise.all(setPromises).then(() =>
-        {
-          self.is_unlocked = false;
-          resolve();
-        }).catch((e) =>
-        {
-          self.is_unlocked = false;
-          reject(e);
-        });
+        setPromises.push(self.setConfig(k, v, true));
+      });
+
+      Promise.all(setPromises).then(() =>
+      {
+        self.is_unlocked = false;
+        resolve();
       }).catch((e) =>
       {
         self.is_unlocked = false;
@@ -142,3 +183,5 @@ export class ConfigurationService
     });
   }
 }
+
+
