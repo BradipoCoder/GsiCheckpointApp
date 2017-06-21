@@ -1,7 +1,6 @@
 /**
- * Created by jack on 13/06/17.
+ * Checkpoint Model
  */
-
 export class Checkpoint
 {
   public static readonly TYPE_IN: string = "IN";
