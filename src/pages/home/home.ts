@@ -55,6 +55,14 @@ export class HomePage implements OnInit, OnDestroy
         //user has just registered the EXIT checkin code
         if(!this.isUserCheckedIn())
         {
+
+          //@todo: rethink this!
+          let toast = this.toastCtrl.create({
+            message: "!!!",
+            duration: 10000,
+            position: 'bottom'
+          });
+          /*
           // 1) store user data (before logout) present logged-out screen
           this.logoutScreenData.name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
           //this.logoutScreenData.img_url = this.userService.getUserData("img_url") || 'assets/image/user.png';
@@ -77,6 +85,9 @@ export class HomePage implements OnInit, OnDestroy
             console.log("Remote data service was reset.");
             //DONE
           });
+          */
+
+
         } else {
           let checkin = this.remoteDataService.getCheckin({id: newCheckinId});
 
@@ -117,22 +128,20 @@ export class HomePage implements OnInit, OnDestroy
 
   /**
    *
+   */
+  isUserConfigured(): boolean
+  {
+    return this.userService.is_user_configured;
+  }
+
+  /**
+   *
    * @returns {boolean}
    */
   isUserAuthenticated(): boolean
   {
     return this.userService.isAuthenticated();
   }
-
-  /**
-   *
-   * @returns {boolean}
-
-  isConnected(): boolean
-  {
-    return this.offlineCapableRestService.isNetworkConnected();
-  }*/
-
 
   /**
    *
@@ -215,7 +224,6 @@ export class HomePage implements OnInit, OnDestroy
   //------------------------------------------------------------------------------------------------------INIT & DESTROY
   ngOnInit(): void
   {
-    console.log("HP ngOnInit!");
     let self = this;
 
     this.autoUpdateIntevalExecution(this);
@@ -230,9 +238,8 @@ export class HomePage implements OnInit, OnDestroy
       });
   }
 
-
   ngOnDestroy(): void
   {
-    console.log("HP ngOnDestroy!");
+    //
   }
 }

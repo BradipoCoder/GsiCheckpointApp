@@ -13,7 +13,7 @@ import {Injectable} from '@angular/core';
 import {Platform} from "ionic-angular";
 import {Network} from '@ionic-native/network';
 import {RestService} from "./rest.service";
-import PouchDB from "pouchdb";
+/*import PouchDB from "pouchdb";*/
 import _ from "lodash";
 import Rx from "rxjs/Rx";
 import {Observable} from "rxjs/Observable";
@@ -64,8 +64,6 @@ export class OfflineCapableRestService extends RestService
    */
   initialize(rest_api_url: string, rest_api_version: string): void
   {
-    super.initialize(rest_api_url, rest_api_version);
-
 
     /* Subsribe to network and observe connection/disconnection */
     this.platform.ready().then(() =>
@@ -86,5 +84,8 @@ export class OfflineCapableRestService extends RestService
       }
       this.setIsNetworkConnected(conn);
     });
+
+    //@todo: remove OFFLAJN
+    super.initialize(rest_api_url, rest_api_version);
   }
 }

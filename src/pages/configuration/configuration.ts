@@ -4,7 +4,6 @@ import {ConfigurationService} from '../../services/configuration.service';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
-import MekitTracerApp from '../../app/app.component';
 import {HomePage} from "../home/home";
 import _ from "lodash";
 
@@ -31,25 +30,60 @@ export class ConfigurationPage implements OnInit
     this.viewIsReady = false;
   }
 
-  isFormDisabled():boolean
+  /**
+   * Save configuration values and reset application
+   */
+  saveAndResetApplication():void
   {
-    return !this.configurationService.isUnlocked();
-  }
+    let self = this;
+    let loader = this.loadingCtrl.create({
+      content: "Elaborazione in corso...",
+      duration: 30000
+    });
+    loader.present();
 
-  getConfiguration():void {
-    this.configurationService.getConfigObject().then((config) => {
-      this.cfg = config;
-      this.viewIsReady = true;
-    }).catch((e) => {
-      this.cfg = {};
+    //save all config values
+    let setPromises = [];
+    _.each(this.cfg, function(val, key)
+    {
+      setPromises.push(self.configurationService.setConfig(key, val));
+    });
+
+    Promise.all(setPromises).then(() =>
+    {
+      this.configurationService.unlockWithCode("");//lock it
+      console.log("Configuration values were saved.");
+
+      return this.userService.logout();
+    }).then(() => {
+      console.log("User is now logged out.");
+
+      return this.userService.initialize();
+    }).then(() =>
+    {
+      console.log("User service initialized.");
+
+      return this.remoteDataService.initialize();
+    }).then(() =>
+    {
+      console.log("RemoteData service initialized.");
+
+      this.navCtrl.push(HomePage);
+      this.navCtrl.setRoot(HomePage);
+      loader.dismiss();
+
+      console.log("APPLICATION RESET OK");
+    }).catch((e) =>
+    {
+      loader.dismiss();
+      console.log("Config save error: " + e);
     });
   }
 
   /**
    * Ask user for unlock code and attempt to unlock the configuration service
-   * @param value
    */
-  onUnlockConfigForm(value):void
+  onUnlockConfigForm():void
   {
     let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage, false, {});
     unlockModal.onDidDismiss(data => {
@@ -67,56 +101,37 @@ export class ConfigurationPage implements OnInit
     unlockModal.present();
   }
 
-  resetApplication():void
-  {
-    let loader = this.loadingCtrl.create({
-      content: "Elaborazione in corso...",
-      duration: 30000
-    });
-    loader.present();
-
-    this.configurationService.unlockWithCode("");//block it
-    this.userService.logout().then(() => {
-      console.log("User is now logged out.");
-      return this.userService.initialize();
-    }).then(() =>
-    {
-      console.log("User service initialized.");
-      return this.remoteDataService.initialize();
-    }).then(() =>
-    {
-      console.log("RemoteData service initialized.");
-      console.log("APPLICATION RESET OK");
-      this.navCtrl.push(HomePage);
-      this.navCtrl.setRoot(HomePage);
-      loader.dismiss();
-    }).catch((e) => {
-      loader.dismiss();
-    });
-  }
-
   /**
    * Lock the configuration service
-   * @param value
    */
-  onLockConfigForm(value):void
+  onLockConfigForm():void
   {
     this.configurationService.unlockWithCode("");
   }
 
-  onConfigChange(key, newValue):void
+  /**
+   *
+   * @returns {boolean}
+   */
+  isFormDisabled():boolean
   {
-    let self = this;
-    this.configurationService.setConfig(key, newValue).then((savedValue) => {
-        _.set(self.cfg, key, savedValue);
+    return !this.configurationService.isUnlocked();
+  }
+
+  /**
+   *
+   */
+  private getConfiguration():void {
+    this.configurationService.getConfigObject().then((config) => {
+      this.cfg = config;
+      this.viewIsReady = true;
+    }).catch((e) => {
+      this.cfg = {};
     });
   }
 
   ngOnInit():void
   {
-    console.log("CONFINIT");
     this.getConfiguration();
   }
-
-
 }

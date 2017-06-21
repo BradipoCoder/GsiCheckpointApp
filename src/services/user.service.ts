@@ -4,6 +4,7 @@
 import {Injectable} from '@angular/core';
 import {ConfigurationService} from './configuration.service';
 import {OfflineCapableRestService} from './offline.capable.rest.service';
+import PouchDB from "pouchdb";
 import _ from "lodash";
 
 @Injectable()
@@ -12,7 +13,9 @@ export class UserService
   private authenticated: boolean = false;
   private user_data: any = {};
   public is_initialized = false;
-  public last_error:Error;
+  public is_user_configured = false;
+  public last_error: Error;
+  private db: any;
 
 
   constructor(private configurationService: ConfigurationService
@@ -52,7 +55,7 @@ export class UserService
   }
 
   /**
-   *
+   * Log out user and delete "user" database
    * @returns {Promise<any>}
    */
   logout(): Promise<any>
@@ -64,6 +67,9 @@ export class UserService
       self.offlineCapableRestService.logout().then(() =>
       {
         self.authenticated = false;
+        return self.db.destroy();
+      }).then(() => {
+        console.log("User database has been destroyed.");
         self.user_data = {};
         resolve();
       }).catch((e) =>
@@ -72,8 +78,14 @@ export class UserService
         console.log("LOGOUT ERROR! " + e);
         self.authenticated = false;
         self.is_initialized = false;
+        self.is_user_configured = false;
         self.user_data = {};
-        resolve();
+        self.db.destroy().then(() => {
+          console.log("User database has been destroyed.");
+          resolve();
+        }).catch((e) => {
+          resolve();
+        });
       });
     });
   }
@@ -85,7 +97,7 @@ export class UserService
    *
    * @returns {Promise<any>}
    */
-  login(username: string, password: string): Promise<any>
+  private login(username: string, password: string): Promise<any>
   {
     let self = this;
     console.log("Authenticating user: " + username);
@@ -100,6 +112,7 @@ export class UserService
       {
         user_full_data = _.head(user_full_data.entry_list);
         _.assignIn(self.user_data, user_full_data);
+        return self.storeUserData(self.user_data);
       }).then(() =>
       {
         self.authenticated = true;
@@ -114,22 +127,58 @@ export class UserService
   }
 
   /**
+   * Store logged in user values for offline usage
+   *
+   * @param {any} data
+   * @returns {Promise<any>}
+   */
+  storeUserData(data): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      self.db.get('userdata').then(function(doc) {
+        _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
+        return self.db.put(data);
+      }).then(function(res) {
+        console.log("User data stored");
+        resolve();
+      }).catch(function (err) {
+        //console.log(err);
+        _.assignIn(data, {_id: 'userdata'});
+        self.db.put(data).then((res) => {
+          console.log("User data stored(new)");
+          resolve();
+        });
+      });
+    });
+  };
+
+  /**
    * initialize the Rest service
    */
   initialize(): Promise<any>
   {
     let self = this;
+    self.authenticated = false;
     self.is_initialized = false;
+    self.is_user_configured = false;
+    self.user_data = {};
 
     return new Promise(function (resolve, reject)
     {
+      self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+
       self.configurationService.getConfigObject()
         .then((cfg) =>
         {
-          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
           self.is_initialized = true;
+          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
+
           if (!(_.isEmpty(cfg.crm_username) && _.isEmpty(cfg.crm_password)))
           {
+            self.is_user_configured = true;
             console.log("AUTOLOGIN(" + cfg.crm_username + ")...");
             self.login(cfg.crm_username, cfg.crm_password).then(() =>
             {
@@ -137,8 +186,18 @@ export class UserService
             }).catch((e) =>
             {
               self.last_error = e;
-              console.warn("Autologin failed - configuration is wrong?! " + e);
-              resolve();
+              console.warn("Autologin failed! " + e);
+              //load user data from db
+              self.db.get('userdata').then(function(doc) {
+                console.log(doc);
+                self.user_data = doc;
+                resolve();
+              }).catch((e) => {
+                self.last_error = new Error("User data is not available! " + e);
+                console.warn(self.last_error.message);
+                self.is_user_configured = false;
+                resolve();
+              });
             });
           } else
           {

@@ -166,7 +166,7 @@ export class ConfigurationService
   };
 
   /**
-   * Makes sure all keys in the default_config are present in the storage
+   * Makes sure all keys in the default_config are present in the storage.
    *
    * @returns {Promise}
    */
@@ -176,7 +176,7 @@ export class ConfigurationService
 
     return new Promise(function (resolve, reject)
     {
-      self.db = new PouchDB('configuration');
+      self.db = new PouchDB('configuration', {auto_compaction: true, revs_limit: 10});
 
       self.is_unlocked = true;
       let setPromises = [];

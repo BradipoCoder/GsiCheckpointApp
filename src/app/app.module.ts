@@ -10,7 +10,6 @@ import {SplashScreen} from "@ionic-native/splash-screen";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {Network} from '@ionic-native/network';
 
-
 /* Services */
 import {ConfigurationService} from '../services/configuration.service';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
@@ -21,7 +20,6 @@ import {CodeScanService} from '../services/code.scan.service';
 /* Pages */
 import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
-import {LoginPage} from "../pages/login/login";
 import {LogoutPage} from "../pages/logout/logout";
 import {ConfigurationPage} from "../pages/configuration/configuration";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
@@ -33,7 +31,6 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     MekitTracerApp
     , HomePage
     , InfoPage
-    , LoginPage
     , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage
@@ -48,7 +45,6 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     MekitTracerApp
     , HomePage
     , InfoPage
-    , LoginPage
     , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage
