@@ -42,10 +42,21 @@ export class OfflineCapableRestService extends RestService
   {
     if (this.is_network_connected !== is_connected)
     {
+      console.log("NETWORK: " + (is_connected ? "ON" : "OFF"));
       this.is_network_connected = is_connected;
       this.networkStateEventStream.next(is_connected);
     }
   }
+
+  /**
+   *
+   * @returns {boolean}
+   */
+  public isNetworkConnected(): boolean
+  {
+    return this.is_network_connected;
+  }
+
 
   /**
    * @param {string} rest_api_url

@@ -1,5 +1,5 @@
 /**
- * Created by jack on 05/06/17.
+ * Configuration Service
  */
 import {Injectable} from '@angular/core';
 import PouchDB from "pouchdb";
@@ -12,8 +12,6 @@ export class ConfigurationService
 
   private readonly UNLOCK_CODE: string = "MKT";
 
-  private readonly prefix: string = "cfg_";
-
   private is_unlocked: boolean = false;
 
   default_config: any = {
@@ -22,10 +20,6 @@ export class ConfigurationService
     , crm_username: ''
     , crm_password: ''
   };
-
-  constructor()
-  {
-  }
 
 
   unlockWithCode(code: string): boolean
@@ -173,7 +167,6 @@ export class ConfigurationService
 
   /**
    * Makes sure all keys in the default_config are present in the storage
-   * (Should be called on application initialization)
    *
    * @returns {Promise}
    */

@@ -19,10 +19,9 @@ import {LogoutPage} from "../pages/logout/logout";
 export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
-
+  /* The page to start with */
   startupPage: any = HomePage;
-  rootPage: any;//set initial page with this
-
+  rootPage: any;
   pages: Array<{ title: string, icon: string, component: any }>;
 
   constructor(public platform: Platform
@@ -37,7 +36,6 @@ export class MekitTracerApp
     this.pages = [
       {title: 'Home', icon: 'home', component: HomePage},
       {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage},
-      /*{title: 'Informazioni', icon: 'information-circle', component: InfoPage},*/
       {title: 'Esci', icon: 'power', component: LogoutPage}
     ];
 

@@ -221,6 +221,7 @@ export class HomePage implements OnInit, OnDestroy
     this.autoUpdateIntevalExecution(this);
 
 
+    self.is_network_connected = this.offlineCapableRestService.isNetworkConnected();
     this.offlineCapableRestService.networkConnectedObservable.subscribe(
       function (is_network_connected)
       {

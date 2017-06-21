@@ -5,21 +5,20 @@ import {Injectable} from '@angular/core';
 import {ConfigurationService} from './configuration.service';
 import {OfflineCapableRestService} from './offline.capable.rest.service';
 import _ from "lodash";
-import md5 from '../../node_modules/blueimp-md5';
 
 @Injectable()
 export class UserService
 {
   private authenticated: boolean = false;
   private user_data: any = {};
-  private readonly prefix: string = "u_";
-
   public is_initialized = false;
+  public last_error:Error;
 
 
   constructor(private configurationService: ConfigurationService
     , private offlineCapableRestService: OfflineCapableRestService)
-  {  }
+  {
+  }
 
   /**
    *
@@ -69,6 +68,7 @@ export class UserService
         resolve();
       }).catch((e) =>
       {
+        self.last_error = e;
         console.log("LOGOUT ERROR! " + e);
         self.authenticated = false;
         self.is_initialized = false;
@@ -100,54 +100,17 @@ export class UserService
       {
         user_full_data = _.head(user_full_data.entry_list);
         _.assignIn(self.user_data, user_full_data);
-        //Register user hash
-        //return self.registerUserHash(username, md5(password));
       }).then(() =>
       {
         self.authenticated = true;
         resolve();
       }).catch((e) =>
       {
+        self.last_error = e;
         console.log("LOGIN ERROR! " + e);
         reject(e);
       });
     });
-  }
-
-
-  /**
-   * Provide a registered user hash (hashed password)
-   *
-   * @param {string} user
-   * @returns {Promise<any>}
-
-   getRegisteredUserHash(user: string): Promise<any>
-   {
-     return this.storage.get(this.getUserHashKey(user));
-   };*/
-
-  /**
-   * Registers a user hash (hashed password)
-   *
-   * @param {string} user
-   * @param {string} hash
-   * @returns {Promise<any>}
-
-   registerUserHash(user: string, hash: string): Promise<any>
-   {
-     let key = this.getUserHashKey(user);
-     console.log("Registering user hash(" + key + "): " + hash);
-     return this.storage.set(key, hash);
-   };*/
-
-  /**
-   *
-   * @param {string} user
-   * @returns {string}
-   */
-  private getUserHashKey(user: string): string
-  {
-    return this.prefix + '_userhash__' + user;
   }
 
   /**
@@ -167,23 +130,26 @@ export class UserService
           self.is_initialized = true;
           if (!(_.isEmpty(cfg.crm_username) && _.isEmpty(cfg.crm_password)))
           {
-            console.log("AUTOLOGIN("+cfg.crm_username+")...");
+            console.log("AUTOLOGIN(" + cfg.crm_username + ")...");
             self.login(cfg.crm_username, cfg.crm_password).then(() =>
             {
               resolve();
             }).catch((e) =>
             {
+              self.last_error = e;
               console.warn("Autologin failed - configuration is wrong?! " + e);
               resolve();
             });
           } else
           {
+            self.last_error = new Error("Configuration is incomplete!");
             console.warn("Configuration is incomplete!");
             resolve();
           }
         })
         .catch((e) =>
         {
+          self.last_error = e;
           reject(e);
         });
     });
