@@ -17,9 +17,8 @@ import {Checkpoint} from '../models/Checkpoint';
 import {Checkin} from '../models/Checkin';
 
 import _ from "lodash";
-import md5 from '../../node_modules/blueimp-md5';
 import * as moment from 'moment';
-
+/*import md5 from '../../node_modules/blueimp-md5';*/
 
 @Injectable()
 export class RemoteDataService
@@ -42,37 +41,6 @@ export class RemoteDataService
   }
 
   //-------------------------------------------------------------------------------------------------------REST API DATA
-
-  /**
-   * Create a relationship between records of two modules
-   * Proxy method
-   *
-   * @param {String}      module_name
-   * @param {String}      id
-   * @param {String}      link_field_name
-   * @param {Array}       related_ids
-   * @param {Object}      parameters
-   *
-   * @return {Promise}
-   */
-  private setRelationship(module_name: string, id: string, link_field_name: string, related_ids: any, parameters = {}): Promise<any>
-  {
-    let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.offlineCapableRestService.setRelationship(module_name, id, link_field_name, related_ids, parameters)
-        .then((res) =>
-        {
-          //do something with res
-          resolve(res);
-        })
-        .catch((e) =>
-        {
-          reject(e);
-        });
-    });
-  }
-
   /**
    *
    * @param {string} module_name
@@ -86,30 +54,6 @@ export class RemoteDataService
     return new Promise(function (resolve, reject)
     {
       self.offlineCapableRestService.setEntry(module_name, id, parameters)
-        .then((res) =>
-        {
-          //do something with res
-          resolve(res);
-        })
-        .catch((e) =>
-        {
-          reject(e);
-        });
-    });
-  }
-
-  /**
-   *
-   * @param {string} module_name
-   * @param {object} [parameters]
-   * @returns {Promise<any>}
-   */
-  private getEntries(module_name: string, parameters = {}): Promise<any>
-  {
-    let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.offlineCapableRestService.getEntries(module_name, parameters)
         .then((res) =>
         {
           //do something with res
@@ -338,10 +282,12 @@ export class RemoteDataService
           resolve(newCheckinId);
         } else if (relativeCheckpoint.type == Checkpoint.TYPE_IN)
         {
-          self.initialize().then(() => {
+          self.initialize().then(() =>
+          {
             resolve(newCheckinId);
           });
-        } else {
+        } else
+        {
           resolve(newCheckinId);
         }
 
@@ -362,7 +308,7 @@ export class RemoteDataService
   private loadCheckins(): Promise<any>
   {
     let self = this;
-    let current_user_id = self.userService.getUserData('id');
+    //let current_user_id = self.userService.getUserData('id');
 
     return new Promise(function (resolve, reject)
     {
@@ -375,7 +321,7 @@ export class RemoteDataService
       })
         .then((res) =>
         {
-          let checkpoint: any, time: string;
+          let checkpoint: any;
           //console.log("CHECKINS: " + JSON.stringify(res));
 
           if (!_.isEmpty(res.entry_list))
@@ -408,7 +354,7 @@ export class RemoteDataService
     let self = this;
     let lastOperationType = Checkpoint.TYPE_OUT;
     let lastOperationDate = moment().format(RemoteDataService.CRM_DATE_FORMAT);
-    let current_user_id = self.userService.getUserData('id');
+    //let current_user_id = self.userService.getUserData('id');
 
     return new Promise(function (resolve, reject)
     {

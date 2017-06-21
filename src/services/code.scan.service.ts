@@ -4,7 +4,6 @@
 import {Injectable} from '@angular/core';
 import {Platform} from "ionic-angular";
 import {RemoteDataService} from './remote.data.service';
-import {UserService} from './user.service';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 
 import {Checkpoint} from '../models/Checkpoint';

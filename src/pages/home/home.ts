@@ -7,7 +7,7 @@ import {OfflineCapableRestService} from '../../services/offline.capable.rest.ser
 import {CodeScanService} from '../../services/code.scan.service';
 import {Checkpoint} from '../../models/Checkpoint';
 import {ConfigurationPage} from '../configuration/configuration';
-import {Checkin} from '../../models/Checkin';
+/*import {Checkin} from '../../models/Checkin';*/
 import _ from "lodash";
 import * as moment from 'moment';
 
@@ -21,13 +21,15 @@ export class HomePage implements OnInit, OnDestroy
 
   private shiftTotalDuration: string = "";
 
-  private presentLogoutScreen:boolean = false;
+  protected presentLogoutScreen:boolean = false;
+
+  /*
   private logoutScreenData:any = {
     name: "Andrea",
     img_url: "assets/image/user.png",
     date: "14 giugno",
     duration: "6 ore 22 min"
-  };
+  };*/
 
 
   constructor(public navCtrl: NavController
@@ -62,6 +64,7 @@ export class HomePage implements OnInit, OnDestroy
             duration: 10000,
             position: 'bottom'
           });
+          toast.present();
           /*
           // 1) store user data (before logout) present logged-out screen
           this.logoutScreenData.name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
@@ -176,7 +179,7 @@ export class HomePage implements OnInit, OnDestroy
 
       let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
       let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
-      let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
+      //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
       //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
 
       if (hours)

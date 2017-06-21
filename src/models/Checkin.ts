@@ -65,7 +65,7 @@ export class Checkin
 
     let hours = Math.floor(checkinDuration / 60 / 60);
     let minutes = Math.floor(checkinDuration / 60) - (60 * hours);
-    let seconds = checkinDuration - (60 * 60 * hours) - (60 * minutes);
+    //let seconds = checkinDuration - (60 * 60 * hours) - (60 * minutes);
 
     let durationStr = '';
     if (hours)
