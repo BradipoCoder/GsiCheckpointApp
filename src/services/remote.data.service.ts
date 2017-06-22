@@ -1,21 +1,24 @@
 /**
- * The responsibility of this class is to:
- * a) keep hashed user passwords so that they can be identified when off-line
- * b) be a bucket for unsyncronized data to be pushed to remote when off-line
- * c) be a bucket for important remote data necessary for app when off-line
- * d) control when connection is available and empty buckets
+ * A centralized place for data
  *
  */
 import {Injectable} from '@angular/core';
 import {Platform} from "ionic-angular";
 import {Network} from '@ionic-native/network';
 
+/* Services */
 import {OfflineCapableRestService} from './offline.capable.rest.service';
 import {UserService} from './user.service';
 
+/* Data Models */
 import {Checkpoint} from '../models/Checkpoint';
 import {Checkin} from '../models/Checkin';
 
+/* Data Providers */
+import {CheckpointProvider} from "../providers/checkpoint.provider";
+import {CheckinProvider} from "../providers/checkin.provider";
+
+/* Utils */
 import _ from "lodash";
 import * as moment from 'moment';
 /*import md5 from '../../node_modules/blueimp-md5';*/
@@ -28,15 +31,20 @@ export class RemoteDataService
   private last_operation_type: string = Checkpoint.TYPE_OUT;
   private last_operation_date: string;
 
-  private CHECKPOINTS: any = [];
-
+  // private CHECKPOINTS: any = [];
   private CHECKINS: any = [];
+
+  // private checkpointProvider:CheckpointProvider;
+  // private checkinProvider:CheckinProvider;
 
 
   constructor(private offlineCapableRestService: OfflineCapableRestService
     , private userService: UserService
     , private network: Network
-    , private platform: Platform)
+    , private platform: Platform
+    , private checkpointProvider: CheckpointProvider
+    , private checkinProvider: CheckinProvider
+  )
   {
   }
 
@@ -93,15 +101,6 @@ export class RemoteDataService
 
   //---------------------------------------------------------------------------------------------------------CHECKKPOINT
 
-  /**
-   *
-   * @param {any} filter
-   * @returns {array}
-   */
-  public getCheckpoints(filter = {}): any
-  {
-    return _.filter(this.CHECKPOINTS, filter);
-  }
 
   /**
    *
@@ -110,13 +109,14 @@ export class RemoteDataService
    */
   public getCheckpoint(filter = {}): Checkpoint
   {
-    return _.find(this.CHECKPOINTS, filter) as Checkpoint;
+    return null;//_.find(this.CHECKPOINTS, filter) as Checkpoint;
   }
 
   /**
    *
    * @returns {Promise<any>}
    */
+  /*
   private loadCheckpoints(): Promise<any>
   {
     let self = this;
@@ -151,6 +151,7 @@ export class RemoteDataService
         });
     });
   }
+  */
 
 
   //-------------------------------------------------------------------------------------------------------------CHECKIN
@@ -414,12 +415,30 @@ export class RemoteDataService
 
     return new Promise(function (resolve, reject)
     {
+
+
       //reset
       self.last_operation_type = Checkpoint.TYPE_OUT;
       self.last_operation_date = '';
-      self.CHECKPOINTS = [];
+
+
+      // self.CHECKPOINTS = [];
       self.CHECKINS = [];
 
+
+      self.checkpointProvider.syncWithRemote().then(() => {
+
+
+        resolve();
+
+      }).catch((e) => {
+        console.log(e)
+      });
+
+
+
+
+      /*
       if (!self.userService.isAuthenticated())
       {
         console.log("RDS - not authenticated.");
@@ -442,6 +461,7 @@ export class RemoteDataService
       {
         reject(e);
       });
+      */
     });
   }
 }

@@ -17,6 +17,10 @@ import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
 import {CodeScanService} from '../services/code.scan.service';
 
+/* Providers */
+import {CheckpointProvider} from '../providers/checkpoint.provider';
+import {CheckinProvider} from '../providers/checkin.provider';
+
 /* Pages */
 import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
@@ -59,6 +63,8 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , RemoteDataService
     , CodeScanService
     , Network
+    , CheckpointProvider
+    , CheckinProvider
     , {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })

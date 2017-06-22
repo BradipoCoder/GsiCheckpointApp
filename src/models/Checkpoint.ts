@@ -1,51 +1,53 @@
 /**
  * Checkpoint Model
  */
-export class Checkpoint
-{
+import _ from "lodash";
+
+export class Checkpoint {
   public static readonly TYPE_IN: string = "IN";
   public static readonly TYPE_OUT: string = "OUT";
   public static readonly TYPE_CHK: string = "CHK";
   public static readonly TYPE_PAUSE: string = "PAUSE";
 
-  public id: string;
-  public type: string;
-  public code: string;
-  public name: string;
-  public description: string;
-  public account_id_c: string;
-  public account_reference: string;
+  /* the below properties must be initialized */
+  public id: string                  = null;
+  public type: string                = null;
+  public code: string                = null;
+  public name: string                = null;
+  public description: string         = null;
+  public position: string            = null;
+  public account_id_c: string        = null;
+  public account_reference: string   = null;
+  public date_entered: string        = null;
+  public date_modified: string       = null;
 
   /**
+   * Create an instance by mapping supplied data to existent properties
    *
-   * @param {string} id
-   * @param {string} type
-   * @param {string} code
-   * @param {string} name
-   * @param {string} description
-   * @param {string} account_id_c
-   * @param {string} account_reference
+   * @param {{id:string}} data
    */
-  constructor(
-    id:string,
-    type: string,
-    code: string,
-    name:string,
-    description:string,
-    account_id_c: string,
-    account_reference: string
-  )
-  {
-    this.id = id;
-    this.type = type;
-    this.code = code;
-    this.name = name;
-    this.description = description;
-    this.account_id_c = account_id_c;
-    this.account_reference = account_reference;
-
-    //console.log(this);
+  constructor(data: any = {}) {
+    console.log("Undefined keys", _.difference(_.keys(data), _.keys(this)));
+    let self = this;
+    _.each(_.keys(this), function(key) {
+      _.set(self, key, _.get(data, key, null));
+    });
   }
 
 
+  /**
+   *
+   * @returns {string[]}
+   */
+  public getDefinedProperties():any
+  {
+    return _.keys(this);
+  }
+
+  /**
+   * @todo: devel method - remove!
+   */
+  public dump(): void {
+    console.log("Checkpoint", this);
+  }
 }
