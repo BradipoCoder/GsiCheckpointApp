@@ -92,10 +92,10 @@ export class HomePage implements OnInit, OnDestroy
 
 
         } else {
-          let checkin = this.remoteDataService.getCheckin({id: newCheckinId});
+          //let checkin = this.remoteDataService.getCheckin({id: newCheckinId});
 
           let toast = this.toastCtrl.create({
-            message: checkin.name,
+            message: "Cantina buia", /*checkin.name,*/
             duration: 3000,
             position: 'bottom'
           });
@@ -171,7 +171,7 @@ export class HomePage implements OnInit, OnDestroy
   recalculateShiftTotalDuration(self: HomePage): void
   {
     let durationStr = '';
-
+    /*
     if (self.isUserAuthenticated() && self.isUserCheckedIn())
     {
       let shiftStartCheckin = self.remoteDataService.getCheckin({type: Checkpoint.TYPE_IN});
@@ -189,7 +189,7 @@ export class HomePage implements OnInit, OnDestroy
       durationStr += minutes + " min";
       //durationStr += " " + seconds + "s";
     }
-
+    */
     self.shiftTotalDuration = durationStr;
   }
 
@@ -198,6 +198,7 @@ export class HomePage implements OnInit, OnDestroy
    */
   recalculateLastCheckinDuration(self: HomePage): void
   {
+    /*
     if (self.isUserAuthenticated() && self.isUserCheckedIn())
     {
       let lastCheckin = self.remoteDataService.getLastCheckin();
@@ -205,7 +206,7 @@ export class HomePage implements OnInit, OnDestroy
       {
         lastCheckin.setDurationFromNow();
       }
-    }
+    }*/
   }
 
   /**

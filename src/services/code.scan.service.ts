@@ -113,19 +113,22 @@ export class CodeScanService
       throw new Error("Codice scansionato non valido: " + JSON.stringify(barcodeData));
     }
 
-    // Find a matching checkpoint
+    // Find a matching checkpoint - @todo: re-enable this check
+    /*
     let checkpoint = this.remoteDataService.getCheckpoint({code: barcodeData.text});
     if(_.isUndefined(checkpoint))
     {
       throw new Error("Nessun ambiente corrispondente per il codice scansionato: " + barcodeData.text);
-    }
+    }*/
     //console.log("MATCHING CP: " + JSON.stringify(checkpoint));
 
-    // Expected type check
+    // Expected type check - @todo: re-enable this check
+    /*
     if(!_.includes(allowed_types, checkpoint.type))
     {
       throw new Error("Il codice scansionato("+barcodeData.text+") non è tra i tipi attesi: " + JSON.stringify(allowed_types));
     }
+    */
   }
 
   /**
