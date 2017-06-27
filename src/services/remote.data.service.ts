@@ -347,6 +347,7 @@ export class RemoteDataService
    */
 
   /**
+   * @todo: should keep track of company od as well
    *
    * @returns {Promise<any>}
    */
@@ -360,19 +361,41 @@ export class RemoteDataService
 
     return new Promise(function (resolve, reject)
     {
-      self.checkinProvider.findDocuments({
-        selector: {checkin_date: {$gte: '2017-06-19 14:00:00'}},
-        fields: ['checkin_date', '_id', 'name', 'mkt_checkpoint_id_c'],
-        sort: [{'checkin_date': 'desc'}]
-      }).then((res) =>
+      //IN/OUT
+      self.checkpointProvider.getInOutCheckpoints().then((inOutCheckpoints) =>
       {
-        console.log("FIND RES: ", res);
-        resolve();
-      }).catch((e) =>
-      {
-        console.log(e);
-        resolve();
+        let idList = _.map(inOutCheckpoints, "id");
+        self.checkinProvider.findDocuments({
+          selector: {
+            checkin_date: {$ne: ''},
+            mkt_checkpoint_id_c: {$in: idList}
+          },
+          fields: ['checkin_date', 'mkt_checkpoint_id_c'],
+        }).then((res) =>
+        {
+          if (_.size(res.docs))
+          {
+            let mostRecentCheckin = _.last(_.sortBy(res.docs, ['checkin_date']));
+            //console.log("MOST RECENT CHECKIN: ", mostRecentCheckin);
+            let relatedCheckpoint = _.find(inOutCheckpoints, {id: mostRecentCheckin["mkt_checkpoint_id_c"]});
+            if (!_.isUndefined(relatedCheckpoint))
+            {
+              //console.log("RELATED CHK: ", relatedCheckpoint);
+              lastOperationType = relatedCheckpoint["type"];
+              lastOperationDate = mostRecentCheckin["checkin_date"];
+            }
+          }
+          resolve();
+        }).catch((e) =>
+        {
+          console.error(e);
+          resolve();
+        });
       });
+    }).finally(() => {
+      self.last_operation_type = lastOperationType;
+      self.last_operation_date = lastOperationDate;
+      console.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastOperationType + " @ " + lastOperationDate);
     });
   }
 
@@ -405,6 +428,9 @@ export class RemoteDataService
       self.checkpointProvider.initialize().then(() =>
       {
         return self.checkinProvider.initialize();
+      }).then(() =>
+      {
+        return self.findLastInOutOperation();
       }).then(() =>
       {
         resolve();

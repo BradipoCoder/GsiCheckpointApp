@@ -7,17 +7,22 @@ import {CrmDataModel} from '../models/crm.data.model';
 
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
-PouchDB.plugin(PouchDBFind);
 
 import _ from "lodash";
 import * as moment from 'moment';
 import {Promise} from '../../node_modules/bluebird'
 
+
+PouchDB.plugin(PouchDBFind);
+//PouchDB.debug.enable('pouchdb:find');
+PouchDB.debug.disable('pouchdb:find');
+
+
 @Injectable()
 export class RestDataProvider
 {
   protected database_name: string;
-  protected database_options: any = {revs_limit: 50};
+  protected database_options: any = {};/*adapter: 'websql', revs_limit: 50*/
   protected database_indices: any = [];
 
   protected remote_table_name: string;
@@ -53,7 +58,7 @@ export class RestDataProvider
           document._rev = registeredDocument._rev;
           self.db.put(document).then((res) =>
           {
-            console.log("Doc updated:", key);
+            //console.log("Doc updated:", key);
             resolve();
           });
         } else
@@ -66,7 +71,7 @@ export class RestDataProvider
         document._id = key;
         self.db.put(document).then((res) =>
         {
-          console.log("Doc registered:", key);
+          //console.log("Doc registered:", key);
           resolve();
         });
       });
@@ -140,15 +145,19 @@ export class RestDataProvider
     let self = this;
 
     return new Promise(function (resolve, reject){
+      console.log("Creating IDB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
       let indexCreationPromises = [];
+
       _.each(self.database_indices, function (indexObject)
       {
+        //console.log("Creating INDEX["+self.database_name+"]: ", indexObject);
         indexCreationPromises.push(self.db.createIndex({index: indexObject}));
       });
 
-      Promise.all(indexCreationPromises).then(() => {
+      Promise.all(indexCreationPromises).then((res) => {
+        //console.log("INDEXES OK: ", res);
         resolve();
       });
     });

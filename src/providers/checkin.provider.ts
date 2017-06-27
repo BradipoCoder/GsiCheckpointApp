@@ -17,6 +17,14 @@ export class CheckinProvider extends RestDataProvider
     {
       name: 'idx_date',
       fields: ['checkin_date']
+    },
+    {
+      name: 'idx_checkpoint',
+      fields: ['mkt_checkpoint_id_c']
+    },
+    {
+      name: 'idx_date_checkpoint',
+      fields: ['checkin_date', 'mkt_checkpoint_id_c']
     }
   ];
 

@@ -40,38 +40,30 @@ export class CheckpointProvider extends RestDataProvider
   }
 
   /**
-   * Finds the IN and OUT codes for a given company
+   * Returns all IN and OUT type checkpoints
    *
-   * @param companyId: string
    * @returns {Promise<any>}
    */
-  private findInOutCheckpoints(companyId: string): Promise<any>
+  public getInOutCheckpoints(): Promise<any>
   {
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.findDocuments({
-        selector: {
-          $and: [
-            {account_id_c: companyId},
-            {
-              $or: [
-                {type: Checkpoint.TYPE_IN},
-                {type: Checkpoint.TYPE_OUT},
-              ],
-            }
-          ],
-        },
-        fields: ['_id', 'type', 'account_id_c', 'name', 'code', 'code'],
-        /*sort: [{'type':'asc'}]*/
-      }).then((res) =>
+      let findPromises = [];
+      //@todo: for some reason index on 'type' does not work - when using combined selector
+      findPromises.push(self.findDocuments({selector: {type: Checkpoint.TYPE_IN}}));
+      findPromises.push(self.findDocuments({selector: {type: Checkpoint.TYPE_OUT}}));
+        Promise.all(findPromises).then((res) =>
       {
-        console.log("FIND IN-OUT: ", res);
-        resolve();
+        let answer = [];
+        _.each(res, function(obj){
+          answer = _.concat(answer, obj.docs);
+        });
+        resolve(answer);
       }).catch((e) =>
       {
-        console.log(e);
-        resolve();
+        console.error(e);
+        reject(e);
       });
     });
   }
@@ -158,12 +150,10 @@ export class CheckpointProvider extends RestDataProvider
         return self.syncWithRemote();
       }).then(() =>
       {
-        //IN/OUT for CSI PIEMONTE - @todo: put this into config
-        return self.findInOutCheckpoints("3aaaca35-bf86-5e1b-488b-591abe50a893");
-
+        resolve();
       }).then(() =>
       {
-        resolve();
+        //resolve();
       });
     });
   }
