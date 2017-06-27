@@ -22,7 +22,8 @@ PouchDB.debug.disable('pouchdb:find');
 export class RestDataProvider
 {
   protected database_name: string;
-  protected database_options: any = {};/*adapter: 'websql', revs_limit: 50*/
+  protected database_options: any = {};
+  /*adapter: 'websql', revs_limit: 50*/
   protected database_indices: any = [];
 
   protected remote_table_name: string;
@@ -140,12 +141,37 @@ export class RestDataProvider
     return whilst(data);
   };
 
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public destroyDatabase(): Promise<any>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject)
+    {
+      self.db.destroy().then((res) =>
+      {
+        console.log("DB destroyed: " + self.database_name, res);
+        resolve();
+      }).catch((e) =>
+      {
+        reject(e);
+      });
+    });
+  }
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
   protected setupDatabase(): Promise<any>
   {
     let self = this;
 
-    return new Promise(function (resolve, reject){
-      console.log("Creating IDB: " + self.database_name);
+    return new Promise(function (resolve, reject)
+    {
+      console.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
       let indexCreationPromises = [];
@@ -156,7 +182,8 @@ export class RestDataProvider
         indexCreationPromises.push(self.db.createIndex({index: indexObject}));
       });
 
-      Promise.all(indexCreationPromises).then((res) => {
+      Promise.all(indexCreationPromises).then((res) =>
+      {
         //console.log("INDEXES OK: ", res);
         resolve();
       });

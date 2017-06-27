@@ -31,6 +31,34 @@ export class ConfigurationPage implements OnInit
   }
 
   /**
+   * destroy and recreate databases
+   */
+  cleanCache():void
+  {
+    let self = this;
+    let loader = this.loadingCtrl.create({
+      content: "Elaborazione in corso...",
+      duration: 30000
+    });
+    loader.present();
+
+    this.remoteDataService.cleanCache().then(() =>
+    {
+      console.log("CACHE WAS CLEANED");
+      return this.remoteDataService.initialize();
+    }).then(() => {
+      console.log("RemoteData service initialized.");
+      this.navCtrl.push(HomePage);
+      this.navCtrl.setRoot(HomePage);
+      loader.dismiss();
+    }).catch((e) =>
+    {
+      loader.dismiss();
+      console.log("Cache clean error: " + e);
+    });
+  }
+
+  /**
    * Save configuration values and reset application
    */
   saveAndResetApplication():void
@@ -62,6 +90,11 @@ export class ConfigurationPage implements OnInit
     }).then(() =>
     {
       console.log("User service initialized.");
+
+      return this.remoteDataService.cleanCache();
+    }).then(() =>
+    {
+      console.log("Cache was cleaned.");
 
       return this.remoteDataService.initialize();
     }).then(() =>

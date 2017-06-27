@@ -410,6 +410,28 @@ export class RemoteDataService
   }
 
   /**
+   * Destroys and recreates databases
+   *
+   * @returns {Promise}
+   */
+  public cleanCache():Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      let promises = [];
+      promises.push(self.checkpointProvider.destroyDatabase());
+      promises.push(self.checkinProvider.destroyDatabase());
+      Promise.all(promises).then(() =>
+      {
+        console.log("DBS DESTROYED!");
+        resolve();
+      });
+    });
+  }
+
+  /**
    * Makes sure all keys in the default_config are present in the storage
    * (Should be called on application initialization)
    *

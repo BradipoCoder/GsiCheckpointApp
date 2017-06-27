@@ -58,6 +58,15 @@
       </ion-col>
     </ion-row>
 
+    <ion-row *ngIf="isFormDisabled()">
+      <ion-col text-md-center>
+        <button ion-button icon-left (click)="cleanCache()" color="dark">
+          <ion-icon name="nuclear"></ion-icon>
+          <ion-label>Cancella la cache</ion-label>
+        </button>
+      </ion-col>
+    </ion-row>
+
   </ion-grid>
 </ion-content>
 

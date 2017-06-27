@@ -11,7 +11,6 @@
       </button>
       <ion-title float-left>Home</ion-title>
       <ion-icon float-right name="{{is_network_connected ? 'cloud' : 'thunderstorm'}}"></ion-icon>
-      <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
     </ion-navbar>
   </ion-header>
 
@@ -61,7 +60,8 @@
       </button>
       <ion-title float-left>Home</ion-title>
       <ion-icon float-right name="{{is_network_connected ? 'cloud' : 'thunderstorm'}}"></ion-icon>
-      <ion-label float-right>{{userService.getUserData("full_name")}}</ion-label>
+      <ion-label float-right>{{userService.getUserData("first_name") ||
+        userService.getUserData("name")}}</ion-label>
 
     </ion-navbar>
   </ion-header>
