@@ -11,6 +11,7 @@ import {OfflineCapableRestService} from './offline.capable.rest.service';
 import {UserService} from './user.service';
 
 /* Data Models */
+import {CrmDataModel} from '../models/crm.data.model';
 import {Checkpoint} from '../models/Checkpoint';
 import {Checkin} from '../models/Checkin';
 
@@ -36,8 +37,7 @@ export class RemoteDataService
     , private network: Network
     , private platform: Platform
     , private checkpointProvider: CheckpointProvider
-    , private checkinProvider: CheckinProvider
-  )
+    , private checkinProvider: CheckinProvider)
   {
   }
 
@@ -92,6 +92,8 @@ export class RemoteDataService
   }
 
 
+  //----------------------------------------------------------------------------------------------------------CHECKPOINT
+
 
   //-------------------------------------------------------------------------------------------------------------CHECKIN
 
@@ -102,71 +104,76 @@ export class RemoteDataService
    * @param {string} type
    * @param {string} time
    * @param {string} mkt_checkpoint_id_c
-   *//*
-  private registerCheckin(id: string, name: string, type: string, time: string, mkt_checkpoint_id_c: string): void
-  {
-    let currentCheckin = new Checkin(id, name, type, time, mkt_checkpoint_id_c);
-    currentCheckin.css_class = "row first";
+   */
+  /*
+   private registerCheckin(id: string, name: string, type: string, time: string, mkt_checkpoint_id_c: string): void
+   {
+   let currentCheckin = new Checkin(id, name, type, time, mkt_checkpoint_id_c);
+   currentCheckin.css_class = "row first";
 
-    //calculate and set duration of last checkin
-    let lastCheckin = _.last(this.CHECKINS) as Checkin;
-    if (lastCheckin)
-    {
-      lastCheckin.css_class = "row";
+   //calculate and set duration of last checkin
+   let lastCheckin = _.last(this.CHECKINS) as Checkin;
+   if (lastCheckin)
+   {
+   lastCheckin.css_class = "row";
 
-      let lastCheckinDuration = moment(currentCheckin.time).diff(lastCheckin.time, "minutes");
-      if (lastCheckinDuration < 60)
-      {
-        lastCheckin.duration = lastCheckinDuration + " min";
-      } else
-      {
-        let hours = Math.floor(lastCheckinDuration / 60);
-        let minutes = lastCheckinDuration - (60 * hours);
-        lastCheckin.duration = hours + " " + (hours > 1 ? "ore" : "ora") + " " + minutes + " min";
-      }
-    }
+   let lastCheckinDuration = moment(currentCheckin.time).diff(lastCheckin.time, "minutes");
+   if (lastCheckinDuration < 60)
+   {
+   lastCheckin.duration = lastCheckinDuration + " min";
+   } else
+   {
+   let hours = Math.floor(lastCheckinDuration / 60);
+   let minutes = lastCheckinDuration - (60 * hours);
+   lastCheckin.duration = hours + " " + (hours > 1 ? "ore" : "ora") + " " + minutes + " min";
+   }
+   }
 
-    this.CHECKINS.push(currentCheckin);
-  }*/
+   this.CHECKINS.push(currentCheckin);
+   }*/
 
   /**
    * Return checkins in chronologically reversed order - this is for home display
    *
    * @returns {any[]}
-   *//*
-  public getAllCheckinsReversed(): any
-  {
-    return _.reverse(_.clone(this.CHECKINS));
-  }*/
+   */
+  /*
+   public getAllCheckinsReversed(): any
+   {
+   return _.reverse(_.clone(this.CHECKINS));
+   }*/
 
   /**
    *
    * @param {any} filter
    * @returns {any}
-   *//*
-  public getCheckins(filter = {}): any
-  {
-    return _.filter(this.CHECKINS, filter);
-  }*/
+   */
+  /*
+   public getCheckins(filter = {}): any
+   {
+   return _.filter(this.CHECKINS, filter);
+   }*/
 
   /**
    *
    * @param {any} filter
    * @returns {any}
-   *//*
-  public getCheckin(filter = {}): Checkin
-  {
-    return _.find(this.CHECKINS, filter) as Checkin;
-  }*/
+   */
+  /*
+   public getCheckin(filter = {}): Checkin
+   {
+   return _.find(this.CHECKINS, filter) as Checkin;
+   }*/
 
   /**
    *
    * @returns {any}
-   *//*
-  public getLastCheckin(): Checkin
-  {
-    return _.last(this.CHECKINS) as Checkin;
-  }*/
+   */
+  /*
+   public getLastCheckin(): Checkin
+   {
+   return _.last(this.CHECKINS) as Checkin;
+   }*/
 
   /**
    * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
@@ -186,60 +193,60 @@ export class RemoteDataService
     {
       return reject(new Error("storeNewCheckin method in not implemented!"));
       /*
-      let checkPointId = relativeCheckpoint.id;
-      let checkinDate = moment().format(RemoteDataService.CRM_DATE_FORMAT);
-      let checkinUserId = self.userService.getUserData("id");
-      let checkinName = relativeCheckpoint.name;
-      let checkinDescription = '';
+       let checkPointId = relativeCheckpoint.id;
+       let checkinDate = moment().format(RemoteDataService.CRM_DATE_FORMAT);
+       let checkinUserId = self.userService.getUserData("id");
+       let checkinName = relativeCheckpoint.name;
+       let checkinDescription = '';
 
-      let param = {
-        name: checkinName,
-        description: checkinDescription,
-        checkin_date: checkinDate,
-        user_id_c: checkinUserId,
-        assigned_user_id: checkinUserId,
-        mkt_checkpoint_id_c: checkPointId
-      };
+       let param = {
+       name: checkinName,
+       description: checkinDescription,
+       checkin_date: checkinDate,
+       user_id_c: checkinUserId,
+       assigned_user_id: checkinUserId,
+       mkt_checkpoint_id_c: checkPointId
+       };
 
-      self.setEntry('mkt_Checkin', false, param).then((res) =>
-      {
-        if (_.isUndefined(res.id) || _.isEmpty(res.id))
-        {
-          throw new Error("Salvataggio Checkin fallito!");
-        }
-        //console.log("CHKIN: " + JSON.stringify(res));
+       self.setEntry('mkt_Checkin', false, param).then((res) =>
+       {
+       if (_.isUndefined(res.id) || _.isEmpty(res.id))
+       {
+       throw new Error("Salvataggio Checkin fallito!");
+       }
+       //console.log("CHKIN: " + JSON.stringify(res));
 
-        newCheckinId = res.id;
+       newCheckinId = res.id;
 
-        //register new checkin
-        self.registerCheckin(newCheckinId, checkinName, relativeCheckpoint.type, checkinDate, checkPointId);
+       //register new checkin
+       self.registerCheckin(newCheckinId, checkinName, relativeCheckpoint.type, checkinDate, checkPointId);
 
-        //it could have been an IN/OUT checkin
-        // if (_.includes([Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT], relativeCheckpoint.type))
-        // {
-        //   self.last_operation_type = relativeCheckpoint.type;
-        // }
-        if (relativeCheckpoint.type == Checkpoint.TYPE_OUT)
-        {
-          self.last_operation_type = relativeCheckpoint.type;
-          resolve(newCheckinId);
-        } else if (relativeCheckpoint.type == Checkpoint.TYPE_IN)
-        {
-          self.initialize().then(() =>
-          {
-            resolve(newCheckinId);
-          });
-        } else
-        {
-          resolve(newCheckinId);
-        }
+       //it could have been an IN/OUT checkin
+       // if (_.includes([Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT], relativeCheckpoint.type))
+       // {
+       //   self.last_operation_type = relativeCheckpoint.type;
+       // }
+       if (relativeCheckpoint.type == Checkpoint.TYPE_OUT)
+       {
+       self.last_operation_type = relativeCheckpoint.type;
+       resolve(newCheckinId);
+       } else if (relativeCheckpoint.type == Checkpoint.TYPE_IN)
+       {
+       self.initialize().then(() =>
+       {
+       resolve(newCheckinId);
+       });
+       } else
+       {
+       resolve(newCheckinId);
+       }
 
-      }).catch((e) =>
-      {
-        console.log("CHECKIN REGISTRATION ERROR: " + JSON.stringify(e));
-        reject(e);
-      });
-      */
+       }).catch((e) =>
+       {
+       console.log("CHECKIN REGISTRATION ERROR: " + JSON.stringify(e));
+       reject(e);
+       });
+       */
     });
   }
 
@@ -250,94 +257,124 @@ export class RemoteDataService
    * @returns {Promise<any>}
    */
   /*
-  private loadCheckins(): Promise<any>
-  {
-    let self = this;
-    //let current_user_id = self.userService.getUserData('id');
+   private loadCheckins(): Promise<any>
+   {
+   let self = this;
+   //let current_user_id = self.userService.getUserData('id');
 
-    return new Promise(function (resolve, reject)
-    {
-      self.getEntryList('mkt_Checkin', {
-        select_fields: ["id", "mkt_checkpoint_id_c", "checkin_date", "name"],
-        /*query: 'user_id_c = ' + current_user_id + ' AND checkin_date >= "' + self.last_operation_date + '"',* /
-        query: 'checkin_date >= "' + self.last_operation_date + '"',
-        order_by: 'checkin_date ASC',
-        max_results: 100
-      })
-        .then((res) =>
-        {
-          let checkpoint: any;
-          //console.log("CHECKINS: " + JSON.stringify(res));
+   return new Promise(function (resolve, reject)
+   {
+   self.getEntryList('mkt_Checkin', {
+   select_fields: ["id", "mkt_checkpoint_id_c", "checkin_date", "name"],
+   /*query: 'user_id_c = ' + current_user_id + ' AND checkin_date >= "' + self.last_operation_date + '"',* /
+   query: 'checkin_date >= "' + self.last_operation_date + '"',
+   order_by: 'checkin_date ASC',
+   max_results: 100
+   })
+   .then((res) =>
+   {
+   let checkpoint: any;
+   //console.log("CHECKINS: " + JSON.stringify(res));
 
-          if (!_.isEmpty(res.entry_list))
-          {
-            self.CHECKINS = [];
-            _.each(res.entry_list, function (checkin)
-            {
-              checkpoint = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
-              if (!_.isUndefined(checkpoint))
-              {
-                self.registerCheckin(checkin.id, checkin.name, checkpoint.type, checkin.checkin_date, checkin.mkt_checkpoint_id_c);
-              }
-            });
-          }
-          resolve();
-        })
-        .catch((e) =>
-        {
-          reject(e);
-        });
-    });
-  }*/
+   if (!_.isEmpty(res.entry_list))
+   {
+   self.CHECKINS = [];
+   _.each(res.entry_list, function (checkin)
+   {
+   checkpoint = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
+   if (!_.isUndefined(checkpoint))
+   {
+   self.registerCheckin(checkin.id, checkin.name, checkpoint.type, checkin.checkin_date, checkin.mkt_checkpoint_id_c);
+   }
+   });
+   }
+   resolve();
+   })
+   .catch((e) =>
+   {
+   reject(e);
+   });
+   });
+   }*/
 
   /**
    *
    * @returns {Promise<any>}
    */
   /*
+   private findLastInOutOperation(): Promise<any>
+   {
+   let self = this;
+   let lastOperationType = Checkpoint.TYPE_OUT;
+   let lastOperationDate = moment().format(RemoteDataService.CRM_DATE_FORMAT);
+   //let current_user_id = self.userService.getUserData('id');
+
+   return new Promise(function (resolve, reject)
+   {
+   self.getEntryList('mkt_Checkin', {
+   select_fields: ["id", "mkt_checkpoint_id_c", "checkin_date"],
+   /*query: "assigned_user_id = " + current_user_id,* /
+   order_by: 'checkin_date DESC',
+   max_results: 50
+   })
+   .then((res) =>
+   {
+   _.each(res.entry_list, function (checkin)
+   {
+   let checkpoint: any = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
+   if (!_.isUndefined(checkpoint))
+   {
+   if (_.includes([Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT], checkpoint.type))
+   {
+   lastOperationType = checkpoint.type;
+   lastOperationDate = checkin.checkin_date;
+   return false;//equivalent of break
+   }
+   }
+   });
+
+   self.last_operation_type = lastOperationType;
+   self.last_operation_date = lastOperationDate;
+
+   resolve();
+   })
+   .catch((e) =>
+   {
+   reject(e);
+   });
+   });
+   }
+   */
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
   private findLastInOutOperation(): Promise<any>
   {
     let self = this;
+
     let lastOperationType = Checkpoint.TYPE_OUT;
-    let lastOperationDate = moment().format(RemoteDataService.CRM_DATE_FORMAT);
-    //let current_user_id = self.userService.getUserData('id');
+    let lastOperationDate = moment().format(CrmDataModel.CRM_DATE_FORMAT);
+
 
     return new Promise(function (resolve, reject)
     {
-      self.getEntryList('mkt_Checkin', {
-        select_fields: ["id", "mkt_checkpoint_id_c", "checkin_date"],
-        /*query: "assigned_user_id = " + current_user_id,* /
-        order_by: 'checkin_date DESC',
-        max_results: 50
-      })
-        .then((res) =>
-        {
-          _.each(res.entry_list, function (checkin)
-          {
-            let checkpoint: any = self.getCheckpoint({id: checkin.mkt_checkpoint_id_c});
-            if (!_.isUndefined(checkpoint))
-            {
-              if (_.includes([Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT], checkpoint.type))
-              {
-                lastOperationType = checkpoint.type;
-                lastOperationDate = checkin.checkin_date;
-                return false;//equivalent of break
-              }
-            }
-          });
-
-          self.last_operation_type = lastOperationType;
-          self.last_operation_date = lastOperationDate;
-
-          resolve();
-        })
-        .catch((e) =>
-        {
-          reject(e);
-        });
+      self.checkinProvider.findDocuments({
+        selector: {checkin_date: {$gte: '2017-06-19 14:00:00'}},
+        fields: ['checkin_date', '_id', 'name', 'mkt_checkpoint_id_c'],
+        sort: [{'checkin_date': 'desc'}]
+      }).then((res) =>
+      {
+        console.log("FIND RES: ", res);
+        resolve();
+      }).catch((e) =>
+      {
+        console.log(e);
+        resolve();
+      });
     });
   }
-  */
 
   //----------------------------------------------------------------------------------------------SIMPLE GETTERS/SETTERS
   /**
@@ -365,11 +402,11 @@ export class RemoteDataService
       self.last_operation_type = Checkpoint.TYPE_OUT;
       self.last_operation_date = '';
 
-
-      let promises = [];
-      promises.push(self.checkpointProvider.syncWithRemote());
-      promises.push(self.checkinProvider.syncWithRemote());
-      Promise.all(promises).then(() => {
+      self.checkpointProvider.initialize().then(() =>
+      {
+        return self.checkinProvider.initialize();
+      }).then(() =>
+      {
         resolve();
       }).catch((e) =>
       {

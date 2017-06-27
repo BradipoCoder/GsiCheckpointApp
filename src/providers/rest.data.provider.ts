@@ -4,15 +4,21 @@
 import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {CrmDataModel} from '../models/crm.data.model';
+
 import PouchDB from "pouchdb";
+import PouchDBFind from "pouchdb-find";
+PouchDB.plugin(PouchDBFind);
+
 import _ from "lodash";
 import * as moment from 'moment';
 import {Promise} from '../../node_modules/bluebird'
 
 @Injectable()
-export class RestDataProvider {
+export class RestDataProvider
+{
   protected database_name: string;
   protected database_options: any = {revs_limit: 50};
+  protected database_indices: any = [];
 
   protected remote_table_name: string;
 
@@ -20,7 +26,8 @@ export class RestDataProvider {
 
   protected module_fields: any = [];
 
-  constructor(protected offlineCapableRestService: OfflineCapableRestService) {
+  constructor(protected offlineCapableRestService: OfflineCapableRestService)
+  {
   }
 
   /**
@@ -29,30 +36,36 @@ export class RestDataProvider {
    * @param {Boolean} [forceUpdate]
    * @returns {Promise<any>}
    */
-  protected storeDocument(document:CrmDataModel, forceUpdate:boolean = false): Promise<any>
+  protected storeDocument(document: CrmDataModel, forceUpdate: boolean = false): Promise<any>
   {
     let self = this;
     let key: string = document.id;
     let doUpdate = false;
 
-    return new Promise(function (resolve, reject) {
-      self.db.get(key).then((registeredDocument:any) => {
+    return new Promise(function (resolve, reject)
+    {
+      self.db.get(key).then((registeredDocument: any) =>
+      {
         doUpdate = document.isNewer(moment(registeredDocument.date_modified).toDate());
-        if(doUpdate || forceUpdate)
+        if (doUpdate || forceUpdate)
         {
           document._id = registeredDocument._id;
           document._rev = registeredDocument._rev;
-          self.db.put(document).then((res) => {
+          self.db.put(document).then((res) =>
+          {
             console.log("Doc updated:", key);
             resolve();
           });
-        } else {
+        } else
+        {
           //console.log("Skipping doc update:", key);
           resolve();
         }
-      }).catch((e) => {
+      }).catch((e) =>
+      {
         document._id = key;
-        self.db.put(document).then((res) => {
+        self.db.put(document).then((res) =>
+        {
           console.log("Doc registered:", key);
           resolve();
         });
@@ -66,21 +79,35 @@ export class RestDataProvider {
    * @param {Boolean} [forceUpdate]
    * @returns {Promise<any>}
    */
-  protected storeDocuments(documents:any, forceUpdate:boolean = false): Promise<any>
+  protected storeDocuments(documents: any, forceUpdate: boolean = false): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject)
+    {
       let promises = [];
-      _.each(documents, function (document) {
+      _.each(documents, function (document)
+      {
         promises.push(self.storeDocument(document, forceUpdate));
       });
-      Promise.all(promises).then(() => {
+      Promise.all(promises).then(() =>
+      {
         resolve();
       });
     });
   }
 
   /**
+   * @see https://pouchdb.com/api.html#query_index
+   * @param {{}} options
+   * @returns @returns {Promise<any>}
+   */
+  public findDocuments(options: any): Promise<any>
+  {
+    return this.db.find(options);
+  }
+
+  /**
+   * @see https://pouchdb.com/api.html#database_information
    * @returns @returns {Promise<any>}
    */
   public getDatabaseInfo(): Promise<any>
@@ -98,7 +125,8 @@ export class RestDataProvider {
    */
   promiseWhile(data, condition, action): Promise<any>
   {
-    let whilst = (data): Promise<any> => {
+    let whilst = (data): Promise<any> =>
+    {
       return condition(data)
         ? action(data).then(whilst)
         : Promise.resolve(data);
@@ -107,8 +135,22 @@ export class RestDataProvider {
     return whilst(data);
   };
 
-  protected initialize(): void {
-    //let self = this;
-    this.db = new PouchDB(this.database_name, this.database_options);
+  protected setupDatabase(): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject){
+      self.db = new PouchDB(self.database_name, self.database_options);
+
+      let indexCreationPromises = [];
+      _.each(self.database_indices, function (indexObject)
+      {
+        indexCreationPromises.push(self.db.createIndex({index: indexObject}));
+      });
+
+      Promise.all(indexCreationPromises).then(() => {
+        resolve();
+      });
+    });
   }
 }
