@@ -40,9 +40,9 @@ export class RestDataProvider
    *
    * @param {CrmDataModel} document
    * @param {Boolean} [forceUpdate]
-   * @returns {Promise<any>}
+   * @returns {Promise<string>}
    */
-  protected storeDocument(document: CrmDataModel, forceUpdate: boolean = false): Promise<any>
+  protected storeDocument(document: CrmDataModel, forceUpdate: boolean = false): Promise<string>
   {
     let self = this;
     let key: string = document.id;
@@ -60,12 +60,12 @@ export class RestDataProvider
           self.db.put(document).then((res) =>
           {
             //console.log("Doc updated:", key);
-            resolve();
+            resolve(key);
           });
         } else
         {
           //console.log("Skipping doc update:", key);
-          resolve();
+          resolve(key);
         }
       }).catch((e) =>
       {
@@ -73,7 +73,7 @@ export class RestDataProvider
         self.db.put(document).then((res) =>
         {
           //console.log("Doc registered:", key);
-          resolve();
+          resolve(key);
         });
       });
     });
@@ -129,7 +129,7 @@ export class RestDataProvider
    * @param {function} action
    * @returns @returns {Promise<any>}
    */
-  promiseWhile(data, condition, action): Promise<any>
+  protected promiseWhile(data, condition, action): Promise<any>
   {
     let whilst = (data): Promise<any> =>
     {

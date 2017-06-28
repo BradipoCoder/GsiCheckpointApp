@@ -145,9 +145,9 @@ export class CodeScanService
     let expected_type = _.first(allowed_types) as string;
 
     let codes:any = [];
-    codes[Checkpoint.TYPE_IN] = ["GSI-IN"];
-    codes[Checkpoint.TYPE_OUT] = ["GSI-OUT"];
-    codes[Checkpoint.TYPE_CHK] = ["B35", "C20", "F41", "T40"];
+    codes[Checkpoint.TYPE_IN] = ["MKT-IN"];
+    codes[Checkpoint.TYPE_OUT] = ["MKT-OUT"];
+    codes[Checkpoint.TYPE_CHK] = ["A150", "S132", "T14", "AT06"];
 
     let allowFakes = codes[expected_type];
 

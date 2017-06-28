@@ -25,11 +25,17 @@ export class Checkpoint extends CrmDataModel {
    */
   constructor(data: any = {}) {
     super();
+
     //console.log("Undefined keys", _.difference(_.keys(data), _.keys(this)));
     let self = this;
-    _.each(_.keys(this), function (key) {
-      _.set(self, key, _.get(data, key, null));
+    _.each(_.keys(this), function (key)
+    {
+      if (_.has(data, key))
+      {
+        _.set(self, key, _.get(data, key, null));
+      }
     });
+
   }
 
 

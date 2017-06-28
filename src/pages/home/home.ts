@@ -17,19 +17,19 @@ import * as moment from 'moment';
 })
 export class HomePage implements OnInit, OnDestroy
 {
-  public is_network_connected:boolean;
+  public is_network_connected: boolean;
 
   private shiftTotalDuration: string = "";
 
-  protected presentLogoutScreen:boolean = false;
+  protected presentLogoutScreen: boolean = false;
 
   /*
-  private logoutScreenData:any = {
-    name: "Andrea",
-    img_url: "assets/image/user.png",
-    date: "14 giugno",
-    duration: "6 ore 22 min"
-  };*/
+   private logoutScreenData:any = {
+   name: "Andrea",
+   img_url: "assets/image/user.png",
+   date: "14 giugno",
+   duration: "6 ore 22 min"
+   };*/
 
 
   constructor(public navCtrl: NavController
@@ -51,11 +51,60 @@ export class HomePage implements OnInit, OnDestroy
   {
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) =>
     {
+      //console.log("BARCODE", barcodeData);
+      return this.remoteDataService.storeNewCheckin(barcodeData.text);
+    }).then((newCheckin) =>
+    {
+      console.log("CHECKIN REGISTERED", newCheckin);
+
+      let toastMessage = newCheckin.name;
+      if (newCheckin.type == Checkpoint.TYPE_OUT)
+      {
+        // OUT
+        toastMessage = "Fine turno";
+
+      } else if (newCheckin.type == Checkpoint.TYPE_OUT)
+      {
+        // IN
+        toastMessage = "Inizio turno";
+      } else
+      {
+        // CHK
+      }
+
+
+      let toast = this.toastCtrl.create({
+        message: toastMessage,
+        duration: 3000,
+        position: 'bottom'
+      });
+      toast.present();
+    }).catch((e) =>
+    {
+      console.error("Errore scansione: " + e);
+      let toast = this.toastCtrl.create({
+        message: e,
+        duration: 3000,
+        position: 'top'
+      });
+      toast.present();
+    });
+  }
+
+  /**
+   *
+   * @param {[<string>]} allowedTypes
+   */
+  scanQRCodeOld(allowedTypes: any): void
+  {
+    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) =>
+    {
       //this.lastScannedBarcode = JSON.stringify(barcodeData);
-      this.remoteDataService.storeNewCheckin(barcodeData.text).then((newCheckinId) => {
+      this.remoteDataService.storeNewCheckin(barcodeData.text).then((newCheckin) =>
+      {
 
         //user has just registered the EXIT checkin code
-        if(!this.isUserCheckedIn())
+        if (!this.isUserCheckedIn())
         {
 
           //@todo: rethink this!
@@ -66,43 +115,43 @@ export class HomePage implements OnInit, OnDestroy
           });
           toast.present();
           /*
-          // 1) store user data (before logout) present logged-out screen
-          this.logoutScreenData.name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
-          //this.logoutScreenData.img_url = this.userService.getUserData("img_url") || 'assets/image/user.png';
-          moment.locale("it");
-          this.logoutScreenData.date = moment().format('D MMMM');
-          this.logoutScreenData.duration = this.shiftTotalDuration;
-          this.presentLogoutScreen = true;
+           // 1) store user data (before logout) present logged-out screen
+           this.logoutScreenData.name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
+           //this.logoutScreenData.img_url = this.userService.getUserData("img_url") || 'assets/image/user.png';
+           moment.locale("it");
+           this.logoutScreenData.date = moment().format('D MMMM');
+           this.logoutScreenData.duration = this.shiftTotalDuration;
+           this.presentLogoutScreen = true;
 
-          // 2) start timeout to hide logged-out screen
-          setTimeout(function(self) {
-            self.presentLogoutScreen = false;
-          }, 15 * 1000, this);
+           // 2) start timeout to hide logged-out screen
+           setTimeout(function(self) {
+           self.presentLogoutScreen = false;
+           }, 15 * 1000, this);
 
-          // 3) log out user
-          this.userService.logout().then(() => {
-            console.log("User is now logged out.");
-            //reinitialize remote data
-            return this.remoteDataService.initialize();
-          }).then(() => {
-            console.log("Remote data service was reset.");
-            //DONE
-          });
-          */
+           // 3) log out user
+           this.userService.logout().then(() => {
+           console.log("User is now logged out.");
+           //reinitialize remote data
+           return this.remoteDataService.initialize();
+           }).then(() => {
+           console.log("Remote data service was reset.");
+           //DONE
+           });
+           */
 
 
-        } else {
-          //let checkin = this.remoteDataService.getCheckin({id: newCheckinId});
-
+        } else
+        {
           let toast = this.toastCtrl.create({
-            message: "Cantina buia", /*checkin.name,*/
+            message: newCheckin.name,
             duration: 3000,
             position: 'bottom'
           });
           toast.present();
 
         }
-      }).catch((e) => {
+      }).catch((e) =>
+      {
         console.error("Errore registrazione: " + e);
         let toast = this.toastCtrl.create({
           message: e,
@@ -172,24 +221,24 @@ export class HomePage implements OnInit, OnDestroy
   {
     let durationStr = '';
     /*
-    if (self.isUserAuthenticated() && self.isUserCheckedIn())
-    {
-      let shiftStartCheckin = self.remoteDataService.getCheckin({type: Checkpoint.TYPE_IN});
-      let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.time, "seconds");
+     if (self.isUserAuthenticated() && self.isUserCheckedIn())
+     {
+     let shiftStartCheckin = self.remoteDataService.getCheckin({type: Checkpoint.TYPE_IN});
+     let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.time, "seconds");
 
-      let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
-      let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
-      //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
-      //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
+     let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
+     let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
+     //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
+     //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
 
-      if (hours)
-      {
-        durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
-      }
-      durationStr += minutes + " min";
-      //durationStr += " " + seconds + "s";
-    }
-    */
+     if (hours)
+     {
+     durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
+     }
+     durationStr += minutes + " min";
+     //durationStr += " " + seconds + "s";
+     }
+     */
     self.shiftTotalDuration = durationStr;
   }
 
@@ -199,14 +248,14 @@ export class HomePage implements OnInit, OnDestroy
   recalculateLastCheckinDuration(self: HomePage): void
   {
     /*
-    if (self.isUserAuthenticated() && self.isUserCheckedIn())
-    {
-      let lastCheckin = self.remoteDataService.getLastCheckin();
-      if(!_.isUndefined(lastCheckin))
-      {
-        lastCheckin.setDurationFromNow();
-      }
-    }*/
+     if (self.isUserAuthenticated() && self.isUserCheckedIn())
+     {
+     let lastCheckin = self.remoteDataService.getLastCheckin();
+     if(!_.isUndefined(lastCheckin))
+     {
+     lastCheckin.setDurationFromNow();
+     }
+     }*/
   }
 
   /**

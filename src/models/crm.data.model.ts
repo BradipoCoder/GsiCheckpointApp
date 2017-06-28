@@ -34,7 +34,11 @@ export class CrmDataModel
 
   constructor()
   {
-    /**/
+    this.id = _.uniqueId("ID_");
+    this._id = this.id;
+    this.date_entered = moment().format(CrmDataModel.CRM_DATE_FORMAT);
+    this.date_modified = moment().format(CrmDataModel.CRM_DATE_FORMAT);
+    this.deleted = "0";
   }
 
   /**
@@ -61,6 +65,52 @@ export class CrmDataModel
   public isNewer(date:Date): boolean
   {
     return (moment(this.date_modified).diff(date, "seconds")) > 0;
+  }
+
+
+
+  /**
+   *
+   * @param {string} property
+   * @param {string} [format]
+   * @throws {Error}
+   */
+  protected checkPropertyDate(property:string, format:string = null):void
+  {
+    let dateValue = this.getPropertyValue(property);
+    let date = moment(dateValue, CrmDataModel.CRM_DATE_FORMAT);
+    if(!_.isEmpty(dateValue) && !date.isValid())
+    {
+      throw new Error("Checkin: Invalid date on property["+property+"]: " + dateValue);
+    }
+  }
+
+  /**
+   *
+   * @param {string} property
+   * @param {string} [format]
+   */
+  protected getDatePropertyValue(property:string, format:string = null):string
+  {
+    format = format || CrmDataModel.CRM_DATE_FORMAT;
+    let dateValue = this.getPropertyValue(property);
+    let date = moment(dateValue, CrmDataModel.CRM_DATE_FORMAT);
+    return date.format(format);
+  }
+
+  /**
+   *
+   * @param {string} property
+   * @throws {Error}
+   * @returns {any}
+   */
+  protected getPropertyValue(property:string):any
+  {
+    if(!_.has(this, property))
+    {
+      throw new Error("No property by this name["+property+"]!");
+    }
+    return _.get(this, property);
   }
 
   /**

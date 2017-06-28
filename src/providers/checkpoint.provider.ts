@@ -19,6 +19,10 @@ export class CheckpointProvider extends RestDataProvider
       fields: ['type']
     },
     {
+      name: 'idx_code',
+      fields: ['code']
+    },
+    {
       name: 'idx_company',
       fields: ['account_id_c']
     },
@@ -37,6 +41,32 @@ export class CheckpointProvider extends RestDataProvider
 
     let model = new Checkpoint();
     this.module_fields = model.getDefinedProperties();
+  }
+
+  /**
+   *
+   * @param {{}} options
+   * @returns {Promise<Checkpoint>}
+   */
+  public getCheckpoint(options:any): Promise<Checkpoint>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject)
+    {
+      self.findDocuments(options).then((res) => {
+        if(_.size(res.docs) < 1)
+        {
+          throw new Error("Checkpoint was not found!");
+        }
+        if (_.size(res.docs) > 1) {
+          throw new Error("Multiple checkpoint were found!");
+        }
+        let checkpoint = new Checkpoint(res.docs[0]);
+        resolve(checkpoint);
+      }).catch((e) => {
+        reject(e);
+      });
+    });
   }
 
   /**
@@ -98,7 +128,7 @@ export class CheckpointProvider extends RestDataProvider
             offset: offset
           }).then((res) =>
           {
-            //console.log("CHECKPOINT LIST["+seq+"]["+offset+"]", res);
+            //console.log("CHECKPOINT LIST["+sequence+"]["+offset+"]", res);
             sequence++;
             hasMore = (res.next_offset < res.total_count) && _.size(res.entry_list) > 0;
 

@@ -129,19 +129,21 @@
 
 
       <ion-grid class="checkin_list">
-        <ion-row *ngFor="let checkin of remoteDataService.getAllCheckinsReversed()" ngClass="{{checkin.css_class}}">
+
+        <ion-row *ngFor="let checkin of remoteDataService.getCurrentSessionCheckins()" ngClass="{{checkin.css_class}}">
           <ion-col col-10>
             <div>
               <ion-icon [name]="checkin.icon" item-left></ion-icon>
-              {{checkin.name}} ({{checkin.duration}})
+              {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>{{checkin.id}}</small>
             </div>
           </ion-col>
           <ion-col col-2 text-right="">
             <div>
-              {{checkin.getFormattedTime()}}
+              {{checkin.getDatePropertyValue('checkin_date', 'H:mm')}}
             </div>
           </ion-col>
         </ion-row>
+
       </ion-grid>
     </div>
 
@@ -154,6 +156,7 @@
 <ng-template #checkedOut>
   <div *ngIf="presentLogoutScreen; then checkedOutEndOfSessionScreen else checkedOutStartScreen"></div>
 </ng-template>
+
 
 <!-- The block for checked OUT user -->
 <ng-template #checkedOutStartScreen>
@@ -190,6 +193,7 @@
   </div>
 
 </ng-template>
+
 
 <!-- The block for checked OUT user - End of session screen -->
 <ng-template #checkedOutEndOfSessionScreen>
