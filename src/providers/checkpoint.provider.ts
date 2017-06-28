@@ -113,6 +113,7 @@ export class CheckpointProvider extends RestDataProvider
       let sequence = 0;
       let offset = 0;
       let hasMore = true;
+
       self.promiseWhile(hasMore, function (hasMore)
       {
         return hasMore;
@@ -162,6 +163,7 @@ export class CheckpointProvider extends RestDataProvider
       }).catch((e) =>
       {
         console.error(e);
+        reject(e);
       });
     });
   }
@@ -181,10 +183,11 @@ export class CheckpointProvider extends RestDataProvider
       }).then(() =>
       {
         resolve();
-      }).then(() =>
+      }).catch((e) =>
       {
-        //resolve();
+        reject(e);
       });
     });
   }
 }
+

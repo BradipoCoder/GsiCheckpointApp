@@ -121,6 +121,11 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
+      if(_.isUndefined(self.last_in_out_operation) || _.isNull(self.last_in_out_operation))
+      {
+        resolve();
+      }
+
       let fromDate = self.last_in_out_operation.checkin_date;
       //console.log("Updating CURRENT_SESSION_CHECKINS (from date: "+fromDate+")...");
 
@@ -135,6 +140,7 @@ export class RemoteDataService
         {
           self.CURRENT_SESSION_CHECKINS = [];
           _.each(res.docs, function(doc) {
+            console.log("CHK", doc);
             self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
           });
         }

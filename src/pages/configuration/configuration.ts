@@ -38,7 +38,7 @@ export class ConfigurationPage implements OnInit
     let self = this;
     let loader = this.loadingCtrl.create({
       content: "Elaborazione in corso...",
-      duration: 30000
+      duration: 60000
     });
     loader.present();
 
@@ -54,6 +54,12 @@ export class ConfigurationPage implements OnInit
     }).catch((e) =>
     {
       loader.dismiss();
+      let toast = this.toastCtrl.create({
+        message: e,
+        duration: 5000,
+        position: 'top'
+      });
+      toast.present();
       console.log("Cache clean error: " + e);
     });
   }

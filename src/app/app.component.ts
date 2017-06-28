@@ -60,25 +60,34 @@ export class MekitTracerApp
     }).then(() =>
     {
       console.log("RemoteData service initialized.");
-      if (!this.platform.is("core"))
-      {
-        this.statusBar.styleDefault();
-        this.splashScreen.hide();
-      }
-      /*-----------------------------------------*/
-      /*------------START ROOT COMPONENT---------*/
-      this.rootPage = this.startupPage;
-      /*-----------------------------------------*/
+      this.presentStartupPage();
     }).catch((e) =>
     {
-      console.log("App initialization error: " + e);
+      console.error("App initialization error: " + e);
     });
   }
 
+  presentStartupPage(): void
+  {
+    if (!this.platform.is("core"))
+    {
+      this.statusBar.styleDefault();
+      this.splashScreen.hide();
+    }
+    /*-----------------------------------------*/
+    /*------------START ROOT COMPONENT---------*/
+    this.rootPage = this.startupPage;
+    /*-----------------------------------------*/
+  }
+
+  /**
+   * Used by main menu items
+   * Reset the content nav to have just this page - so we don't have the back button
+   *
+   * @param page
+   */
   openPage(page)
   {
-    // Reset the content nav to have just this page
-    // we wouldn't want the back button to show in this scenario
     this.nav.setRoot(page.component);
   }
 }
