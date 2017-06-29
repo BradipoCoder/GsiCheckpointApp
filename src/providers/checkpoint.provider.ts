@@ -179,9 +179,6 @@ export class CheckpointProvider extends RestDataProvider
     {
       self.setupDatabase().then(() =>
       {
-        return self.syncWithRemote();
-      }).then(() =>
-      {
         resolve();
       }).catch((e) =>
       {

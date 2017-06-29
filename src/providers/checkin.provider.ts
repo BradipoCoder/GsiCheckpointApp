@@ -168,10 +168,10 @@ export class CheckinProvider extends RestDataProvider
     {
       self.setupDatabase().then(() =>
       {
-        return self.syncWithRemote();
-      }).then(() =>
-      {
         resolve();
+      }).catch((e) =>
+      {
+        reject(e);
       });
     });
   }

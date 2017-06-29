@@ -121,7 +121,7 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      if(_.isUndefined(self.last_in_out_operation) || _.isNull(self.last_in_out_operation))
+      if (_.isUndefined(self.last_in_out_operation) || _.isNull(self.last_in_out_operation))
       {
         resolve();
       }
@@ -135,11 +135,13 @@ export class RemoteDataService
         },
         sort: [{checkin_date: 'desc'}]
       };
-      self.checkinProvider.findDocuments(options).then((res) => {
-        if(_.size(res.docs))
+      self.checkinProvider.findDocuments(options).then((res) =>
+      {
+        if (_.size(res.docs))
         {
           self.CURRENT_SESSION_CHECKINS = [];
-          _.each(res.docs, function(doc) {
+          _.each(res.docs, function (doc)
+          {
             console.log("CHK", doc);
             self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
           });
@@ -247,8 +249,9 @@ export class RemoteDataService
         sort: [{checkin_date: 'desc'}],
         limit: 2
       };
-      self.checkinProvider.findDocuments(options).then((res) => {
-        if(_.isUndefined(res.docs[0]))
+      self.checkinProvider.findDocuments(options).then((res) =>
+      {
+        if (_.isUndefined(res.docs[0]))
         {
           //no previous document
           resolve();
@@ -265,9 +268,10 @@ export class RemoteDataService
         // console.log("PREV: ", checkin_date_prev);
         // console.log("DUR: ", prevCheckinDuration);
         previousCheckin.duration = prevCheckinDuration.toString();
-        console.log("Storing duration of previous checkin("+previousCheckin.id+"): ", prevCheckinDuration);
+        console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
 
-        self.checkinProvider.storeCheckin(previousCheckin, true).then(() => {
+        self.checkinProvider.storeCheckin(previousCheckin, true).then(() =>
+        {
 
           resolve();
 
@@ -366,12 +370,59 @@ export class RemoteDataService
   }
 
   /**
-   * Makes sure all keys in the default_config are present in the storage
-   * (Should be called on application initialization)
-   *
-   * @returns {Promise}
+   * Triggers data sync operation in every registered provider
    */
-  public initialize(): Promise<any>
+  public triggerProviderDataSync(): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      let providers = [''];
+      providers.push('checkpointProvider');
+      providers.push('checkinProvider');
+
+      Promise.reduce(providers, function (accu, item, index, length)
+      {
+        return new Promise(function (resolve, reject)
+        {
+          let hasFunctionToCall = false;
+          if (_.has(self, item))
+          {
+            let provider = self[item];
+            if (_.isFunction(provider.syncWithRemote))
+            {
+              hasFunctionToCall = true;
+              provider.syncWithRemote().then(() => {
+                resolve();
+              });
+            }
+          }
+          if(!hasFunctionToCall)
+          {
+            resolve();
+          }
+        });
+
+      }).then(() =>
+      {
+        //console.log("All providers are in sync now");
+        resolve();
+      }).catch((e) =>
+      {
+        //console.error("Error when syncing providers: " + e);
+        reject(e);
+      });
+    });
+  }
+
+
+  /**
+   *
+   * @param {boolean} [waitForProviderData]
+   * @returns {Promise<any>}
+   */
+  public initialize(waitForProviderData:boolean = false): Promise<any>
   {
     let self = this;
 
@@ -392,7 +443,18 @@ export class RemoteDataService
         return self.updateCurrentSessionCheckins();
       }).then(() =>
       {
-        resolve();
+        if(!waitForProviderData)
+        {
+          resolve();
+        }
+        return self.triggerProviderDataSync();
+      }).then(() =>
+      {
+        console.log("PROVIDER DATA IS IN SYNC NOW");
+        if(waitForProviderData)
+        {
+          resolve();
+        }
       }).catch((e) =>
       {
         reject(e);
@@ -400,3 +462,4 @@ export class RemoteDataService
     });
   }
 }
+

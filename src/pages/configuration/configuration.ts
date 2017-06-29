@@ -45,7 +45,7 @@ export class ConfigurationPage implements OnInit
     this.remoteDataService.cleanCache().then(() =>
     {
       console.log("CACHE WAS CLEANED");
-      return this.remoteDataService.initialize();
+      return this.remoteDataService.initialize(true);
     }).then(() => {
       console.log("RemoteData service initialized.");
       this.navCtrl.push(HomePage);
@@ -102,7 +102,7 @@ export class ConfigurationPage implements OnInit
     {
       console.log("Cache was cleaned.");
 
-      return this.remoteDataService.initialize();
+      return this.remoteDataService.initialize(true);
     }).then(() =>
     {
       console.log("RemoteData service initialized.");
