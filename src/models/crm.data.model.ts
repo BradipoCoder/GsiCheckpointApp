@@ -8,6 +8,12 @@ export class CrmDataModel
 {
   public static readonly CRM_DATE_FORMAT: string = "YYYY-MM-DD HH:mm:ss";
 
+  public static readonly SYNC_STATE__IN_SYNC: string = "in-sync";
+  public static readonly SYNC_STATE__NEW: string = "new";
+  public static readonly SYNC_STATE__CHANGED: string = "changed";
+  public static readonly SYNC_STATE__DELETED: string = "deleted";
+
+
   /* PouchDb doc related */
   public _id: string;
   public _rev: string;
@@ -31,6 +37,7 @@ export class CrmDataModel
   public modified_by_name: string = null;
 
   public module_name: string = null;
+  public sync_state: string = CrmDataModel.SYNC_STATE__IN_SYNC;
 
   constructor()
   {

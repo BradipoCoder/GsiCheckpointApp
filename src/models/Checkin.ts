@@ -59,7 +59,7 @@ export class Checkin extends CrmDataModel
    * duration is stored in seconds
    * @returns {string}
    */
-  getFormattedDuration():string
+  getFormattedDuration(): string
   {
     let answer = '';
     let checkinDuration = parseInt(this.getPropertyValue("duration"));
@@ -67,13 +67,16 @@ export class Checkin extends CrmDataModel
     let minutes = Math.floor(checkinDuration / 60) - (60 * hours);
     let seconds = checkinDuration - (60 * 60 * hours) - (60 * minutes);
 
-    if (hours) {
+    if (hours)
+    {
       answer += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
     }
-    if(minutes){
+    if (minutes)
+    {
       answer += minutes + " min";
     }
-    if(seconds){
+    if (seconds)
+    {
       answer += " " + seconds + "s";
     }
 
@@ -82,12 +85,31 @@ export class Checkin extends CrmDataModel
 
   /**
    *
+   * @returns {{}}
+   */
+  public getRestData(): any
+  {
+    let self = this;
+    let answer = {};
+    let keys = this.getDefinedProperties(['_id', 'sync_state', 'module_name']);
+    _.each(keys, function (key)
+    {
+      if(!_.isNull(_.get(self, key, null))) {
+        _.set(answer, key, _.get(self, key, null));
+      }
+    });
+
+    return answer;
+  }
+
+  /**
+   * @param {[]} additionalExcludeFields
    * @returns {string[]}
    */
-  public getDefinedProperties(): any
+  public getDefinedProperties(additionalExcludeFields:any = []): any
   {
     let nonModuleFields = ['css_class', 'type', 'icon'];
     let properties = super.getDefinedProperties();
-    return _.difference(properties, nonModuleFields);
+    return _.difference(_.difference(properties, nonModuleFields), additionalExcludeFields);
   }
 }

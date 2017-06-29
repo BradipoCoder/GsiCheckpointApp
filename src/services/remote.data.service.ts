@@ -152,30 +152,6 @@ export class RemoteDataService
     });
   }
 
-
-  /**
-   *
-   * @param {any} filter
-   * @returns {any}
-   */
-  /*
-   public getCheckins(filter = {}): any
-   {
-   return _.filter(this.CHECKINS, filter);
-   }*/
-
-  /**
-   *
-   * @param {any} filter
-   * @returns {any}
-   */
-  /*
-   public getCheckin(filter = {}): Checkin
-   {
-   return _.find(this.CHECKINS, filter) as Checkin;
-   }*/
-
-
   /**
    * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
    *
@@ -200,6 +176,7 @@ export class RemoteDataService
           checkin_user: self.userService.getUserData("full_name"),
           mkt_checkpoint_id_c: relativeCheckpoint.id,
           type: relativeCheckpoint.type,
+          sync_state: CrmDataModel.SYNC_STATE__NEW
         });
         return self.checkinProvider.storeCheckin(checkin);
       }).then((checkinId) =>
@@ -251,31 +228,29 @@ export class RemoteDataService
       };
       self.checkinProvider.findDocuments(options).then((res) =>
       {
-        if (_.isUndefined(res.docs[0]))
+        if (!_.isUndefined(res.docs[0]))
         {
-          //no previous document
+          let previousCheckin = new Checkin(res.docs[0]);
+          //console.log("DURATION UPDATE - PREV: ", previousCheckin);
+
+          let checkin_date_last = lastCheckin.checkin_date;
+          let checkin_date_prev = previousCheckin.checkin_date;
+          let prevCheckinDuration = moment(checkin_date_last).diff(checkin_date_prev, "seconds");
+
+          // console.log("LAST: ", checkin_date_last);
+          // console.log("PREV: ", checkin_date_prev);
+          // console.log("DUR: ", prevCheckinDuration);
+          previousCheckin.duration = prevCheckinDuration.toString();
+          console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
+
+          self.checkinProvider.storeCheckin(previousCheckin, true).then(() =>
+          {
+            resolve();
+          });
+        } else {
+          console.log("DURATION-UPDATE: NO DOCS");
           resolve();
         }
-
-        let previousCheckin = new Checkin(res.docs[0]);
-        //console.log("DURATION UPDATE - PREV: ", previousCheckin);
-
-        let checkin_date_last = lastCheckin.checkin_date;
-        let checkin_date_prev = previousCheckin.checkin_date;
-        let prevCheckinDuration = moment(checkin_date_last).diff(checkin_date_prev, "seconds");
-
-        // console.log("LAST: ", checkin_date_last);
-        // console.log("PREV: ", checkin_date_prev);
-        // console.log("DUR: ", prevCheckinDuration);
-        previousCheckin.duration = prevCheckinDuration.toString();
-        console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
-
-        self.checkinProvider.storeCheckin(previousCheckin, true).then(() =>
-        {
-
-          resolve();
-
-        });
       });
     });
   }

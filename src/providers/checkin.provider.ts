@@ -26,6 +26,10 @@ export class CheckinProvider extends RestDataProvider
     {
       name: 'idx_date_checkpoint',
       fields: ['checkin_date', 'mkt_checkpoint_id_c']
+    },
+    {
+      name: 'idx_sync_state',
+      fields: ['sync_state']
     }
   ];
 
@@ -54,6 +58,7 @@ export class CheckinProvider extends RestDataProvider
       {
         resolve(docId);
         //@todo: trigger background sync from here!
+        self.syncWithRemote_PUSH();
       }).catch((e) =>
       {
         console.error(e);
@@ -88,11 +93,126 @@ export class CheckinProvider extends RestDataProvider
     });
   }
 
+
   /**
    *
    * @returns {Promise<any>}
    */
   public syncWithRemote(): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      let syncMethods = [''];
+      syncMethods.push('syncWithRemote_PUSH');
+      syncMethods.push('syncWithRemote_PULL');
+
+      Promise.reduce(syncMethods, function (accu, item, index, length)
+      {
+        return new Promise(function (resolve, reject)
+        {
+          let hasFunctionToCall = false;
+
+          if (_.isFunction(self[item]))
+          {
+            let fn = self[item];
+            hasFunctionToCall = true;
+            fn.apply(self).then(() =>
+            {
+              resolve();
+            });
+          }
+
+          if (!hasFunctionToCall)
+          {
+            resolve();
+          }
+        });
+      }).then(() =>
+      {
+        //console.log("All providers are in sync now");
+        resolve();
+      }).catch((e) =>
+      {
+        //console.error("Error when syncing providers: " + e);
+        reject(e);
+      });
+    });
+  }
+
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  private syncWithRemote_PUSH(): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      console.log("syncWithRemote_PUSH: ");
+
+      self.findDocuments({
+        selector: {
+          $or: [
+            {sync_state: CrmDataModel.SYNC_STATE__NEW},
+            {sync_state: CrmDataModel.SYNC_STATE__CHANGED},
+          ]
+        },
+        /*fields: ['checkin_date', 'mkt_checkpoint_id_c'],*/
+      }).then((res) =>
+      {
+        if (_.size(res.docs))
+        {
+          let docs = _.concat([""], res.docs);//for Promise.reduce
+
+          Promise.reduce(docs, function (accu, doc, index, length)
+          {
+            return new Promise(function (resolve, reject)
+            {
+              let checkin = new Checkin(doc);
+              let id = (doc.sync_state == CrmDataModel.SYNC_STATE__CHANGED) ? doc.id: false;
+              let parameters = checkin.getRestData();
+              if(!id) {
+                _.unset(parameters, 'id');
+              }
+              console.log("PUSHING PARAMS:   ", parameters);
+              self.offlineCapableRestService.setEntry(self.remote_table_name, id, parameters).then((res) => {
+                console.log("saved", res);
+                checkin.id = res.id;
+                checkin.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
+                return self.storeDocument(checkin, true);
+              }).then((res) => {
+                console.log("stored", res);
+                resolve();
+              }).catch((e) => {
+                reject(e);
+              });
+            });
+          }).then(() => {
+            resolve();
+          }).catch((e) => {
+            reject(e);
+          });
+        } else {
+          console.log("NOTHING TO SYNC");
+          resolve();
+        }
+      }).catch((e) =>
+      {
+        console.error(e);
+        resolve();
+      });
+    });
+  }
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  private syncWithRemote_PULL(): Promise<any>
   {
     let self = this;
     let forceUpdate = false;

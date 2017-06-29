@@ -50,6 +50,7 @@ export class RestDataProvider
 
     return new Promise(function (resolve, reject)
     {
+      //@todo: we need to look for document by "id" and not "_id" because we cannot change "_id"!!!
       self.db.get(key).then((registeredDocument: any) =>
       {
         doUpdate = document.isNewer(moment(registeredDocument.date_modified).toDate());
@@ -59,12 +60,12 @@ export class RestDataProvider
           document._rev = registeredDocument._rev;
           self.db.put(document).then((res) =>
           {
-            //console.log("Doc updated:", key);
+            console.log("Doc updated:", key);
             resolve(key);
           });
         } else
         {
-          //console.log("Skipping doc update:", key);
+          console.log("Skipping doc update:", key);
           resolve(key);
         }
       }).catch((e) =>
@@ -72,7 +73,7 @@ export class RestDataProvider
         document._id = key;
         self.db.put(document).then((res) =>
         {
-          //console.log("Doc registered:", key);
+          console.log("Doc registered:", key);
           resolve(key);
         });
       });
