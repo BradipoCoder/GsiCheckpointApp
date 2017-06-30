@@ -397,9 +397,10 @@ export class RemoteDataService
   /**
    *
    * @param {boolean} [waitForProviderData]
+   * @param {boolean} [skipDataSync]
    * @returns {Promise<any>}
    */
-  public initialize(waitForProviderData:boolean = false): Promise<any>
+  public initialize(waitForProviderData:boolean = false, skipDataSync:boolean = false): Promise<any>
   {
     let self = this;
 
@@ -420,6 +421,10 @@ export class RemoteDataService
         return self.updateCurrentSessionCheckins();
       }).then(() =>
       {
+        if(skipDataSync)
+        {
+          return resolve();
+        }
         if(!waitForProviderData)
         {
           resolve();
@@ -427,11 +432,11 @@ export class RemoteDataService
         return self.triggerProviderDataSync();
       }).then(() =>
       {
-        console.log("PROVIDER DATA IS IN SYNC NOW");
-        if(waitForProviderData)
-        {
-          resolve();
-        }
+        //console.log("PROVIDER DATA IS IN SYNC NOW");
+        //if(waitForProviderData)
+        //{
+        resolve();
+        //}
       }).catch((e) =>
       {
         reject(e);

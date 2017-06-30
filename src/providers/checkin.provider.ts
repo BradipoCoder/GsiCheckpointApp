@@ -255,7 +255,10 @@ export class CheckinProvider extends RestDataProvider
               let documents = [];
               _.each(res.entry_list, function (remoteData)
               {
-                documents.push(new Checkin(remoteData));
+                let checkin = new Checkin(remoteData);
+                //need to get checkin type
+                //mkt_checkpoint_id_c
+                documents.push(checkin);
               });
               self.storeDocuments(documents, forceUpdate).then(() =>
               {

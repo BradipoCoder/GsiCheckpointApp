@@ -38,16 +38,18 @@ export class ConfigurationPage implements OnInit
     let self = this;
     let loader = this.loadingCtrl.create({
       content: "Elaborazione in corso...",
-      duration: 60000
+      duration: (5 * 60 * 1000)
     });
-    loader.present();
-
-    this.remoteDataService.cleanCache().then(() =>
-    {
+    loader.present().then(() => {
+      return this.remoteDataService.cleanCache();
+    }).then(() => {
       console.log("CACHE WAS CLEANED");
       return this.remoteDataService.initialize(true);
     }).then(() => {
-      console.log("RemoteData service initialized.");
+      console.log("RemoteData service initialized [WITH DATA].");
+      return this.remoteDataService.initialize(false, true);
+    }).then(() => {
+      console.log("RemoteData service initialized [SKIP DATA].");
       this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
       loader.dismiss();
@@ -72,7 +74,7 @@ export class ConfigurationPage implements OnInit
     let self = this;
     let loader = this.loadingCtrl.create({
       content: "Elaborazione in corso...",
-      duration: 30000
+      duration: (5 * 60 * 1000)
     });
     loader.present();
 
@@ -105,7 +107,12 @@ export class ConfigurationPage implements OnInit
       return this.remoteDataService.initialize(true);
     }).then(() =>
     {
-      console.log("RemoteData service initialized.");
+      console.log("RemoteData service initialized [WITH DATA].");
+
+      return this.remoteDataService.initialize(false, true);
+    }).then(() =>
+    {
+      console.log("RemoteData service initialized [SKIP DATA].");
 
       this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
