@@ -178,13 +178,14 @@ export class CheckinProvider extends RestDataProvider
             return new Promise(function (resolve, reject)
             {
               let checkin = new Checkin(doc);
-              let id = (doc.sync_state == CrmDataModel.SYNC_STATE__CHANGED) ? doc.id: false;
+              let isNewOnRemote = _.startsWith(checkin.id, CrmDataModel.TEMPORARY_ID_PREFIX);
               let parameters = checkin.getRestData();
-              if(!id) {
+              if(isNewOnRemote)
+              {
                 _.unset(parameters, 'id');
               }
-              console.log("PUSHING TO REMOTE WITH PARAMS:   ", parameters);
-              self.offlineCapableRestService.setEntry(self.remote_table_name, id, parameters).then((res) => {
+              console.log("PUSHING TO REMOTE WITH PARAMS: ", parameters);
+              self.offlineCapableRestService.setEntry(self.remote_table_name, (isNewOnRemote ? false : checkin.id), parameters).then((res) => {
                 console.log("Saved on remote: ", res);
                 let currentLocalStorageId = checkin.id;
                 checkin.id = res.id;
