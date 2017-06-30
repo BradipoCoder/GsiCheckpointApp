@@ -58,7 +58,13 @@ export class CheckinProvider extends RestDataProvider
       self.storeDocument(checkin, forceUpdate).then((docId) =>
       {
         storedDocumentId = docId;
-        return self.syncWithRemote_PUSH();
+        if(self.offlineCapableRestService.isNetworkConnected())
+        {
+          return self.syncWithRemote_PUSH();
+        } else {
+          console.log("No network connection - skipping rest updates...");
+          resolve(storedDocumentId);
+        }
       }).then(() => {
         resolve(storedDocumentId);
       }).catch((e) =>

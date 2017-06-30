@@ -206,7 +206,8 @@ export class RemoteDataService
   }
 
   /**
-   * @todo: make me work
+   *
+   * @todo: it would be easier to use current Session Checkins and pop off the last one
    *
    * @param {Checkin} lastCheckin
    * @returns {Promise<any>}

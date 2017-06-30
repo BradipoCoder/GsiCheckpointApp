@@ -56,6 +56,15 @@ export class Checkin extends CrmDataModel
 
 
   /**
+   *
+   */
+  public setDurationFromNow():void
+  {
+    let checkinDuration = moment().diff(this.checkin_date, "seconds");
+    this.duration = checkinDuration.toString();
+  }
+
+  /**
    * duration is stored in seconds
    * @returns {string}
    */

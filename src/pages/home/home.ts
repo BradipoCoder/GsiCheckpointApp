@@ -10,6 +10,7 @@ import {ConfigurationPage} from '../configuration/configuration';
 /*import {Checkin} from '../../models/Checkin';*/
 import _ from "lodash";
 import * as moment from 'moment';
+import {Checkin} from "../../models/Checkin";
 
 @Component({
   selector: 'page-home',
@@ -72,7 +73,6 @@ export class HomePage implements OnInit, OnDestroy
         // CHK
       }
 
-
       let toast = this.toastCtrl.create({
         message: toastMessage,
         duration: 3000,
@@ -82,87 +82,6 @@ export class HomePage implements OnInit, OnDestroy
     }).catch((e) =>
     {
       console.error("Errore scansione: " + e);
-      let toast = this.toastCtrl.create({
-        message: e,
-        duration: 3000,
-        position: 'top'
-      });
-      toast.present();
-    });
-  }
-
-  /**
-   *
-   * @param {[<string>]} allowedTypes
-   */
-  scanQRCodeOld(allowedTypes: any): void
-  {
-    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) =>
-    {
-      //this.lastScannedBarcode = JSON.stringify(barcodeData);
-      this.remoteDataService.storeNewCheckin(barcodeData.text).then((newCheckin) =>
-      {
-
-        //user has just registered the EXIT checkin code
-        if (!this.isUserCheckedIn())
-        {
-
-          //@todo: rethink this!
-          let toast = this.toastCtrl.create({
-            message: "!!!",
-            duration: 10000,
-            position: 'bottom'
-          });
-          toast.present();
-          /*
-           // 1) store user data (before logout) present logged-out screen
-           this.logoutScreenData.name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
-           //this.logoutScreenData.img_url = this.userService.getUserData("img_url") || 'assets/image/user.png';
-           moment.locale("it");
-           this.logoutScreenData.date = moment().format('D MMMM');
-           this.logoutScreenData.duration = this.shiftTotalDuration;
-           this.presentLogoutScreen = true;
-
-           // 2) start timeout to hide logged-out screen
-           setTimeout(function(self) {
-           self.presentLogoutScreen = false;
-           }, 15 * 1000, this);
-
-           // 3) log out user
-           this.userService.logout().then(() => {
-           console.log("User is now logged out.");
-           //reinitialize remote data
-           return this.remoteDataService.initialize();
-           }).then(() => {
-           console.log("Remote data service was reset.");
-           //DONE
-           });
-           */
-
-
-        } else
-        {
-          let toast = this.toastCtrl.create({
-            message: newCheckin.name,
-            duration: 3000,
-            position: 'bottom'
-          });
-          toast.present();
-
-        }
-      }).catch((e) =>
-      {
-        console.error("Errore registrazione: " + e);
-        let toast = this.toastCtrl.create({
-          message: e,
-          duration: 3000,
-          position: 'top'
-        });
-        toast.present();
-      });
-    }, (e) =>
-    {
-      console.error("Errore scansione codice: " + e);
       let toast = this.toastCtrl.create({
         message: e,
         duration: 3000,
@@ -220,25 +139,26 @@ export class HomePage implements OnInit, OnDestroy
   recalculateShiftTotalDuration(self: HomePage): void
   {
     let durationStr = '';
-    /*
-     if (self.isUserAuthenticated() && self.isUserCheckedIn())
-     {
-     let shiftStartCheckin = self.remoteDataService.getCheckinById({type: Checkpoint.TYPE_IN});
-     let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.time, "seconds");
 
-     let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
-     let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
-     //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
-     //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
+    if (self.isUserAuthenticated() && self.isUserCheckedIn())
+    {
+      let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
+      let shiftStartCheckin: Checkin = _.last(sessionCheckins) as Checkin;
+      let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
 
-     if (hours)
-     {
-     durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
-     }
-     durationStr += minutes + " min";
-     //durationStr += " " + seconds + "s";
-     }
-     */
+      let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
+      let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
+      //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
+      //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
+
+      if (hours)
+      {
+        durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
+      }
+      durationStr += minutes + " min";
+      //durationStr += " " + seconds + "s";
+    }
+
     self.shiftTotalDuration = durationStr;
   }
 
@@ -247,15 +167,16 @@ export class HomePage implements OnInit, OnDestroy
    */
   recalculateLastCheckinDuration(self: HomePage): void
   {
-    /*
-     if (self.isUserAuthenticated() && self.isUserCheckedIn())
-     {
-     let lastCheckin = self.remoteDataService.getLastCheckin();
-     if(!_.isUndefined(lastCheckin))
-     {
-     lastCheckin.setDurationFromNow();
-     }
-     }*/
+
+    if (self.isUserAuthenticated() && self.isUserCheckedIn())
+    {
+      let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
+      let lastCheckin: Checkin = _.first(sessionCheckins) as Checkin;
+      if (!_.isUndefined(lastCheckin))
+      {
+        lastCheckin.setDurationFromNow();
+      }
+    }
   }
 
   /**
@@ -288,6 +209,11 @@ export class HomePage implements OnInit, OnDestroy
       {
         console.log('Connection state: ' + is_network_connected);
         self.is_network_connected = is_network_connected;
+        /*@todo: this should not be here but in Remote Data Services!!!*/
+        if (is_network_connected)
+        {
+          self.remoteDataService.triggerProviderDataSync();
+        }
       });
   }
 
