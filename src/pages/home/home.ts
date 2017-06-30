@@ -1,5 +1,5 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {Platform, NavController, ToastController} from 'ionic-angular';
+import {Platform, NavController, ToastController, LoadingController} from 'ionic-angular';
 import {Network} from '@ionic-native/network';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
@@ -39,6 +39,7 @@ export class HomePage implements OnInit, OnDestroy
     , private platform: Platform
     , private network: Network
     , public toastCtrl: ToastController
+    , private loadingCtrl: LoadingController
     , public userService: UserService
     , public codeScanService: CodeScanService
     , public remoteDataService: RemoteDataService
@@ -52,27 +53,38 @@ export class HomePage implements OnInit, OnDestroy
    */
   scanQRCode(allowedTypes: any): void
   {
-    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) =>
+    let loader;
+    let barcodeData:any;
+    let checkin:Checkin;
+    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((data) =>
     {
+      barcodeData = data;
       //console.log("BARCODE", barcodeData);
+      loader = this.loadingCtrl.create({
+        content: "Elaborazione in corso...",
+        duration: (30 * 1000)
+      });
+      return loader.present();
+    }).then(() => {
+
       return this.remoteDataService.storeNewCheckin(barcodeData.text);
     }).then((newCheckin) =>
     {
-      console.log("CHECKIN REGISTERED", newCheckin);
+      checkin = newCheckin;
+      return loader.dismiss();
+    }).then(() =>
+    {
+      console.log("CHECKIN REGISTERED", checkin);
 
-      let toastMessage = newCheckin.name;
-      if (newCheckin.type == Checkpoint.TYPE_OUT)
+      let toastMessage = checkin.name;
+      if (checkin.type == Checkpoint.TYPE_OUT)
       {
         // OUT
         toastMessage = "Fine turno";
-
-      } else if (newCheckin.type == Checkpoint.TYPE_OUT)
+      } else if (checkin.type == Checkpoint.TYPE_OUT)
       {
         // IN
         toastMessage = "Inizio turno";
-      } else
-      {
-        // CHK
       }
 
       let toast = this.toastCtrl.create({

@@ -72,23 +72,26 @@ export class Checkin extends CrmDataModel
   {
     let answer = '';
     let checkinDuration = parseInt(this.getPropertyValue("duration"));
-    let hours = Math.floor(checkinDuration / 60 / 60);
-    let minutes = Math.floor(checkinDuration / 60) - (60 * hours);
-    let seconds = checkinDuration - (60 * 60 * hours) - (60 * minutes);
+    if(checkinDuration > 60) {
+      let hours = Math.floor(checkinDuration / 60 / 60);
+      let minutes = Math.floor(checkinDuration / 60) - (60 * hours);
+      let seconds = checkinDuration - (60 * 60 * hours) - (60 * minutes);
 
-    if (hours)
-    {
-      answer += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
+      if (hours)
+      {
+        answer += hours + " " + (hours > 1 ? "ore" : "ora");
+      }
+      if (minutes)
+      {
+        answer += (!_.isEmpty(answer)?" ":"") + minutes + " min";
+      }
+      if (seconds)
+      {
+        answer += (!_.isEmpty(answer)?" ":"") + seconds + "s";
+      }
+    } else {
+      answer = 'appena entrato';
     }
-    if (minutes)
-    {
-      answer += minutes + " min";
-    }
-    if (seconds)
-    {
-      answer += " " + seconds + "s";
-    }
-
     return answer;
   }
 
