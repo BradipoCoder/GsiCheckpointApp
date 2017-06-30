@@ -40,19 +40,21 @@ export class RestDataProvider
    *
    * @param {CrmDataModel} document
    * @param {Boolean} [forceUpdate]
+   * @param {String} [findById] - when document contains the new id - you need to use this param to find the document
    * @returns {Promise<string>}
    */
-  protected storeDocument(document: CrmDataModel, forceUpdate: boolean = false): Promise<string>
+  protected storeDocument(document: CrmDataModel, forceUpdate: boolean = false, findById: any = false): Promise<string>
   {
     let self = this;
-    let key: string = document.id;
+    let key: string = findById || document.id;
     let doUpdate = false;
 
     return new Promise(function (resolve, reject)
     {
-      //@todo: we need to look for document by "id" and not "_id" because we cannot change "_id"!!!
-      self.db.get(key).then((registeredDocument: any) =>
+      let registeredDocument: any;
+      self.getDocumentById(key).then((registeredDocument: any) =>
       {
+        //console.log("Docs found:", key, registeredDocument);
         doUpdate = document.isNewer(moment(registeredDocument.date_modified).toDate());
         if (doUpdate || forceUpdate)
         {
@@ -60,21 +62,29 @@ export class RestDataProvider
           document._rev = registeredDocument._rev;
           self.db.put(document).then((res) =>
           {
-            console.log("Doc updated:", key);
+            //console.log("Doc updated:", key, document);
             resolve(key);
           });
         } else
         {
-          console.log("Skipping doc update:", key);
+          //console.log("Skipping doc update:", key, document);
           resolve(key);
         }
+
       }).catch((e) =>
       {
         document._id = key;
         self.db.put(document).then((res) =>
         {
-          console.log("Doc registered:", key);
+          //console.log("Doc registered:", key, document);
           resolve(key);
+        }).catch((e) =>
+        {
+          console.error("Store Document Error - document", document);
+          console.error("Store Document Error - forceUpdate", forceUpdate);
+          console.error("Store Document Error - findById", findById);
+          console.error(e);
+          reject(e);
         });
       });
     });
@@ -111,6 +121,48 @@ export class RestDataProvider
   public findDocuments(options: any): Promise<any>
   {
     return this.db.find(options);
+  }
+
+  /**
+   * @param {string} id
+   * @returns {Promise<any>}
+   */
+  public getDocumentById(id: string): Promise<any>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject)
+    {
+      let isTemporaryId = _.startsWith(id, CrmDataModel.TEMPORARY_ID_PREFIX);
+      if (isTemporaryId)
+      {
+        self.db.get(id).then((doc) =>
+        {
+          resolve(doc);
+        }).catch((e) =>
+        {
+          reject(e);
+        });
+      } else
+      {
+        let options = {selector: {id: id}};
+        self.findDocuments(options).then((res) =>
+        {
+          if (_.size(res.docs) < 1)
+          {
+            throw new Error("Checkin was not found!");
+          }
+          if (_.size(res.docs) > 1)
+          {
+            throw new Error("Multiple checkins were found!");
+          }
+          let doc = _.first(res.docs);
+          resolve(doc);
+        }).catch((e) =>
+        {
+          reject(e);
+        });
+      }
+    });
   }
 
   /**
@@ -175,8 +227,14 @@ export class RestDataProvider
       console.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
-      let indexCreationPromises = [];
+      //add index for 'id'
+      self.database_indices.push(
+        {
+          name: 'idx_id',
+          fields: ['id']
+        });
 
+      let indexCreationPromises = [];
       _.each(self.database_indices, function (indexObject)
       {
         //console.log("Creating INDEX["+self.database_name+"]: ", indexObject);

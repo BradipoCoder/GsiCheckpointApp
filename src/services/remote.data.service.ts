@@ -142,7 +142,6 @@ export class RemoteDataService
           self.CURRENT_SESSION_CHECKINS = [];
           _.each(res.docs, function (doc)
           {
-            console.log("CHK", doc);
             self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
           });
         }
@@ -173,6 +172,7 @@ export class RemoteDataService
           description: '',
           checkin_date: moment().format(CrmDataModel.CRM_DATE_FORMAT), /*@todo!!! SERVER TIME !!!*/
           user_id_c: self.userService.getUserData("id"),
+          assigned_user_id: self.userService.getUserData("id"),
           checkin_user: self.userService.getUserData("full_name"),
           mkt_checkpoint_id_c: relativeCheckpoint.id,
           type: relativeCheckpoint.type,
@@ -181,8 +181,8 @@ export class RemoteDataService
         return self.checkinProvider.storeCheckin(checkin);
       }).then((checkinId) =>
       {
-        //console.log("REG: ", checkinId);
-        return self.checkinProvider.getCheckin({selector: {id: checkinId}});
+        console.log("New Checkin stored with id: ", checkinId);
+        return self.checkinProvider.getCheckinById(checkinId);
       }).then((checkin) =>
       {
         newCheckin = checkin;
@@ -241,16 +241,15 @@ export class RemoteDataService
           // console.log("PREV: ", checkin_date_prev);
           // console.log("DUR: ", prevCheckinDuration);
           previousCheckin.duration = prevCheckinDuration.toString();
+          previousCheckin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
           console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
-
-          self.checkinProvider.storeCheckin(previousCheckin, true).then(() =>
-          {
-            resolve();
-          });
+          return self.checkinProvider.storeCheckin(previousCheckin, true);
         } else {
           console.log("DURATION-UPDATE: NO DOCS");
           resolve();
         }
+      }).then(() => {
+        resolve();
       });
     });
   }

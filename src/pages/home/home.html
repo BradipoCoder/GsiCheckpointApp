@@ -134,7 +134,7 @@
           <ion-col col-10>
             <div>
               <ion-icon [name]="checkin.icon" item-left></ion-icon>
-              {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>{{checkin.id}}</small>
+              [{{checkin.sync_state}}] --- {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>[{{checkin._id}}]-[{{checkin.id}}]</small>
             </div>
           </ion-col>
           <ion-col col-2 text-right="">

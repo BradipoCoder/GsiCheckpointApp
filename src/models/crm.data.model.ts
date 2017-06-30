@@ -6,6 +6,8 @@ import * as moment from 'moment';
 
 export class CrmDataModel
 {
+  public static readonly TEMPORARY_ID_PREFIX: string = "ID___";
+
   public static readonly CRM_DATE_FORMAT: string = "YYYY-MM-DD HH:mm:ss";
 
   public static readonly SYNC_STATE__IN_SYNC: string = "in-sync";
@@ -41,7 +43,7 @@ export class CrmDataModel
 
   constructor()
   {
-    this.id = _.uniqueId("ID_");
+    this.id = _.uniqueId(CrmDataModel.TEMPORARY_ID_PREFIX);
     this._id = this.id;
     this.date_entered = moment().format(CrmDataModel.CRM_DATE_FORMAT);
     this.date_modified = moment().format(CrmDataModel.CRM_DATE_FORMAT);
@@ -125,6 +127,11 @@ export class CrmDataModel
    * @returns {string[]}
    */
   public getDefinedProperties(): any {
-    return _.keys(this);
+    let exclude = ['_id', 'sync_state', 'module_name', 'deleted', 'date_entered'
+      , 'assigned_user_name', 'created_by_name', 'created_by_name'
+    ];
+    let keys = _.keys(this);
+    keys = _.difference(keys, exclude);
+    return keys;
   }
 }

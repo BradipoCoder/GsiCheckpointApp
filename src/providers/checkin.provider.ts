@@ -52,13 +52,15 @@ export class CheckinProvider extends RestDataProvider
   public storeCheckin(checkin: Checkin, forceUpdate: boolean = false): Promise<string>
   {
     let self = this;
+    let storedDocumentId: string;
     return new Promise(function (resolve, reject)
     {
       self.storeDocument(checkin, forceUpdate).then((docId) =>
       {
-        resolve(docId);
-        //@todo: trigger background sync from here!
-        self.syncWithRemote_PUSH();
+        storedDocumentId = docId;
+        return self.syncWithRemote_PUSH();
+      }).then(() => {
+        resolve(storedDocumentId);
       }).catch((e) =>
       {
         console.error(e);
@@ -68,24 +70,17 @@ export class CheckinProvider extends RestDataProvider
   }
 
   /**
-   *
-   * @param {{}} options
+   * @todo: use getDocumentById !!! to find doc
+   * @param {string} id
    * @returns {Promise<Checkin>}
    */
-  public getCheckin(options:any): Promise<Checkin>
+  public getCheckinById(id:string): Promise<Checkin>
   {
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.findDocuments(options).then((res) => {
-        if(_.size(res.docs) < 1)
-        {
-          throw new Error("Checkin was not found!");
-        }
-        if (_.size(res.docs) > 1) {
-          throw new Error("Multiple checkins were found!");
-        }
-        let checkin = new Checkin(res.docs[0]);
+      self.getDocumentById(id).then((doc) => {
+        let checkin = new Checkin(doc);
         resolve(checkin);
       }).catch((e) => {
         reject(e);
@@ -152,7 +147,7 @@ export class CheckinProvider extends RestDataProvider
 
     return new Promise(function (resolve, reject)
     {
-      console.log("syncWithRemote_PUSH: ");
+      //console.log("syncWithRemote_PUSH - START ---------------");
 
       self.findDocuments({
         selector: {
@@ -178,14 +173,14 @@ export class CheckinProvider extends RestDataProvider
               if(!id) {
                 _.unset(parameters, 'id');
               }
-              console.log("PUSHING PARAMS:   ", parameters);
+              console.log("PUSHING TO REMOTE WITH PARAMS:   ", parameters);
               self.offlineCapableRestService.setEntry(self.remote_table_name, id, parameters).then((res) => {
-                console.log("saved", res);
+                console.log("Saved on remote: ", res);
+                let currentLocalStorageId = checkin.id;
                 checkin.id = res.id;
                 checkin.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
-                return self.storeDocument(checkin, true);
+                return self.storeDocument(checkin, true, currentLocalStorageId);
               }).then((res) => {
-                console.log("stored", res);
                 resolve();
               }).catch((e) => {
                 reject(e);

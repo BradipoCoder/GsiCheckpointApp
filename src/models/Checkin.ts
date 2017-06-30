@@ -91,7 +91,7 @@ export class Checkin extends CrmDataModel
   {
     let self = this;
     let answer = {};
-    let keys = this.getDefinedProperties(['_id', 'sync_state', 'module_name']);
+    let keys = this.getDefinedProperties(['checkin_user']);
     _.each(keys, function (key)
     {
       if(!_.isNull(_.get(self, key, null))) {

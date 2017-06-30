@@ -223,7 +223,7 @@ export class HomePage implements OnInit, OnDestroy
     /*
      if (self.isUserAuthenticated() && self.isUserCheckedIn())
      {
-     let shiftStartCheckin = self.remoteDataService.getCheckin({type: Checkpoint.TYPE_IN});
+     let shiftStartCheckin = self.remoteDataService.getCheckinById({type: Checkpoint.TYPE_IN});
      let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.time, "seconds");
 
      let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
