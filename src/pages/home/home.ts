@@ -24,6 +24,8 @@ export class HomePage implements OnInit, OnDestroy
 
   protected presentLogoutScreen: boolean = false;
 
+  private auto_update_timeout:number;
+
   /*
    private logoutScreenData:any = {
    name: "Andrea",
@@ -187,7 +189,8 @@ export class HomePage implements OnInit, OnDestroy
   {
     self.recalculateShiftTotalDuration(self);
     self.recalculateLastCheckinDuration(self);
-    setTimeout(self.autoUpdateIntevalExecution, 5000, self);
+    self.auto_update_timeout = setTimeout(self.autoUpdateIntevalExecution, (10 * 1000), self);
+
   }
 
   protected fakeNetworkStateChange()
@@ -212,13 +215,25 @@ export class HomePage implements OnInit, OnDestroy
         /*@todo: this should not be here but in Remote Data Services!!!*/
         if (is_network_connected)
         {
-          self.remoteDataService.triggerProviderDataSync();
+          self.remoteDataService.triggerProviderDataSync(true).then(() => {
+            console.log("AFTER NETWORK ON DATA SYNC OK");
+            return self.remoteDataService.updateCurrentSessionCheckins();
+          }).then(() => {
+            console.log("AFTER NETWORK ON DATA SYNC OK - #2");
+          });
         }
       });
   }
 
+
+  /**
+   *
+   */
   ngOnDestroy(): void
   {
-    //
+    if(this.auto_update_timeout)
+    {
+      clearTimeout(this.auto_update_timeout);
+    }
   }
 }

@@ -141,6 +141,7 @@
           <ion-col col-2 text-right="">
             <div>
               {{checkin.getDatePropertyValue('checkin_date', 'H:mm')}}
+              <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon>
             </div>
           </ion-col>
         </ion-row>

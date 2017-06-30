@@ -100,9 +100,10 @@ export class CheckpointProvider extends RestDataProvider
 
   /**
    *
+   * @param {boolean} pushOnly
    * @returns {Promise<any>}
    */
-  public syncWithRemote(): Promise<any>
+  public syncWithRemote(pushOnly:boolean = false): Promise<any>
   {
     let self = this;
     let batchSize = 50;
@@ -110,6 +111,11 @@ export class CheckpointProvider extends RestDataProvider
 
     return new Promise(function (resolve, reject)
     {
+      //no need to do anything
+      if(pushOnly){
+        return resolve();
+      }
+
       let sequence = 0;
       let offset = 0;
       let hasMore = true;

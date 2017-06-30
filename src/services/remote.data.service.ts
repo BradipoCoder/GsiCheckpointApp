@@ -346,16 +346,18 @@ export class RemoteDataService
 
   /**
    * Triggers data sync operation in every registered provider
+   *
+   * @param {boolean} pushOnly
    */
-  public triggerProviderDataSync(): Promise<any>
+  public triggerProviderDataSync(pushOnly:boolean = false): Promise<any>
   {
     let self = this;
 
     return new Promise(function (resolve, reject)
     {
       let providers = [''];
-      providers.push('checkpointProvider');
       providers.push('checkinProvider');
+      providers.push('checkpointProvider');
 
       Promise.reduce(providers, function (accu, item, index, length)
       {
@@ -368,7 +370,7 @@ export class RemoteDataService
             if (_.isFunction(provider.syncWithRemote))
             {
               hasFunctionToCall = true;
-              provider.syncWithRemote().then(() => {
+              provider.syncWithRemote(pushOnly).then(() => {
                 resolve();
               });
             }

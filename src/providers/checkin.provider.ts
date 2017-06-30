@@ -97,9 +97,10 @@ export class CheckinProvider extends RestDataProvider
 
   /**
    *
+   * @param {boolean} pushOnly
    * @returns {Promise<any>}
    */
-  public syncWithRemote(): Promise<any>
+  public syncWithRemote(pushOnly:boolean = false): Promise<any>
   {
     let self = this;
 
@@ -107,7 +108,10 @@ export class CheckinProvider extends RestDataProvider
     {
       let syncMethods = [''];
       syncMethods.push('syncWithRemote_PUSH');
-      syncMethods.push('syncWithRemote_PULL');
+      if(pushOnly == false)
+      {
+        syncMethods.push('syncWithRemote_PULL');
+      }
 
       Promise.reduce(syncMethods, function (accu, item, index, length)
       {
