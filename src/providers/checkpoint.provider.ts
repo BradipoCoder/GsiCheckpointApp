@@ -106,7 +106,7 @@ export class CheckpointProvider extends RestDataProvider
   public syncWithRemote(pushOnly:boolean = false): Promise<any>
   {
     let self = this;
-    let batchSize = 50;
+    let batchSize = 100;
     let forceUpdate = false;
 
     return new Promise(function (resolve, reject)
