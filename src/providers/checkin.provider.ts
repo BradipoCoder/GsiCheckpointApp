@@ -255,8 +255,14 @@ export class CheckinProvider extends RestDataProvider
               let documents = [];
               _.each(res.entry_list, function (remoteData)
               {
+                //@todo: DATE TIME - UTC OFFSET FIX
+                if(!_.isUndefined(remoteData.checkin_date))
+                {
+                  remoteData.checkin_date = moment(remoteData.checkin_date).add(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
+                }
+
                 let checkin = new Checkin(remoteData);
-                //need to get checkin type
+                //@todo: need to get checkin type
                 //mkt_checkpoint_id_c
                 documents.push(checkin);
               });

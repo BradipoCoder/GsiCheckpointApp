@@ -105,6 +105,7 @@ export class UserService
     {
       self.offlineCapableRestService.login(username, password).then((res) =>
       {
+        //console.log("LOGIN DATA:", res);
         self.user_data = self.offlineCapableRestService.getAuthenticatedUser();
         self.user_data.id = self.user_data.user_id;
         return self.offlineCapableRestService.getEntry('Users', self.user_data.id);

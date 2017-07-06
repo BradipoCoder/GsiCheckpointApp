@@ -45,6 +45,7 @@ export class Checkin extends CrmDataModel
     this.checkPropertyDate('date_entered');
     this.checkPropertyDate('date_modified');
 
+
     //icon
     let iconsByType = {};
     iconsByType[Checkpoint.TYPE_IN] = 'log-in';
@@ -100,7 +101,7 @@ export class Checkin extends CrmDataModel
   public getRestData(): any
   {
     let self = this;
-    let answer = {};
+    let answer:any = {};
     let keys = this.getDefinedProperties(['checkin_user']);
     _.each(keys, function (key)
     {
@@ -108,6 +109,12 @@ export class Checkin extends CrmDataModel
         _.set(answer, key, _.get(self, key, null));
       }
     });
+
+    //@todo: DATE TIME - UTC OFFSET FIX
+    if(!_.isUndefined(answer.checkin_date))
+    {
+      answer.checkin_date = moment(answer.checkin_date).subtract(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
+    }
 
     return answer;
   }

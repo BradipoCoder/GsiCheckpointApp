@@ -15,6 +15,8 @@ export class CrmDataModel
   public static readonly SYNC_STATE__CHANGED: string = "changed";
   public static readonly SYNC_STATE__DELETED: string = "deleted";
 
+  public static readonly UTC_OFFSET_HOURS: number = 2;
+
 
   /* PouchDb doc related */
   public _id: string;
@@ -127,7 +129,7 @@ export class CrmDataModel
    * @returns {string[]}
    */
   public getDefinedProperties(): any {
-    let exclude = ['_id', 'sync_state', 'module_name', 'deleted', 'date_entered'
+    let exclude = ['_id', 'sync_state', 'module_name', 'deleted', 'date_entered', 'date_modified'
       , 'assigned_user_name', 'created_by_name', 'created_by_name'
     ];
     let keys = _.keys(this);
