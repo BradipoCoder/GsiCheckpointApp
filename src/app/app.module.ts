@@ -69,5 +69,10 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
   ]
 })
 export class AppModule
-{}
+{
+
+  constructor(public userService: UserService)
+  {
+  }
+}
 

@@ -138,6 +138,14 @@ export class UserService
 
     return new Promise(function (resolve, reject)
     {
+      if(!_.isUndefined(data.id))
+      {
+        data.avatar_uri = 'http://gsi.crm.mekit.it/index.php?entryPoint=download'
+        + '&id=' + data.id + '_photo'
+        + '&type=Users'
+      }
+
+
       self.db.get('userdata').then(function(doc) {
         _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
         return self.db.put(data);

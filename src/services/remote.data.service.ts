@@ -356,8 +356,9 @@ export class RemoteDataService
     return new Promise(function (resolve, reject)
     {
       let providers = [''];
-      providers.push('checkinProvider');
       providers.push('checkpointProvider');
+      providers.push('checkinProvider');
+
 
       Promise.reduce(providers, function (accu, item, index, length)
       {

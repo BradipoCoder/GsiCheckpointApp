@@ -2,6 +2,7 @@
   <ion-header>
     <ion-toolbar>
       <div class="user-avatar-wrapper small">
+        <!--<img [src]="userService.getUserData('avatar_uri')">-->
         <img [src]="'assets/image/user.png'">
       </div>
     </ion-toolbar>
@@ -10,7 +11,7 @@
   <ion-content>
     <ion-list margin-top>
       <button menuClose ion-item *ngFor="let page of pages" (click)="openPage(page)">
-          <ion-icon name="{{page.icon}}"></ion-icon> {{page.title}}
+        <ion-icon name="{{page.icon}}"></ion-icon> {{page.title}}
       </button>
     </ion-list>
   </ion-content>

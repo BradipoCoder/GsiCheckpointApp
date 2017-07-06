@@ -51,7 +51,7 @@ export class Checkin extends CrmDataModel
     iconsByType[Checkpoint.TYPE_OUT] = 'log-out';
     iconsByType[Checkpoint.TYPE_CHK] = 'pin';
     iconsByType[Checkpoint.TYPE_PAUSE] = 'pause';
-    this.icon = _.has(iconsByType, this.type) ? _.get(iconsByType, this.type).toString() : 'help';
+    this.icon = _.has(iconsByType, this.type) ? _.get(iconsByType, this.type).toString() : 'pin';
   }
 
 
