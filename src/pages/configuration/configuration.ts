@@ -35,21 +35,30 @@ export class ConfigurationPage implements OnInit
    */
   cleanCache():void
   {
+    let loaderContent = "<strong>Eliminazione cache</strong><br />";
     let self = this;
     let loader = this.loadingCtrl.create({
-      content: "Elaborazione in corso...",
+      content: loaderContent,
       duration: (5 * 60 * 1000)
     });
     loader.present().then(() => {
-      return this.remoteDataService.cleanCache();
+      loader.setContent(loaderContent + "Destroying databases...");
+      return this.remoteDataService.destroyLocalDataStorages();
     }).then(() => {
       console.log("CACHE WAS CLEANED");
+
+      loader.setContent(loaderContent + "Loading data...");
       return this.remoteDataService.initialize(true);
     }).then(() => {
       console.log("RemoteData service initialized [WITH DATA].");
+
+      loader.setContent(loaderContent + "Initializing...");
       return this.remoteDataService.initialize(false, true);
     }).then(() => {
       console.log("RemoteData service initialized [SKIP DATA].");
+
+      loader.setContent(loaderContent + "Cache cleared.");
+
       this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
       loader.dismiss();
@@ -58,13 +67,16 @@ export class ConfigurationPage implements OnInit
       loader.dismiss();
       let toast = this.toastCtrl.create({
         message: e,
-        duration: 5000,
+        duration: 15000,
         position: 'top'
       });
       toast.present();
       console.log("Cache clean error: " + e);
     });
   }
+
+
+
 
   /**
    * Save configuration values and reset application
@@ -99,7 +111,8 @@ export class ConfigurationPage implements OnInit
     {
       console.log("User service initialized.");
 
-      return this.remoteDataService.cleanCache();
+
+      return this.remoteDataService.destroyLocalDataStorages();
     }).then(() =>
     {
       console.log("Cache was cleaned.");

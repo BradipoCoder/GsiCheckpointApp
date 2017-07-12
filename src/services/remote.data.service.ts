@@ -327,7 +327,7 @@ export class RemoteDataService
    *
    * @returns {Promise}
    */
-  public cleanCache(): Promise<any>
+  public destroyLocalDataStorages(): Promise<any>
   {
     let self = this;
 
@@ -338,8 +338,9 @@ export class RemoteDataService
       promises.push(self.checkinProvider.destroyDatabase());
       Promise.all(promises).then(() =>
       {
-        console.log("DBS DESTROYED!");
         resolve();
+      }, (e) => {
+        reject(e);
       });
     });
   }

@@ -56,7 +56,7 @@ export class MekitTracerApp
     }).then(() =>
     {
       console.log("User service initialized.");
-      return this.remoteDataService.initialize();
+      return this.remoteDataService.initialize(false, true);//do NOT load data
     }).then(() =>
     {
       console.log("RemoteData service initialized.");
