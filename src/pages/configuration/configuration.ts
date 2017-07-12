@@ -88,54 +88,34 @@ export class ConfigurationPage implements OnInit
       content: "Elaborazione in corso...",
       duration: (5 * 60 * 1000)
     });
-    loader.present();
+    loader.present().then(() => {
+      //save all config values
+      let setPromises = [];
+      _.each(this.cfg, function(val, key)
+      {
+        setPromises.push(self.configurationService.setConfig(key, val));
+      });
 
-    //save all config values
-    let setPromises = [];
-    _.each(this.cfg, function(val, key)
-    {
-      setPromises.push(self.configurationService.setConfig(key, val));
-    });
+      Promise.all(setPromises).then(() =>
+      {
+        this.configurationService.unlockWithCode("");//lock it
+        console.log("Configuration values were saved.");
 
-    Promise.all(setPromises).then(() =>
-    {
-      this.configurationService.unlockWithCode("");//lock it
-      console.log("Configuration values were saved.");
-
-      return this.userService.logout();
-    }).then(() => {
-      console.log("User is now logged out.");
-
-      return this.userService.initialize();
-    }).then(() =>
-    {
-      console.log("User service initialized.");
-
-
-      return this.remoteDataService.destroyLocalDataStorages();
-    }).then(() =>
-    {
-      console.log("Cache was cleaned.");
-
-      return this.remoteDataService.initialize(true);
-    }).then(() =>
-    {
-      console.log("RemoteData service initialized [WITH DATA].");
-
-      return this.remoteDataService.initialize(false, true);
-    }).then(() =>
-    {
-      console.log("RemoteData service initialized [SKIP DATA].");
-
-      this.navCtrl.push(HomePage);
-      this.navCtrl.setRoot(HomePage);
-      loader.dismiss();
-
-      console.log("APPLICATION RESET OK");
-    }).catch((e) =>
-    {
-      loader.dismiss();
-      console.log("Config save error: " + e);
+        return this.userService.logout();
+      }).then(() => {
+        console.log("User is now logged out.");
+        return this.userService.initialize();
+      }).then(() =>
+      {
+        console.log("User service initialized.");
+        loader.dismiss();
+        console.log("APPLICATION RESET OK");
+        self.cleanCache();
+      }).catch((e) =>
+      {
+        loader.dismiss();
+        console.log("Application reset error: " + e);
+      });
     });
   }
 
