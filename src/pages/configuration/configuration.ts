@@ -104,6 +104,11 @@ export class ConfigurationPage implements OnInit
         return this.userService.logout();
       }).then(() => {
         console.log("User is now logged out.");
+
+        return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
+      }).then(() =>
+      {
+        console.log("User is now logged in.");
         return this.userService.initialize();
       }).then(() =>
       {
@@ -113,8 +118,15 @@ export class ConfigurationPage implements OnInit
         self.cleanCache();
       }).catch((e) =>
       {
-        loader.dismiss();
-        console.log("Application reset error: " + e);
+        loader.dismiss().then(() => {
+          console.log("Application reset error: " + e);
+          let toast = this.toastCtrl.create({
+            message: 'Errore configurazione app! ' + e,
+            duration: 15000,
+            position: 'top'
+          });
+          toast.present();
+        });
       });
     });
   }

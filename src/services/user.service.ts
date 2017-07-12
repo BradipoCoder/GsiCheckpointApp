@@ -62,15 +62,17 @@ export class UserService
   {
     let self = this;
     console.log("Logging out...");
-    return new Promise(function (resolve)
+    return new Promise(function (resolve, reject)
     {
       self.offlineCapableRestService.logout().then(() =>
       {
         self.authenticated = false;
         return self.db.destroy();
-      }).then(() => {
+      }).then(() =>
+      {
         console.log("User database has been destroyed.");
         self.user_data = {};
+        self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
         resolve();
       }).catch((e) =>
       {
@@ -80,11 +82,14 @@ export class UserService
         self.is_initialized = false;
         self.is_user_configured = false;
         self.user_data = {};
-        self.db.destroy().then(() => {
+        self.db.destroy().then(() =>
+        {
           console.log("User database has been destroyed.");
+          self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
           resolve();
-        }).catch((e) => {
-          resolve();
+        }).catch((e) =>
+        {
+          reject(e);
         });
       });
     });
@@ -97,7 +102,7 @@ export class UserService
    *
    * @returns {Promise<any>}
    */
-  private login(username: string, password: string): Promise<any>
+  public login(username: string, password: string): Promise<any>
   {
     let self = this;
     console.log("Authenticating user: " + username);
@@ -139,24 +144,28 @@ export class UserService
 
     return new Promise(function (resolve, reject)
     {
-      if(!_.isUndefined(data.id))
+      if (!_.isUndefined(data.id))
       {
         data.avatar_uri = 'http://gsi.crm.mekit.it/index.php?entryPoint=download'
-        + '&id=' + data.id + '_photo'
-        + '&type=Users'
+          + '&id=' + data.id + '_photo'
+          + '&type=Users'
       }
 
 
-      self.db.get('userdata').then(function(doc) {
+      self.db.get('userdata').then(function (doc)
+      {
         _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
         return self.db.put(data);
-      }).then(function(res) {
+      }).then(function (res)
+      {
         console.log("User data stored");
         resolve();
-      }).catch(function (err) {
+      }).catch(function (err)
+      {
         //console.log(err);
         _.assignIn(data, {_id: 'userdata'});
-        self.db.put(data).then((res) => {
+        self.db.put(data).then((res) =>
+        {
           console.log("User data stored(new)");
           resolve();
         });
@@ -168,6 +177,110 @@ export class UserService
    * initialize the Rest service
    */
   initialize(): Promise<any>
+  {
+    let self = this;
+    let config;
+    self.authenticated = false;
+    self.is_initialized = false;
+    self.is_user_configured = false;
+    self.user_data = {};
+
+    return new Promise(function (resolve, reject)
+    {
+      self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+      self.configurationService.getConfigObject()
+        .then((cfg) =>
+        {
+          self.is_initialized = true;
+          config = cfg;
+          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
+          if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
+          {
+            self.last_error = new Error("Configuration is incomplete!");
+            console.warn("Configuration is incomplete!");
+            return resolve();
+          }
+          self.db.get('userdata').then((doc) => {
+            //console.log("CURRENT USER", doc);
+            self.user_data = doc;
+            self.is_user_configured = true;
+            resolve();
+          }, (e) => {
+            self.last_error = new Error("User data is not available! " + e);
+            console.warn(self.last_error.message);
+            return resolve();
+          });
+        }, (e) =>
+        {
+          self.last_error = e;
+          console.warn(self.last_error.message);
+          return resolve();
+        }).catch((e) =>
+      {
+        self.last_error = e;
+        console.warn(self.last_error.message);
+        return resolve();
+      });
+    });
+  }
+
+  /**
+   * initialize the Rest service
+   */
+  initializeNewer(): Promise<any>
+  {
+    let self = this;
+    let config;
+    self.authenticated = false;
+    self.is_initialized = false;
+    self.is_user_configured = false;
+    self.user_data = {};
+
+    return new Promise(function (resolve, reject)
+    {
+      self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+
+      self.configurationService.getConfigObject()
+        .then((cfg) =>
+        {
+          self.is_initialized = true;
+          config = cfg;
+          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
+
+          if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
+          {
+            self.last_error = new Error("Configuration is incomplete!");
+            console.warn("Configuration is incomplete!");
+            resolve();
+          } else
+          {
+            self.is_user_configured = true;
+            return self.db.get('userdata');
+          }
+        }).then((doc) =>
+      {
+        console.log("CURRENT USER", doc);
+        self.user_data = doc;
+        self.login(config.crm_username, config.crm_password);
+        resolve();
+      }, (e) =>
+      {
+        self.last_error = new Error("User data is not available! " + e);
+        console.warn(self.last_error.message);
+        self.is_user_configured = false;
+        resolve();
+      }).catch((e) =>
+      {
+        self.last_error = e;
+        reject(e);
+      });
+    });
+  }
+
+  /**
+   * initialize the Rest service
+   */
+  initializeOld(): Promise<any>
   {
     let self = this;
     self.authenticated = false;
@@ -197,11 +310,13 @@ export class UserService
               self.last_error = e;
               console.warn("Autologin failed! " + e);
               //load user data from db
-              self.db.get('userdata').then(function(doc) {
+              self.db.get('userdata').then(function (doc)
+              {
                 console.log(doc);
                 self.user_data = doc;
                 resolve();
-              }).catch((e) => {
+              }).catch((e) =>
+              {
                 self.last_error = new Error("User data is not available! " + e);
                 console.warn(self.last_error.message);
                 self.is_user_configured = false;
