@@ -3,6 +3,7 @@
  */
 import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
+import {CheckpointProvider} from "../providers/checkpoint.provider";
 import {RestDataProvider} from './rest.data.provider';
 import {CrmDataModel} from '../models/crm.data.model';
 import {Checkin} from '../models/Checkin';
@@ -35,7 +36,10 @@ export class CheckinProvider extends RestDataProvider
 
   remote_table_name = "mkt_Checkin";
 
-  constructor(protected offlineCapableRestService: OfflineCapableRestService)
+  constructor(
+    protected offlineCapableRestService: OfflineCapableRestService
+    , private checkpointProvider: CheckpointProvider
+  )
   {
     super(offlineCapableRestService);
 
@@ -58,14 +62,16 @@ export class CheckinProvider extends RestDataProvider
       self.storeDocument(checkin, forceUpdate).then((docId) =>
       {
         storedDocumentId = docId;
-        if(self.offlineCapableRestService.isNetworkConnected())
+        if (self.offlineCapableRestService.isNetworkConnected())
         {
           return self.syncWithRemote_PUSH();
-        } else {
+        } else
+        {
           console.log("No network connection - skipping rest updates...");
           resolve(storedDocumentId);
         }
-      }).then(() => {
+      }).then(() =>
+      {
         resolve(storedDocumentId);
       }).catch((e) =>
       {
@@ -80,15 +86,17 @@ export class CheckinProvider extends RestDataProvider
    * @param {string} id
    * @returns {Promise<Checkin>}
    */
-  public getCheckinById(id:string): Promise<Checkin>
+  public getCheckinById(id: string): Promise<Checkin>
   {
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.getDocumentById(id).then((doc) => {
+      self.getDocumentById(id).then((doc) =>
+      {
         let checkin = new Checkin(doc);
         resolve(checkin);
-      }).catch((e) => {
+      }).catch((e) =>
+      {
         reject(e);
       });
     });
@@ -100,7 +108,7 @@ export class CheckinProvider extends RestDataProvider
    * @param {boolean} pushOnly
    * @returns {Promise<any>}
    */
-  public syncWithRemote(pushOnly:boolean = false): Promise<any>
+  public syncWithRemote(pushOnly: boolean = false): Promise<any>
   {
     let self = this;
 
@@ -108,7 +116,7 @@ export class CheckinProvider extends RestDataProvider
     {
       let syncMethods = [''];
       syncMethods.push('syncWithRemote_PUSH');
-      if(pushOnly == false)
+      if (pushOnly == false)
       {
         syncMethods.push('syncWithRemote_PULL');
       }
@@ -180,13 +188,14 @@ export class CheckinProvider extends RestDataProvider
               let checkin = new Checkin(doc);
               let isNewOnRemote = _.startsWith(checkin.id, CrmDataModel.TEMPORARY_ID_PREFIX);
               let parameters = checkin.getRestData();
-              if(isNewOnRemote)
+              if (isNewOnRemote)
               {
                 _.unset(parameters, 'id');
               }
               console.log("PUSHING TO REMOTE WITH PARAMS: ", parameters);
-              self.offlineCapableRestService.setEntry(self.remote_table_name, (isNewOnRemote ? false : checkin.id), parameters).then((res) => {
-                if(!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
+              self.offlineCapableRestService.setEntry(self.remote_table_name, (isNewOnRemote ? false : checkin.id), parameters).then((res) =>
+              {
+                if (!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
                 {
                   throw new Error("failed to save on remote!");
                 }
@@ -195,21 +204,26 @@ export class CheckinProvider extends RestDataProvider
                 checkin.id = res.id;
                 checkin.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
                 return self.storeDocument(checkin, true, currentLocalStorageId);
-              }).then((res) => {
+              }).then((res) =>
+              {
                 resolve();
-              }).catch((e) => {
+              }).catch((e) =>
+              {
                 console.warn("Remote save error! ", e);
                 //reject(e);
                 resolve();
               });
             });
-          }).then(() => {
+          }).then(() =>
+          {
             resolve();
-          }).catch((e) => {
+          }).catch((e) =>
+          {
             console.warn("syncWithRemote_PUSH[reduce] error!", e);
             resolve();
           });
-        } else {
+        } else
+        {
           console.log("NOTHING TO SYNC");
           resolve();
         }
@@ -263,17 +277,19 @@ export class CheckinProvider extends RestDataProvider
               _.each(res.entry_list, function (remoteData)
               {
                 //@todo: DATE TIME - UTC OFFSET FIX
-                if(!_.isUndefined(remoteData.checkin_date))
+                if (!_.isUndefined(remoteData.checkin_date))
                 {
                   remoteData.checkin_date = moment(remoteData.checkin_date).add(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
                 }
 
                 let checkin = new Checkin(remoteData);
-                //@todo: need to get checkin type
-                //mkt_checkpoint_id_c
                 documents.push(checkin);
               });
-              self.storeDocuments(documents, forceUpdate).then(() =>
+
+              self.checkpointProvider.setTypeOnCheckins(documents).then((documents) =>
+              {
+                return self.storeDocuments(documents, forceUpdate);
+              }).then(() =>
               {
                 resolve(hasMore);
               }).catch((e) =>

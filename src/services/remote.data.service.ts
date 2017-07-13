@@ -230,26 +230,34 @@ export class RemoteDataService
       };
       self.checkinProvider.findDocuments(options).then((res) =>
       {
-        if (!_.isUndefined(res.docs[0]))
+        if (_.isUndefined(res.docs[0]))
         {
-          let previousCheckin = new Checkin(res.docs[0]);
-          //console.log("DURATION UPDATE - PREV: ", previousCheckin);
-
-          let checkin_date_last = lastCheckin.checkin_date;
-          let checkin_date_prev = previousCheckin.checkin_date;
-          let prevCheckinDuration = moment(checkin_date_last).diff(checkin_date_prev, "seconds");
-
-          // console.log("LAST: ", checkin_date_last);
-          // console.log("PREV: ", checkin_date_prev);
-          // console.log("DUR: ", prevCheckinDuration);
-          previousCheckin.duration = prevCheckinDuration.toString();
-          previousCheckin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
-          console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
-          return self.checkinProvider.storeCheckin(previousCheckin, true);
-        } else {
-          console.log("DURATION-UPDATE: NO DOCS");
+          console.log("DURATION-UPDATE: No previous document was found.");
           resolve();
+          return;
         }
+
+        let previousCheckin = new Checkin(res.docs[0]);
+
+        if(previousCheckin.type == Checkpoint.TYPE_OUT)
+        {
+          console.log("DURATION-UPDATE: Previous document is of type OUT - skipping.");
+          resolve();
+          return;
+
+        }
+        //console.log("DURATION UPDATE - PREV: ", previousCheckin);
+        let checkin_date_last = lastCheckin.checkin_date;
+        let checkin_date_prev = previousCheckin.checkin_date;
+        let prevCheckinDuration = moment(checkin_date_last).diff(checkin_date_prev, "seconds");
+
+        // console.log("LAST: ", checkin_date_last);
+        // console.log("PREV: ", checkin_date_prev);
+        // console.log("DUR: ", prevCheckinDuration);
+        previousCheckin.duration = prevCheckinDuration.toString();
+        previousCheckin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
+        console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
+        return self.checkinProvider.storeCheckin(previousCheckin, true);
       }).then(() => {
         resolve();
       });

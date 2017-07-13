@@ -46,13 +46,29 @@ export class Checkin extends CrmDataModel
     this.checkPropertyDate('date_modified');
 
 
-    //icon
+    //type & icon
+    this.setType(this.type);
+
+  }
+
+  /**
+   *
+   * @param {String} type
+   */
+  public setType(type:string):void
+  {
+    this.type = _.includes(
+      [Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT, Checkpoint.TYPE_CHK, Checkpoint.TYPE_PAUSE]
+      , type) ? type : Checkpoint.TYPE_CHK;
+
     let iconsByType = {};
     iconsByType[Checkpoint.TYPE_IN] = 'log-in';
     iconsByType[Checkpoint.TYPE_OUT] = 'log-out';
     iconsByType[Checkpoint.TYPE_CHK] = 'pin';
     iconsByType[Checkpoint.TYPE_PAUSE] = 'pause';
+
     this.icon = _.has(iconsByType, this.type) ? _.get(iconsByType, this.type).toString() : 'pin';
+
   }
 
 

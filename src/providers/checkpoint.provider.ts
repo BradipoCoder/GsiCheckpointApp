@@ -5,6 +5,7 @@ import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {RestDataProvider} from './rest.data.provider';
 import {Checkpoint} from '../models/Checkpoint';
+import {Checkin} from '../models/Checkin';
 import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
 import * as moment from 'moment';
@@ -94,6 +95,49 @@ export class CheckpointProvider extends RestDataProvider
       {
         console.error(e);
         reject(e);
+      });
+    });
+  }
+
+  /**
+   *
+   * @param {any} documents
+   * @returns {Promise<any>}
+   */
+  public setTypeOnCheckins(documents): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      let promises = [];
+      _.each(documents, function(checkin){
+        promises.push(self.setTypeOnCheckin(checkin));
+      });
+      Promise.all(promises).then((newDocs) => {
+        resolve(newDocs);
+      });
+    });
+  }
+
+  /**
+   *
+   * @param {Checkin} checkin
+   * @returns {Promise<any>}
+   */
+  public setTypeOnCheckin(checkin:Checkin): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve)
+    {
+      self.db.get(checkin.mkt_checkpoint_id_c).then((checkpoint:Checkpoint) =>
+      {
+        checkin.setType(checkpoint.type);
+        resolve(checkin);
+      }).catch(() =>
+      {
+        resolve(checkin);
       });
     });
   }
