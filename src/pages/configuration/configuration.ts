@@ -3,6 +3,7 @@ import {NavController, ModalController, ToastController, LoadingController} from
 import {ConfigurationService} from '../../services/configuration.service';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
+import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
 import {HomePage} from "../home/home";
 import _ from "lodash";
@@ -14,50 +15,70 @@ import _ from "lodash";
 })
 export class ConfigurationPage implements OnInit
 {
-  cfg:any;
-  viewIsReady:boolean;
+  cfg: any;
+  viewIsReady: boolean;
 
-  constructor(
-    public navCtrl: NavController
+  constructor(public navCtrl: NavController
     , private toastCtrl: ToastController
     , public modalCtrl: ModalController
     , private loadingCtrl: LoadingController
-    , private configurationService:ConfigurationService
-    , private userService:UserService
+    , private configurationService: ConfigurationService
+    , private userService: UserService
     , private remoteDataService: RemoteDataService
-  )
+    , public offlineCapableRestService: OfflineCapableRestService)
   {
     this.viewIsReady = false;
   }
 
   /**
-   * destroy and recreate databases
+   * !!! NETWORK CONNECTION REQUIRED !!!
+   * destroy and recreate databases and load remote data
    */
-  cleanCache():void
+  cleanCache(): void
   {
+    if(!this.offlineCapableRestService.isNetworkConnected())
+    {
+      let toast = this.toastCtrl.create({
+        message: "Nessuna connessione! Connettiti alla rete e riprova.",
+        duration: 5000,
+        position: 'top'
+      });
+      toast.present();
+      return;
+    }
+
     let loaderContent = "<strong>Eliminazione cache</strong><br />";
+    let msg;
     let self = this;
     let loader = this.loadingCtrl.create({
       content: loaderContent,
       duration: (5 * 60 * 1000)
     });
-    loader.present().then(() => {
-      loader.setContent(loaderContent + "Destroying databases...");
+    loader.present().then(() =>
+    {
+      msg = "Destroying databases...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
       return this.remoteDataService.destroyLocalDataStorages();
-    }).then(() => {
-      console.log("CACHE WAS CLEANED");
+    }).then(() =>
+    {
+      msg = "Loading data...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
 
-      loader.setContent(loaderContent + "Loading data...");
       return this.remoteDataService.initialize(true);
-    }).then(() => {
-      console.log("RemoteData service initialized [WITH DATA].");
+    }).then(() =>
+    {
+      msg = "Initializing...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
 
-      loader.setContent(loaderContent + "Initializing...");
       return this.remoteDataService.initialize(false, true);
-    }).then(() => {
-      console.log("RemoteData service initialized [SKIP DATA].");
-
-      loader.setContent(loaderContent + "Cache cleared.");
+    }).then(() =>
+    {
+      msg = "Cache cleared.";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
 
       this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
@@ -76,22 +97,32 @@ export class ConfigurationPage implements OnInit
   }
 
 
-
-
   /**
    * Save configuration values and reset application
    */
-  saveAndResetApplication():void
+  saveAndResetApplication(): void
   {
+    if(!this.offlineCapableRestService.isNetworkConnected())
+    {
+      let toast = this.toastCtrl.create({
+        message: "Nessuna connessione! Connettiti alla rete e riprova.",
+        duration: 5000,
+        position: 'top'
+      });
+      toast.present();
+      return;
+    }
+
     let self = this;
     let loader = this.loadingCtrl.create({
       content: "Elaborazione in corso...",
       duration: (5 * 60 * 1000)
     });
-    loader.present().then(() => {
+    loader.present().then(() =>
+    {
       //save all config values
       let setPromises = [];
-      _.each(this.cfg, function(val, key)
+      _.each(this.cfg, function (val, key)
       {
         setPromises.push(self.configurationService.setConfig(key, val));
       });
@@ -102,7 +133,8 @@ export class ConfigurationPage implements OnInit
         console.log("Configuration values were saved.");
 
         return this.userService.logout();
-      }).then(() => {
+      }).then(() =>
+      {
         console.log("User is now logged out.");
 
         return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
@@ -113,12 +145,15 @@ export class ConfigurationPage implements OnInit
       }).then(() =>
       {
         console.log("User service initialized.");
-        loader.dismiss();
+        return loader.dismiss();
+      }).then(() =>
+      {
         console.log("APPLICATION RESET OK");
         self.cleanCache();
       }).catch((e) =>
       {
-        loader.dismiss().then(() => {
+        loader.dismiss().then(() =>
+        {
           console.log("Application reset error: " + e);
           let toast = this.toastCtrl.create({
             message: 'Errore configurazione app! ' + e,
@@ -134,13 +169,15 @@ export class ConfigurationPage implements OnInit
   /**
    * Ask user for unlock code and attempt to unlock the configuration service
    */
-  onUnlockConfigForm():void
+  onUnlockConfigForm(): void
   {
     let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage, false, {});
-    unlockModal.onDidDismiss(data => {
+    unlockModal.onDidDismiss(data =>
+    {
       let unlock_code = _.get(data, "unlock_code", "");
       this.configurationService.unlockWithCode(unlock_code);
-      if(!this.configurationService.isUnlocked()) {
+      if (!this.configurationService.isUnlocked())
+      {
         let toast = this.toastCtrl.create({
           message: 'Codice sblocco errato!',
           duration: 3000,
@@ -155,7 +192,7 @@ export class ConfigurationPage implements OnInit
   /**
    * Lock the configuration service
    */
-  onLockConfigForm():void
+  onLockConfigForm(): void
   {
     this.configurationService.unlockWithCode("");
   }
@@ -164,7 +201,7 @@ export class ConfigurationPage implements OnInit
    *
    * @returns {boolean}
    */
-  isFormDisabled():boolean
+  isFormDisabled(): boolean
   {
     return !this.configurationService.isUnlocked();
   }
@@ -172,16 +209,19 @@ export class ConfigurationPage implements OnInit
   /**
    *
    */
-  private getConfiguration():void {
-    this.configurationService.getConfigObject().then((config) => {
+  private getConfiguration(): void
+  {
+    this.configurationService.getConfigObject().then((config) =>
+    {
       this.cfg = config;
       this.viewIsReady = true;
-    }).catch((e) => {
+    }).catch((e) =>
+    {
       this.cfg = {};
     });
   }
 
-  ngOnInit():void
+  ngOnInit(): void
   {
     this.getConfiguration();
   }

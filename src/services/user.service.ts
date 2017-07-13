@@ -180,7 +180,6 @@ export class UserService
   {
     let self = this;
     let config;
-    self.authenticated = false;
     self.is_initialized = false;
     self.is_user_configured = false;
     self.user_data = {};
@@ -223,121 +222,6 @@ export class UserService
       });
     });
   }
-
-  /**
-   * initialize the Rest service
-   */
-  initializeNewer(): Promise<any>
-  {
-    let self = this;
-    let config;
-    self.authenticated = false;
-    self.is_initialized = false;
-    self.is_user_configured = false;
-    self.user_data = {};
-
-    return new Promise(function (resolve, reject)
-    {
-      self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
-
-      self.configurationService.getConfigObject()
-        .then((cfg) =>
-        {
-          self.is_initialized = true;
-          config = cfg;
-          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
-
-          if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
-          {
-            self.last_error = new Error("Configuration is incomplete!");
-            console.warn("Configuration is incomplete!");
-            resolve();
-          } else
-          {
-            self.is_user_configured = true;
-            return self.db.get('userdata');
-          }
-        }).then((doc) =>
-      {
-        console.log("CURRENT USER", doc);
-        self.user_data = doc;
-        self.login(config.crm_username, config.crm_password);
-        resolve();
-      }, (e) =>
-      {
-        self.last_error = new Error("User data is not available! " + e);
-        console.warn(self.last_error.message);
-        self.is_user_configured = false;
-        resolve();
-      }).catch((e) =>
-      {
-        self.last_error = e;
-        reject(e);
-      });
-    });
-  }
-
-  /**
-   * initialize the Rest service
-   */
-  initializeOld(): Promise<any>
-  {
-    let self = this;
-    self.authenticated = false;
-    self.is_initialized = false;
-    self.is_user_configured = false;
-    self.user_data = {};
-
-    return new Promise(function (resolve, reject)
-    {
-      self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
-
-      self.configurationService.getConfigObject()
-        .then((cfg) =>
-        {
-          self.is_initialized = true;
-          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
-
-          if (!(_.isEmpty(cfg.crm_username) && _.isEmpty(cfg.crm_password)))
-          {
-            self.is_user_configured = true;
-            console.log("AUTOLOGIN(" + cfg.crm_username + ")...");
-            self.login(cfg.crm_username, cfg.crm_password).then(() =>
-            {
-              resolve();
-            }).catch((e) =>
-            {
-              self.last_error = e;
-              console.warn("Autologin failed! " + e);
-              //load user data from db
-              self.db.get('userdata').then(function (doc)
-              {
-                console.log(doc);
-                self.user_data = doc;
-                resolve();
-              }).catch((e) =>
-              {
-                self.last_error = new Error("User data is not available! " + e);
-                console.warn(self.last_error.message);
-                self.is_user_configured = false;
-                resolve();
-              });
-            });
-          } else
-          {
-            self.last_error = new Error("Configuration is incomplete!");
-            console.warn("Configuration is incomplete!");
-            resolve();
-          }
-        })
-        .catch((e) =>
-        {
-          self.last_error = e;
-          reject(e);
-        });
-    });
-  }
-
 }
 
 
