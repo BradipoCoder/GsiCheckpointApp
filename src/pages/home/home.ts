@@ -24,7 +24,7 @@ export class HomePage implements OnInit, OnDestroy
 
   protected presentLogoutScreen: boolean = false;
 
-  private auto_update_timeout:number;
+  private auto_update_timeout: number;
 
   /*
    private logoutScreenData:any = {
@@ -54,8 +54,8 @@ export class HomePage implements OnInit, OnDestroy
   scanQRCode(allowedTypes: any): void
   {
     let loader;
-    let barcodeData:any;
-    let checkin:Checkin;
+    let barcodeData: any;
+    let checkin: Checkin;
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((data) =>
     {
       barcodeData = data;
@@ -65,7 +65,8 @@ export class HomePage implements OnInit, OnDestroy
         duration: (30 * 1000)
       });
       return loader.present();
-    }).then(() => {
+    }).then(() =>
+    {
 
       return this.remoteDataService.storeNewCheckin(barcodeData.text);
     }).then((newCheckin) =>
@@ -153,25 +154,24 @@ export class HomePage implements OnInit, OnDestroy
   recalculateShiftTotalDuration(self: HomePage): void
   {
     let durationStr = '';
+    //if (self.isUserAuthenticated() && self.isUserCheckedIn())
+    //{
+    let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
+    let shiftStartCheckin: Checkin = _.last(sessionCheckins) as Checkin;
+    let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
 
-    if (self.isUserAuthenticated() && self.isUserCheckedIn())
+    let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
+    let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
+    //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
+    //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
+
+    if (hours)
     {
-      let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-      let shiftStartCheckin: Checkin = _.last(sessionCheckins) as Checkin;
-      let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
-
-      let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
-      let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
-      //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
-      //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
-
-      if (hours)
-      {
-        durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
-      }
-      durationStr += minutes + " min";
-      //durationStr += " " + seconds + "s";
+      durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
     }
+    durationStr += minutes + " min";
+    //durationStr += " " + seconds + "s";
+    //}
 
     self.shiftTotalDuration = durationStr;
   }
@@ -181,16 +181,18 @@ export class HomePage implements OnInit, OnDestroy
    */
   recalculateLastCheckinDuration(self: HomePage): void
   {
+    //console.log("AUTH: " + (self.userService.isAuthenticated() ? "Y" : "N"));
+    //console.log("CKIN: " + (self.remoteDataService.getLastOperationType() == Checkpoint.TYPE_IN ? "Y" : "N"));
 
-    if (self.isUserAuthenticated() && self.isUserCheckedIn())
+    //if (self.isUserAuthenticated() && self.isUserCheckedIn())
+    //{
+    let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
+    let lastCheckin: Checkin = _.first(sessionCheckins) as Checkin;
+    if (!_.isUndefined(lastCheckin))
     {
-      let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-      let lastCheckin: Checkin = _.first(sessionCheckins) as Checkin;
-      if (!_.isUndefined(lastCheckin))
-      {
-        lastCheckin.setDurationFromNow();
-      }
+      lastCheckin.setDurationFromNow();
     }
+    //}
   }
 
   /**
@@ -210,31 +212,42 @@ export class HomePage implements OnInit, OnDestroy
     this.offlineCapableRestService.setIsNetworkConnected(this.is_network_connected);
   }
 
+
   //------------------------------------------------------------------------------------------------------INIT & DESTROY
   ngOnInit(): void
   {
     let self = this;
+    console.log("HOME INIT");
 
     this.autoUpdateIntevalExecution(this);
 
-
     self.is_network_connected = this.offlineCapableRestService.isNetworkConnected();
+
     this.offlineCapableRestService.networkConnectedObservable.subscribe(
       function (is_network_connected)
       {
         console.log('Connection state: ' + is_network_connected);
         self.is_network_connected = is_network_connected;
-        /*@todo: this should not be here but in Remote Data Services!!!*/
+
         if (is_network_connected)
         {
-          self.remoteDataService.triggerProviderDataSync(true).then(() => {
-            console.log("AFTER NETWORK ON DATA SYNC OK");
+          self.remoteDataService.triggerProviderDataSync(true).then(() =>
+          {
+            //console.log("AFTER NETWORK ON DATA SYNC OK");
             return self.remoteDataService.updateCurrentSessionCheckins();
-          }).then(() => {
-            console.log("AFTER NETWORK ON DATA SYNC OK - #2");
+          }).then(() =>
+          {
+            //console.log("AFTER NETWORK ON DATA SYNC OK - #2");
           });
         }
       });
+
+    if(!this.isUserAuthenticated())
+    {
+      console.log("H-INIT - user is not logged in...");
+      //@todo: this would need an observable in userService to be notified on user login/logout status
+      this.userService.autologin();
+    }
   }
 
 
@@ -243,7 +256,7 @@ export class HomePage implements OnInit, OnDestroy
    */
   ngOnDestroy(): void
   {
-    if(this.auto_update_timeout)
+    if (this.auto_update_timeout)
     {
       clearTimeout(this.auto_update_timeout);
     }

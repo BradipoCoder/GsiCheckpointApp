@@ -36,6 +36,82 @@ export class ConfigurationPage implements OnInit
    */
   cleanCache(): void
   {
+    if (!this.offlineCapableRestService.isNetworkConnected())
+    {
+      let toast = this.toastCtrl.create({
+        message: "Nessuna connessione! Connettiti alla rete e riprova.",
+        duration: 5000,
+        position: 'top'
+      });
+      toast.present();
+      return;
+    }
+
+    let loaderContent = "<strong>Eliminazione cache</strong><br />";
+    let msg;
+    let self = this;
+
+    let loader = this.loadingCtrl.create({
+      content: loaderContent,
+      duration: (5 * 60 * 1000)
+    });
+    loader.present().then(() =>
+    {
+      msg = "Logging out user...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.userService.logout();
+    }).then(() =>
+    {
+      msg = "Logging in user...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
+    }).then(() =>
+    {
+      msg = "Destroying databases...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.remoteDataService.destroyLocalDataStorages();
+    }).then(() =>
+    {
+      msg = "Loading data...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.remoteDataService.initialize(true);
+    }).then(() =>
+    {
+      msg = "Initializing remote data service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.remoteDataService.initialize(false, true);
+    }).then(() =>
+    {
+      msg = "Cache cleared.";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      this.navCtrl.push(HomePage);
+      this.navCtrl.setRoot(HomePage);
+      loader.dismiss();
+    }).catch((e) => {
+      let toast = this.toastCtrl.create({
+        message: e,
+        duration: 15000,
+        position: 'top'
+      });
+      toast.present().then(() => {
+        console.log("Cache clean error: " + e);
+        loader.dismiss();
+      });
+    });
+  }
+
+  /**
+   * !!! NETWORK CONNECTION REQUIRED !!!
+   * destroy and recreate databases and load remote data
+   */
+  cleanCacheOld(): void
+  {
     if(!this.offlineCapableRestService.isNetworkConnected())
     {
       let toast = this.toastCtrl.create({
@@ -78,11 +154,13 @@ export class ConfigurationPage implements OnInit
     {
       msg = "Cache cleared.";
       console.log(msg);
-      loader.setContent(loaderContent + msg);
-
-      this.navCtrl.push(HomePage);
-      this.navCtrl.setRoot(HomePage);
-      loader.dismiss();
+      loader.dismiss().then(() => {
+        this.navCtrl.push(HomePage).then(() => {
+          this.navCtrl.setRoot(HomePage).then(() => {
+            console.log("going home...");
+          });
+        });
+      });
     }).catch((e) =>
     {
       loader.dismiss();

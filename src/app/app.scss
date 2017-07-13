@@ -64,6 +64,16 @@ ion-footer{
   background: color($colors, lightest);
 }
 
+ion-loading{
+  .loading-wrapper{
+    .loading-content{
+      font-size: 1.4rem;
+    }
+  }
+}
+
+
+
 /*Generic*/
 .user-avatar-wrapper
 {

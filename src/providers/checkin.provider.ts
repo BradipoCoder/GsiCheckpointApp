@@ -186,6 +186,10 @@ export class CheckinProvider extends RestDataProvider
               }
               console.log("PUSHING TO REMOTE WITH PARAMS: ", parameters);
               self.offlineCapableRestService.setEntry(self.remote_table_name, (isNewOnRemote ? false : checkin.id), parameters).then((res) => {
+                if(!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
+                {
+                  throw new Error("failed to save on remote!");
+                }
                 console.log("Saved on remote: ", res);
                 let currentLocalStorageId = checkin.id;
                 checkin.id = res.id;
@@ -194,13 +198,16 @@ export class CheckinProvider extends RestDataProvider
               }).then((res) => {
                 resolve();
               }).catch((e) => {
-                reject(e);
+                console.warn("Remote save error! ", e);
+                //reject(e);
+                resolve();
               });
             });
           }).then(() => {
             resolve();
           }).catch((e) => {
-            reject(e);
+            console.warn("syncWithRemote_PUSH[reduce] error!", e);
+            resolve();
           });
         } else {
           console.log("NOTHING TO SYNC");
@@ -208,7 +215,7 @@ export class CheckinProvider extends RestDataProvider
         }
       }).catch((e) =>
       {
-        console.error(e);
+        console.warn("syncWithRemote_PUSH[find doc] error!", e);
         resolve();
       });
     });

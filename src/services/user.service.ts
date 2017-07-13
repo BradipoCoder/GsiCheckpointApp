@@ -73,6 +73,7 @@ export class UserService
         console.log("User database has been destroyed.");
         self.user_data = {};
         self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+        console.log("User database created.");
         resolve();
       }).catch((e) =>
       {
@@ -86,6 +87,7 @@ export class UserService
         {
           console.log("User database has been destroyed.");
           self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+          console.log("User database created.");
           resolve();
         }).catch((e) =>
         {
@@ -94,6 +96,7 @@ export class UserService
       });
     });
   }
+
 
   /**
    *
@@ -122,6 +125,7 @@ export class UserService
       }).then(() =>
       {
         self.authenticated = true;
+        self.is_user_configured = true;
         resolve();
       }).catch((e) =>
       {
@@ -158,7 +162,7 @@ export class UserService
         return self.db.put(data);
       }).then(function (res)
       {
-        console.log("User data stored");
+        //console.log("User data stored");
         resolve();
       }).catch(function (err)
       {
@@ -166,12 +170,36 @@ export class UserService
         _.assignIn(data, {_id: 'userdata'});
         self.db.put(data).then((res) =>
         {
-          console.log("User data stored(new)");
+          //console.log("User data stored(new)");
           resolve();
         });
       });
     });
   };
+
+  /**
+   * Log user in automatically
+   */
+  autologin(): void
+  {
+    let config;
+    this.configurationService.getConfigObject()
+      .then((cfg) =>
+      {
+        config = cfg;
+        if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
+        {
+          console.log("AUTOLOGIN - missing username or password");
+          return;
+        }
+        return this.login(cfg.crm_username, cfg.crm_password);
+      }).then(() => {
+      console.log("AUTOLOGIN SUCCESS");
+    }).catch((e) =>
+    {
+      console.log("AUTOLOGIN FAILED: ", e);
+    });
+  }
 
   /**
    * initialize the Rest service
