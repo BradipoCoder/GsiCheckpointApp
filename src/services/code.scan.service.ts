@@ -147,7 +147,7 @@ export class CodeScanService
     let codes:any = [];
     codes[Checkpoint.TYPE_IN] = ["MKT-IN"];
     codes[Checkpoint.TYPE_OUT] = ["MKT-OUT"];
-    codes[Checkpoint.TYPE_CHK] = ["A150", "S132", "T14", "AT06"];
+    codes[Checkpoint.TYPE_CHK] = ["A150", "S132", "T14", "AT06", "F41"];
 
     let allowFakes = codes[expected_type];
 

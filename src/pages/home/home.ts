@@ -48,6 +48,7 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
+   *@todo: missing control if we are checked in!
    *
    * @param {[<string>]} allowedTypes
    */
@@ -61,7 +62,7 @@ export class HomePage implements OnInit, OnDestroy
       barcodeData = data;
       //console.log("BARCODE", barcodeData);
       loader = this.loadingCtrl.create({
-        content: "Elaborazione in corso...",
+        content: "Ricerca locale("+barcodeData.text+") in corso...",
         duration: (30 * 1000)
       });
       return loader.present();
@@ -77,7 +78,7 @@ export class HomePage implements OnInit, OnDestroy
     {
       console.log("CHECKIN REGISTERED", checkin);
 
-      let toastMessage = checkin.name;
+      let toastMessage = "Sei entrato in: " + checkin.name + "(" + barcodeData.text + ")";
       if (checkin.type == Checkpoint.TYPE_OUT)
       {
         // OUT
@@ -97,6 +98,10 @@ export class HomePage implements OnInit, OnDestroy
     }).catch((e) =>
     {
       console.error("Errore scansione: " + e);
+      if(!_.isUndefined(loader))
+      {
+        loader.dismiss();
+      }
       let toast = this.toastCtrl.create({
         message: e,
         duration: 3000,

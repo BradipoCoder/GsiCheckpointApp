@@ -355,6 +355,8 @@ export class RemoteDataService
   }
 
   /**
+   *
+   * @todo: this is shit - make it more solid!
    * Triggers data sync operation in every registered provider
    *
    * @param {boolean} pushOnly
