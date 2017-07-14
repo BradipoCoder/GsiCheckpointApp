@@ -21,6 +21,11 @@
           <ion-label>Blocca</ion-label>
         </button>
 
+        <button *ngIf="!isFormDisabled()" ion-button float-right icon-left (click)="cleanCache()" color="yellow-light">
+          <ion-icon name="nuclear"></ion-icon>
+          <ion-label>Cancella la cache</ion-label>
+        </button>
+
         <ion-list>
 
           <ion-list-header>Applicazione</ion-list-header>
@@ -54,15 +59,6 @@
         <button ion-button icon-left (click)="saveAndResetApplication()" color="dark">
           <ion-icon name="refresh"></ion-icon>
           <ion-label>Salva e ricarica</ion-label>
-        </button>
-      </ion-col>
-    </ion-row>
-
-    <ion-row *ngIf="isFormDisabled()">
-      <ion-col text-md-center>
-        <button ion-button icon-left (click)="cleanCache()" color="dark">
-          <ion-icon name="nuclear"></ion-icon>
-          <ion-label>Cancella la cache</ion-label>
         </button>
       </ion-col>
     </ion-row>
