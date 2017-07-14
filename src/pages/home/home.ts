@@ -159,24 +159,23 @@ export class HomePage implements OnInit, OnDestroy
   recalculateShiftTotalDuration(self: HomePage): void
   {
     let durationStr = '';
-    //if (self.isUserAuthenticated() && self.isUserCheckedIn())
-    //{
+
     let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-    let shiftStartCheckin: Checkin = _.last(sessionCheckins) as Checkin;
-    let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
+    if(_.size(sessionCheckins) > 0) {
+      let shiftStartCheckin: Checkin = _.last(sessionCheckins) as Checkin;
+      let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
 
-    let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
-    let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
-    //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
-    //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
-
-    if (hours)
-    {
-      durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
+      let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
+      let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
+      //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
+      //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
+      if (hours)
+      {
+        durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
+      }
+      durationStr += minutes + " min";
+      //durationStr += " " + seconds + "s";
     }
-    durationStr += minutes + " min";
-    //durationStr += " " + seconds + "s";
-    //}
 
     self.shiftTotalDuration = durationStr;
   }
@@ -186,18 +185,14 @@ export class HomePage implements OnInit, OnDestroy
    */
   recalculateLastCheckinDuration(self: HomePage): void
   {
-    //console.log("AUTH: " + (self.userService.isAuthenticated() ? "Y" : "N"));
-    //console.log("CKIN: " + (self.remoteDataService.getLastOperationType() == Checkpoint.TYPE_IN ? "Y" : "N"));
-
-    //if (self.isUserAuthenticated() && self.isUserCheckedIn())
-    //{
     let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-    let lastCheckin: Checkin = _.first(sessionCheckins) as Checkin;
-    if (!_.isUndefined(lastCheckin))
-    {
-      lastCheckin.setDurationFromNow();
+    if(_.size(sessionCheckins) > 0) {
+      let lastCheckin: Checkin = _.first(sessionCheckins) as Checkin;
+      if (!_.isUndefined(lastCheckin))
+      {
+        lastCheckin.setDurationFromNow();
+      }
     }
-    //}
   }
 
   /**
