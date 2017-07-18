@@ -57,10 +57,10 @@ export class CheckpointProvider extends RestDataProvider
       self.findDocuments(options).then((res) => {
         if(_.size(res.docs) < 1)
         {
-          throw new Error("Checkpoint was not found!");
+          throw new Error("Codice locale sconosciuto!");
         }
         if (_.size(res.docs) > 1) {
-          throw new Error("Multiple checkpoint were found!");
+          throw new Error("Locali multipli per il codice!");
         }
         let checkpoint = new Checkpoint(res.docs[0]);
         resolve(checkpoint);

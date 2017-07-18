@@ -48,7 +48,9 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
-   *@todo: missing control if we are checked in!
+   *@todo: !!!missing important controls!!!
+   *  1) cannot scan anything if we are NOT checked in!
+   *  2) cannot check the same code twice in a row
    *
    * @param {[<string>]} allowedTypes
    */
@@ -62,7 +64,7 @@ export class HomePage implements OnInit, OnDestroy
       barcodeData = data;
       //console.log("BARCODE", barcodeData);
       loader = this.loadingCtrl.create({
-        content: "Ricerca locale("+barcodeData.text+") in corso...",
+        content: "Ricerca locale(" + barcodeData.text + ") in corso...",
         duration: (30 * 1000)
       });
       return loader.present();
@@ -98,7 +100,7 @@ export class HomePage implements OnInit, OnDestroy
     }).catch((e) =>
     {
       console.error("Errore scansione: " + e);
-      if(!_.isUndefined(loader))
+      if (!_.isUndefined(loader))
       {
         loader.dismiss();
       }
@@ -110,6 +112,42 @@ export class HomePage implements OnInit, OnDestroy
       toast.present();
     });
   }
+
+  /**
+   *
+   */
+  activatePause(): void
+  {
+
+    this.remoteDataService.storeNewCheckin("PAUSA").then((checkin: Checkin) =>
+    {
+      console.log("CHECKIN REGISTERED", checkin);
+    }).catch((e) =>
+    {
+      console.error("Errore pausa: " + e);
+
+      let toast = this.toastCtrl.create({
+        message: e,
+        duration: 3000,
+        position: 'top'
+      });
+      toast.present();
+    });
+  }
+
+  /**
+   *
+   */
+  registerNewTask(): void
+  {
+    let toast = this.toastCtrl.create({
+      message: "Questa funzionalità non è ancora implementata.",
+      duration: 3000,
+      position: 'top'
+    });
+    toast.present();
+  }
+
 
   goToConfigurationPage(): void
   {
@@ -140,7 +178,28 @@ export class HomePage implements OnInit, OnDestroy
    */
   isUserCheckedIn(): boolean
   {
-    return this.remoteDataService.getLastOperationType() == Checkpoint.TYPE_IN;
+    try
+    {
+      return this.remoteDataService.getSessionInOutOperation().type == Checkpoint.TYPE_IN;
+    } catch (e)
+    {
+      return false;
+    }
+  }
+
+  /**
+   *
+   * @returns {boolean}
+   */
+  isUserHavingABreak(): boolean
+  {
+    try
+    {
+      return this.remoteDataService.getLastOperation().type == Checkpoint.TYPE_PAUSE;
+    } catch (e)
+    {
+      return false;
+    }
   }
 
   /**
@@ -161,7 +220,8 @@ export class HomePage implements OnInit, OnDestroy
     let durationStr = '';
 
     let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-    if(_.size(sessionCheckins) > 0) {
+    if (_.size(sessionCheckins) > 0)
+    {
       let shiftStartCheckin: Checkin = _.last(sessionCheckins) as Checkin;
       let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
 
@@ -186,7 +246,8 @@ export class HomePage implements OnInit, OnDestroy
   recalculateLastCheckinDuration(self: HomePage): void
   {
     let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-    if(_.size(sessionCheckins) > 0) {
+    if (_.size(sessionCheckins) > 0)
+    {
       let lastCheckin: Checkin = _.first(sessionCheckins) as Checkin;
       if (!_.isUndefined(lastCheckin))
       {
@@ -242,7 +303,7 @@ export class HomePage implements OnInit, OnDestroy
         }
       });
 
-    if(!this.isUserAuthenticated())
+    if (!this.isUserAuthenticated())
     {
       console.log("H-INIT - user is not logged in...");
       //@todo: this would need an observable in userService to be notified on user login/logout status

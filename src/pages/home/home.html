@@ -16,7 +16,7 @@
 
   <ion-content class="logged-out">
     <div class="header loginBlock" margin-top text-center>
-      <img src="assets/image/logo-traccia.png" class="logo-trace" width="228" height="128" />
+      <img src="assets/image/logo-traccia.png" class="logo-trace" width="228" height="128"/>
     </div>
     <ion-grid margin-top>
       <ion-row>
@@ -38,15 +38,8 @@
   </ion-content>
 
   <ion-footer>
-    <div text-left float-left *ngIf="!isMobileDevice()">
-      <ion-label>
-        <ion-checkbox color="dark" [(ngModel)]="is_network_connected" (ionChange)="fakeNetworkStateChange()"></ion-checkbox>
-        NETWORK
-      </ion-label>
-    </div>
-
     <div text-right float-right>
-      <img class="footer-logo" src="assets/image/logo-gsi.png" class="logo-trace" width="165" height="50" />
+      <img class="footer-logo" src="assets/image/logo-gsi.png" class="logo-trace" width="165" height="50"/>
     </div>
   </ion-footer>
 </ng-template>
@@ -61,8 +54,8 @@
       <ion-title float-left>Home</ion-title>
       <ion-icon float-right name="{{is_network_connected ? 'cloud' : 'thunderstorm'}}"></ion-icon>
       <ion-label float-right>{{userService.getUserData("first_name") ||
-        userService.getUserData("name")}}</ion-label>
-
+        userService.getUserData("name")}}
+      </ion-label>
     </ion-navbar>
   </ion-header>
 
@@ -71,85 +64,137 @@
   </ion-content>
 
   <ion-footer>
-    <ion-footer>
-        <ion-label float-left>
-          <ion-icon name="chatbubbles"></ion-icon>
-          Segnala
-        </ion-label>
-      <ion-label float-left>
-        <ion-icon name="pause"></ion-icon>
-        Pausa
-      </ion-label>
-
-      <div text-right float-right>
-        <img class="footer-logo" src="assets/image/logo-gsi.png" class="logo-trace" width="165" height="50" />
-      </div>
-    </ion-footer>
+    <ion-grid padding-left padding-right>
+      <ion-row>
+        <ion-col col-6 text-left>
+          <div *ngIf="isUserCheckedIn() && !isUserHavingABreak()">
+            <ion-label class="button" float-left padding-right (tap)="registerNewTask()">
+              <ion-icon name="chatbubbles"></ion-icon>
+              Segnala
+            </ion-label>
+            <ion-label class="button" float-left padding-right (tap)="activatePause()">
+              <ion-icon name="pause"></ion-icon>
+              Pausa
+            </ion-label>
+          </div>
+        </ion-col>
+        <ion-col col-6 text-right>
+          <img class="footer-logo" src="assets/image/logo-gsi.png" class="logo-trace" width="165" height="50"/>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
   </ion-footer>
 </ng-template>
 
-
 <!-- The block for checked IN user -->
 <ng-template #checkedIn>
+  <div *ngIf="isUserHavingABreak(); then checkedInPaused else checkedInActive"></div>
+</ng-template>
 
-    <div class="header">
-      <ion-fab top right class="qr-scan-fab">
-        <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
-          <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-        </button>
-      </ion-fab>
+<!-- checked-in + active  -->
+<ng-template #checkedInPaused>
+  <div class="header">
+    <ion-fab top right class="qr-scan-fab">
+      <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
+        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+      </button>
+    </ion-fab>
 
-      <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
-        <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
-          <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-        </button>
-      </ion-fab>
+    <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
+      <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
+        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+      </button>
+    </ion-fab>
 
-      <ion-grid>
-        <ion-row>
-          <ion-col>
-            <p>Stai lavorando da</p>
-            <h3>
-              <ion-label color="lightest">
-                {{shiftTotalDuration}}
-              </ion-label>
-            </h3>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <p>Sei in pausa da</p>
+          <h3>
+            <ion-label color="lightest">
+              {{shiftTotalDuration}}
+            </ion-label>
+          </h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
 
-    <div class="main">
-      <ion-grid>
-        <ion-row>
-          <ion-col>
-            <h5>Scansiona il <strong>QRcode dell'ambiente</strong> da pulire</h5>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+  <div class="main">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <p>
+            Per ricominciare il lavoro <strong>scansiona il QRcode</strong> dell'ambiente da pulire.
+          </p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+</ng-template>
+
+<!-- checked-in + active  -->
+<ng-template #checkedInActive>
+
+  <div class="header">
+    <ion-fab top right class="qr-scan-fab">
+      <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
+        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+      </button>
+    </ion-fab>
+
+    <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
+      <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
+        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+      </button>
+    </ion-fab>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <p>Stai lavorando da</p>
+          <h3>
+            <ion-label color="lightest">
+              {{shiftTotalDuration}}
+            </ion-label>
+          </h3>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="main">
+    <ion-grid>
+      <ion-row>
+        <ion-col>
+          <h5>Scansiona il <strong>QRcode dell'ambiente</strong> da pulire</h5>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
 
 
-      <ion-grid class="checkin_list">
+    <ion-grid class="checkin_list">
 
-        <ion-row *ngFor="let checkin of remoteDataService.getCurrentSessionCheckins()" ngClass="{{checkin.css_class}}">
-          <ion-col col-9>
-            <div>
-              <ion-icon [name]="checkin.icon" item-left></ion-icon>
-              <!--[{{checkin.sync_state}}] -&#45;&#45; {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>[{{checkin._id}}]-[{{checkin.id}}]</small>-->
-              {{checkin.name}} ({{checkin.getFormattedDuration()}})
-            </div>
-          </ion-col>
-          <ion-col col-3 text-right="">
-            <div>
-              {{checkin.getDatePropertyValue('checkin_date', 'H:mm')}}
-              <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
+      <ion-row *ngFor="let checkin of remoteDataService.getCurrentSessionCheckins()" ngClass="{{checkin.css_class}}">
+        <ion-col col-9>
+          <div>
+            <ion-icon [name]="checkin.icon" item-left></ion-icon>
+            <!--[{{checkin.sync_state}}] -&#45;&#45; {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>[{{checkin._id}}]-[{{checkin.id}}]</small>-->
+            {{checkin.name}} ({{checkin.getFormattedDuration()}})
+          </div>
+        </ion-col>
+        <ion-col col-3 text-right="">
+          <div>
+            {{checkin.getDatePropertyValue('checkin_date', 'H:mm')}}
+            <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
 
 </ng-template>
+
 
 
 

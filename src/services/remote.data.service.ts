@@ -28,9 +28,9 @@ import {Promise} from '../../node_modules/bluebird'
 @Injectable()
 export class RemoteDataService
 {
-  private last_in_out_operation: Checkin;
-  private last_operation_type: string = Checkpoint.TYPE_OUT;
-  private last_operation_date: string;
+  private last_checkin_operation: Checkin;
+  //private last_operation_type: string = Checkpoint.TYPE_OUT;
+  //private last_operation_date: string;
 
   private CURRENT_SESSION_CHECKINS: any;
 
@@ -121,33 +121,88 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      if (_.isUndefined(self.last_in_out_operation) || _.isNull(self.last_in_out_operation))
-      {
-        resolve();
-      }
+      self.CURRENT_SESSION_CHECKINS = [];
 
-      let fromDate = self.last_in_out_operation.checkin_date;
-      //console.log("Updating CURRENT_SESSION_CHECKINS (from date: "+fromDate+")...");
-
-      let options = {
-        selector: {
-          checkin_date: {$gte: fromDate}
-        },
-        sort: [{checkin_date: 'desc'}]
-      };
-      self.checkinProvider.findDocuments(options).then((res) =>
-      {
-        if (_.size(res.docs))
+      self.getLastInOutOperation().then((operation:Checkin) => {
+        if (_.isNull(operation) || _.isEmpty(operation))
         {
-          self.CURRENT_SESSION_CHECKINS = [];
-          _.each(res.docs, function (doc)
-          {
-            self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
-          });
+          return resolve();
         }
-        //console.log("CSCI: ", self.CURRENT_SESSION_CHECKINS);
-        resolve();
+
+        let fromDate = operation.checkin_date;
+        //console.log("Updating CURRENT_SESSION_CHECKINS (from date: "+fromDate+")...");
+
+        let options = {
+          selector: {
+            checkin_date: {$gte: fromDate}
+          },
+          sort: [{checkin_date: 'desc'}]
+        };
+
+        self.checkinProvider.findDocuments(options).then((res) =>
+        {
+          if (_.size(res.docs))
+          {
+            _.each(res.docs, function (doc)
+            {
+              self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
+            });
+          }
+
+          console.log("CURRENT_SESSION_CHECKINS: ", self.CURRENT_SESSION_CHECKINS);
+
+          if(!_.isUndefined(self.CURRENT_SESSION_CHECKINS[0]))
+          {
+            self.last_checkin_operation = self.CURRENT_SESSION_CHECKINS[0];
+            //console.log("LAST IN OUT OP: ", self.last_checkin_operation);
+          }
+
+          resolve();
+        });
       });
+    });
+  }
+
+  /**
+   * @todo: should keep track of company id as well
+   *
+   * @returns {Promise<any>}
+   */
+  private getLastInOutOperation(): Promise<Checkin>
+  {
+    let self = this;
+    let lastInOutCheckin:Checkin;
+
+    return new Promise(function (resolve, reject)
+    {
+      //IN/OUT
+      self.checkpointProvider.getInOutCheckpoints().then((inOutCheckpoints) =>
+      {
+        let idList = _.map(inOutCheckpoints, "id");
+        self.checkinProvider.findDocuments({
+          selector: {
+            checkin_date: {$ne: ''},
+            mkt_checkpoint_id_c: {$in: idList}
+          },
+          fields: ['checkin_date', 'mkt_checkpoint_id_c'],
+        }).then((res) =>
+        {
+          if (_.size(res.docs))
+          {
+            let mostRecentCheckin = _.last(_.sortBy(res.docs, ['checkin_date']));
+            //console.log("MOST RECENT CHECKIN: ", mostRecentCheckin);
+            lastInOutCheckin = new Checkin(mostRecentCheckin);
+          }
+          resolve(lastInOutCheckin);
+        }).catch((e) =>
+        {
+          console.error(e);
+          resolve(lastInOutCheckin);
+        });
+      });
+    }).finally(() =>
+    {
+      console.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastInOutCheckin.type + " @ " + lastInOutCheckin.checkin_date);
     });
   }
 
@@ -189,13 +244,9 @@ export class RemoteDataService
         return self.updateDurationOfPreviousCheckin(newCheckin);
       }).then(() =>
       {
-        return self.findLastInOutOperation();
-      }).then(() =>
-      {
         return self.updateCurrentSessionCheckins();
       }).then(() =>
       {
-
         resolve(newCheckin);
 
       }).catch((e) =>
@@ -264,72 +315,38 @@ export class RemoteDataService
     });
   }
 
-  /**
-   * @todo: should keep track of company id as well
-   * @todo: now storing "last_in_out_operation" - use that one
-   *
-   * @returns {Promise<any>}
-   */
-  private findLastInOutOperation(): Promise<any>
-  {
-    let self = this;
 
-    let lastOperationType = Checkpoint.TYPE_OUT;
-    let lastOperationDate = moment().format(CrmDataModel.CRM_DATE_FORMAT);
-
-
-    return new Promise(function (resolve, reject)
-    {
-      //IN/OUT
-      self.checkpointProvider.getInOutCheckpoints().then((inOutCheckpoints) =>
-      {
-        let idList = _.map(inOutCheckpoints, "id");
-        self.checkinProvider.findDocuments({
-          selector: {
-            checkin_date: {$ne: ''},
-            mkt_checkpoint_id_c: {$in: idList}
-          },
-          fields: ['checkin_date', 'mkt_checkpoint_id_c'],
-        }).then((res) =>
-        {
-          if (_.size(res.docs))
-          {
-            let mostRecentCheckin = _.last(_.sortBy(res.docs, ['checkin_date']));
-            //console.log("MOST RECENT CHECKIN: ", mostRecentCheckin);
-            self.last_in_out_operation = new Checkin(mostRecentCheckin);
-
-            let relatedCheckpoint = _.find(inOutCheckpoints, {id: self.last_in_out_operation.mkt_checkpoint_id_c});
-            if (!_.isUndefined(relatedCheckpoint))
-            {
-              //console.log("RELATED CHK: ", relatedCheckpoint);
-              lastOperationType = relatedCheckpoint["type"];
-              lastOperationDate = self.last_in_out_operation.checkin_date;
-            }
-          }
-          resolve();
-        }).catch((e) =>
-        {
-          console.error(e);
-          resolve();
-        });
-      });
-    }).finally(() =>
-    {
-      self.last_operation_type = lastOperationType;
-      self.last_operation_date = lastOperationDate;
-      console.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastOperationType + " @ " + lastOperationDate);
-    });
-  }
 
   //----------------------------------------------------------------------------------------------SIMPLE GETTERS/SETTERS
   /**
    *
-   * @returns {boolean}
+   * @returns {Checkin}
    */
-  public getLastOperationType(): string
+  public getLastOperation(): Checkin
   {
-    return this.last_operation_type;
+    if(_.isNull(this.last_checkin_operation))
+    {
+      throw new Error("Last Checkin operation has not been identified yet");
+    }
+    return this.last_checkin_operation;
   }
+
+
+  /**
+   *
+   * @returns {Checkin}
+   */
+  public getSessionInOutOperation(): Checkin
+  {
+    if(_.isEmpty(this.CURRENT_SESSION_CHECKINS))
+    {
+      throw new Error("No Session Checkins");
+    }
+
+    return _.last(this.CURRENT_SESSION_CHECKINS) as Checkin;
+  }
+
+
 
   /**
    * Destroys and recreates databases
@@ -420,15 +437,11 @@ export class RemoteDataService
     return new Promise(function (resolve, reject)
     {
       //reset
-      self.last_operation_type = Checkpoint.TYPE_OUT;
-      self.last_operation_date = '';
+      self.last_checkin_operation = null;
 
       self.checkpointProvider.initialize().then(() =>
       {
         return self.checkinProvider.initialize();
-      }).then(() =>
-      {
-        return self.findLastInOutOperation();
       }).then(() =>
       {
         return self.updateCurrentSessionCheckins();
@@ -445,11 +458,7 @@ export class RemoteDataService
         return self.triggerProviderDataSync();
       }).then(() =>
       {
-        //console.log("PROVIDER DATA IS IN SYNC NOW");
-        //if(waitForProviderData)
-        //{
         resolve();
-        //}
       }).catch((e) =>
       {
         reject(e);
