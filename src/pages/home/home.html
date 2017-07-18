@@ -72,13 +72,14 @@
 
   <ion-footer>
     <ion-footer>
-
-      <div text-left float-left *ngIf="!isMobileDevice()">
-        <ion-label>
-          <ion-checkbox color="dark" [(ngModel)]="is_network_connected" (ionChange)="fakeNetworkStateChange()"></ion-checkbox>
-          NETWORK
+        <ion-label float-left>
+          <ion-icon name="chatbubbles"></ion-icon>
+          Segnala
         </ion-label>
-      </div>
+      <ion-label float-left>
+        <ion-icon name="pause"></ion-icon>
+        Pausa
+      </ion-label>
 
       <div text-right float-right>
         <img class="footer-logo" src="assets/image/logo-gsi.png" class="logo-trace" width="165" height="50" />

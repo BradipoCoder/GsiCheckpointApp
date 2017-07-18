@@ -57,8 +57,13 @@ ion-nav {
 
     background: color($app-colors, app-bg);
     color: color($app-colors, content-color);
+    .scroll-content{
+      margin-top:56px;
+      margin-bottom:56px;
+    }
   }
 }
+
 
 ion-footer{
   background: color($colors, lightest);
