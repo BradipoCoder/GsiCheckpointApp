@@ -202,7 +202,10 @@ export class RemoteDataService
       });
     }).finally(() =>
     {
-      console.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastInOutCheckin.type + " @ " + lastInOutCheckin.checkin_date);
+      if(lastInOutCheckin)
+      {
+        console.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastInOutCheckin.type + " @ " + lastInOutCheckin.checkin_date);
+      }
     });
   }
 

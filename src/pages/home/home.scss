@@ -1,4 +1,28 @@
 page-home {
+  ion-header
+  {
+    ion-grid.header-content
+    {
+      ion-row
+      {
+        ion-col.message
+        {
+
+        }
+        ion-col.buttons
+        {
+          ion-fab.qr-scan-fab {
+            top: 85px;
+            right: 25px;
+            &.exit{
+              right: 85px;
+            }
+          }
+        }
+      }
+    }
+  }
+
   ion-content.content {
     &.logged-in{
       background: color($colors, lightest);
@@ -16,15 +40,6 @@ page-home {
       background: color($app-colors, app-bg);
       text-align: left;
 
-      ion-fab.qr-scan-fab {
-        top: 76px;
-        right: 38px;
-      }
-
-      ion-fab.qr-scan-fab.exit {
-        top: 76px;
-        right: 88px;
-      }
 
       &.loginBlock{
         color: color($colors, lightest);

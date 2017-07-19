@@ -46,17 +46,87 @@
 
 <!--The block to use to show current status-->
 <ng-template #knownUserBlock>
+
   <ion-header>
-    <ion-navbar>
-      <button ion-button menuToggle>
-        <ion-icon name="menu"></ion-icon>
-      </button>
-      <ion-title float-left>Home</ion-title>
-      <ion-icon float-right name="{{is_network_connected ? 'cloud' : 'thunderstorm'}}"></ion-icon>
-      <ion-label float-right>{{userService.getUserData("first_name") ||
-        userService.getUserData("name")}}
-      </ion-label>
-    </ion-navbar>
+    <div class="custom-background" [ngClass]="{'paused': isUserHavingABreak()}">
+      <ion-navbar padding-right>
+        <button ion-button menuToggle>
+          <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title float-left>Home</ion-title>
+        <ion-icon float-right name="{{is_network_connected ? 'cloud' : 'thunderstorm'}}"></ion-icon>
+        <ion-label float-right>{{userService.getUserData("first_name") ||
+          userService.getUserData("name")}}
+        </ion-label>
+      </ion-navbar>
+
+      <ion-grid padding class="header-content">
+        <!-- ----------------------------------------------------------------------------------CHECKED IN AND ACTIVE -->
+        <ion-row *ngIf="isUserCheckedIn() && !isUserHavingABreak()">
+          <ion-col class="message" col-10>
+            <p>Stai lavorando da</p>
+            <h3>
+              <ion-label color="lightest">
+                {{shiftTotalDuration}}
+              </ion-label>
+            </h3>
+          </ion-col>
+          <ion-col class="buttons" col-2>
+            <ion-fab top right class="qr-scan-fab">
+              <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
+                <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+              </button>
+            </ion-fab>
+
+            <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
+              <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
+                <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+              </button>
+            </ion-fab>
+          </ion-col>
+        </ion-row>
+
+        <!-- ----------------------------------------------------------------------------------CHECKED IN AND PAUSED -->
+        <ion-row *ngIf="isUserCheckedIn() && isUserHavingABreak()">
+          <ion-col class="message" col-10>
+            <p>Sei in pausa da</p>
+            <h3>
+              <ion-label color="lightest">
+                {{currentOperationDuration}}
+              </ion-label>
+            </h3>
+          </ion-col>
+
+          <ion-col class="buttons" col-2>
+            <ion-fab top right class="qr-scan-fab">
+              <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
+                <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+              </button>
+            </ion-fab>
+
+            <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
+              <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
+                <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+              </button>
+            </ion-fab>
+          </ion-col>
+        </ion-row>
+
+        <!-- ------------------------------------------------------------------------------------CHECKED OUT - START -->
+        <ion-row *ngIf="!isUserCheckedIn() && !presentLogoutScreen">
+          <ion-col>
+            Welcome back - start working please
+          </ion-col>
+        </ion-row>
+
+        <!-- ---------------------------------------------------------------------------------CHECKED OUT - FINISHED -->
+        <ion-row *ngIf="!isUserCheckedIn() && presentLogoutScreen">
+          <ion-col>
+            Bye-bye - hai finito di lavorare
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </div>
   </ion-header>
 
   <ion-content class="logged-in checked--in--out">
@@ -86,39 +156,16 @@
   </ion-footer>
 </ng-template>
 
+
+
 <!-- The block for checked IN user -->
 <ng-template #checkedIn>
   <div *ngIf="isUserHavingABreak(); then checkedInPaused else checkedInActive"></div>
 </ng-template>
 
-<!-- checked-in + active  -->
+<!-- checked-in + having a break  -->
 <ng-template #checkedInPaused>
-  <div class="header">
-    <ion-fab top right class="qr-scan-fab">
-      <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
-        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-      </button>
-    </ion-fab>
 
-    <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
-      <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
-        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-      </button>
-    </ion-fab>
-
-    <ion-grid>
-      <ion-row>
-        <ion-col>
-          <p>Sei in pausa da</p>
-          <h3>
-            <ion-label color="lightest">
-              {{shiftTotalDuration}}
-            </ion-label>
-          </h3>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
 
   <div class="main">
     <ion-grid>
@@ -135,33 +182,6 @@
 
 <!-- checked-in + active  -->
 <ng-template #checkedInActive>
-
-  <div class="header">
-    <ion-fab top right class="qr-scan-fab">
-      <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
-        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-      </button>
-    </ion-fab>
-
-    <ion-fab top right class="qr-scan-fab exit" *ngIf="!isMobileDevice()">
-      <button ion-fab mini color="danger" (tap)="scanQRCode(['OUT'])">
-        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-      </button>
-    </ion-fab>
-
-    <ion-grid>
-      <ion-row>
-        <ion-col>
-          <p>Stai lavorando da</p>
-          <h3>
-            <ion-label color="lightest">
-              {{shiftTotalDuration}}
-            </ion-label>
-          </h3>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
 
   <div class="main">
     <ion-grid>

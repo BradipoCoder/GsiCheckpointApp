@@ -151,9 +151,19 @@ export class CodeScanService
 
     let allowFakes = codes[expected_type];
 
+    /*
+    //@todo: to be able to remove previous checkin 'code' from 'allowFakes' - we need code on checkins
+    // now we only have reference to checkpoint by id
+    let lastCheckinOperation = this.remoteDataService.getLastOperation();
+    if(!_.isUndefined(lastCheckinOperation.type) && lastCheckinOperation.type == Checkpoint.TYPE_CHK)
+    {
+
+    }
+    */
+
 
     let code = _.sample(allowFakes);
-    console.log("Not mobile - faking("+expected_type+"): "+JSON.stringify(allowFakes)+"...: " + code);
+    //console.log("Not mobile - faking("+expected_type+"): "+JSON.stringify(allowFakes)+"...: " + code);
 
     return {
       format: CodeScanService.BARCODE_TYPE_QR,
