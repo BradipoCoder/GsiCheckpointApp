@@ -51,6 +51,7 @@ page-home {
 
       &.logoutBlock{
         color: color($colors, lightest);
+        min-height: 100%;
       }
     }
 

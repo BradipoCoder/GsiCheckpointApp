@@ -46,7 +46,6 @@
 
 <!--The block to use to show current status-->
 <ng-template #knownUserBlock>
-
   <ion-header>
     <div class="custom-background" [ngClass]="{'paused': isUserHavingABreak()}">
       <ion-navbar padding-right>
@@ -115,16 +114,51 @@
         <!-- ------------------------------------------------------------------------------------CHECKED OUT - START -->
         <ion-row *ngIf="!isUserCheckedIn() && !presentLogoutScreen">
           <ion-col>
-            Welcome back - start working please
+            <h1>
+              <ion-label color="lightest">Ciao {{userService.getUserData("first_name") ||
+                userService.getUserData("name")}}!
+              </ion-label>
+            </h1>
+            <p>Bentornato!</p>
+          </ion-col>
+          <ion-col class="buttons" col-2>
+            <ion-fab top right class="qr-scan-fab">
+              <button ion-fab color="yellow-light" (tap)="scanQRCode(['IN'])">
+                <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+              </button>
+            </ion-fab>
           </ion-col>
         </ion-row>
 
         <!-- ---------------------------------------------------------------------------------CHECKED OUT - FINISHED -->
         <ion-row *ngIf="!isUserCheckedIn() && presentLogoutScreen">
           <ion-col>
-            Bye-bye - hai finito di lavorare
+
+            <ion-grid text-center>
+              <ion-row>
+                <ion-col>
+                  <div class="user-avatar-wrapper">
+                    <img [src]="userService.getUserData('avatar_uri')">
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>
+                  <h1>Arrivederci {{userService.getUserData("first_name") ||
+                    userService.getUserData("name")}}</h1>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col>
+                  <ion-label color="darkest">Hai segnalato la tua uscita.</ion-label>
+                  <ion-label>Oggi {{getTodaysDate("D MMMM")}} hai lavorato<br/>{{shiftTotalDuration}}</ion-label>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+
           </ion-col>
         </ion-row>
+
       </ion-grid>
     </div>
   </ion-header>
@@ -227,30 +261,8 @@
 
 <!-- The block for checked OUT user -->
 <ng-template #checkedOutStartScreen>
-
-  <div class="header">
-    <ion-fab top right class="qr-scan-fab">
-      <button ion-fab color="yellow-light" (tap)="scanQRCode(['IN'])">
-        <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-      </button>
-    </ion-fab>
-
-    <ion-grid>
-      <ion-row>
-        <ion-col>
-          <h3>
-            <ion-label color="lightest">Ciao {{userService.getUserData("first_name") ||
-              userService.getUserData("name")}}!
-            </ion-label>
-          </h3>
-          <p>Bentornato!</p>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
-
   <div class="main">
-    <ion-grid>
+    <ion-grid padding>
       <ion-row>
         <ion-col>
           <p>Scansiona il <strong>QRcode d'ingresso</strong> per iniziare la tua giornata lavorativa.</p>
@@ -258,34 +270,35 @@
       </ion-row>
     </ion-grid>
   </div>
-
 </ng-template>
 
 
 <!-- The block for checked OUT user - End of session screen -->
 <ng-template #checkedOutEndOfSessionScreen>
-  <div class="header logoutBlock">
-    <ion-grid text-center>
-      <ion-row>
-        <ion-col>
-          <div class="user-avatar-wrapper">
-            <img [src]="logoutScreenData.img_url">
-          </div>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <h1>Arrivederci {{logoutScreenData.name}}</h1>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <ion-label color="darkest">Hai segnalato la tua uscita.</ion-label>
-          <ion-label>Oggi {{logoutScreenData.date}} hai lavorato<br/>{{logoutScreenData.duration}}</ion-label>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
+  ...
+  <!--<div class="header logoutBlock">-->
+    <!--<ion-grid text-center>-->
+      <!--<ion-row>-->
+        <!--<ion-col>-->
+          <!--<div class="user-avatar-wrapper">-->
+            <!--<img [src]="userService.getUserData('avatar_uri')">-->
+          <!--</div>-->
+        <!--</ion-col>-->
+      <!--</ion-row>-->
+      <!--<ion-row>-->
+        <!--<ion-col>-->
+          <!--<h1>Arrivederci {{userService.getUserData("first_name") ||-->
+            <!--userService.getUserData("name")}}</h1>-->
+        <!--</ion-col>-->
+      <!--</ion-row>-->
+      <!--<ion-row>-->
+        <!--<ion-col>-->
+          <!--<ion-label color="darkest">Hai segnalato la tua uscita.</ion-label>-->
+          <!--<ion-label>Oggi {{getTodaysDate("D MMMM")}} hai lavorato<br/>{{shiftTotalDuration}}</ion-label>-->
+        <!--</ion-col>-->
+      <!--</ion-row>-->
+    <!--</ion-grid>-->
+  <!--</div>-->
 </ng-template>
 
 

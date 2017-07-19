@@ -1,16 +1,15 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {Platform, NavController, ToastController, LoadingController} from 'ionic-angular';
-import {Network} from '@ionic-native/network';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
 import {CodeScanService} from '../../services/code.scan.service';
 import {Checkpoint} from '../../models/Checkpoint';
+import {Checkin} from "../../models/Checkin";
 import {ConfigurationPage} from '../configuration/configuration';
-/*import {Checkin} from '../../models/Checkin';*/
 import _ from "lodash";
 import * as moment from 'moment';
-import {Checkin} from "../../models/Checkin";
+
 
 @Component({
   selector: 'page-home',
@@ -27,18 +26,9 @@ export class HomePage implements OnInit, OnDestroy
 
   private auto_update_timeout: number;
 
-  /*
-   private logoutScreenData:any = {
-   name: "Andrea",
-   img_url: "assets/image/user.png",
-   date: "14 giugno",
-   duration: "6 ore 22 min"
-   };*/
-
 
   constructor(public navCtrl: NavController
     , private platform: Platform
-    , private network: Network
     , public toastCtrl: ToastController
     , private loadingCtrl: LoadingController
     , public userService: UserService
@@ -60,6 +50,7 @@ export class HomePage implements OnInit, OnDestroy
     let loader;
     let barcodeData: any;
     let checkin: Checkin;
+
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((data) =>
     {
       barcodeData = data;
@@ -86,6 +77,8 @@ export class HomePage implements OnInit, OnDestroy
       {
         // OUT
         toastMessage = "Fine turno";
+        this.presentLogoutScreen = true;
+
       } else if (checkin.type == Checkpoint.TYPE_OUT)
       {
         // IN
@@ -98,6 +91,16 @@ export class HomePage implements OnInit, OnDestroy
         position: 'bottom'
       });
       toast.present();
+
+      //timeout to hide end of session screen
+      if(this.presentLogoutScreen)
+      {
+        setTimeout((self) => {
+          console.log("time is up!");
+          self.presentLogoutScreen = false;
+        }, 15000, this);
+      }
+
     }).catch((e) =>
     {
       console.error("Errore scansione: " + e);
@@ -115,18 +118,16 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
-   *
+   * Register PAUSE type checkin
    */
   activatePause(): void
   {
-
     this.remoteDataService.storeNewCheckin("PAUSA").then((checkin: Checkin) =>
     {
       console.log("CHECKIN REGISTERED", checkin);
     }).catch((e) =>
     {
       console.error("Errore pausa: " + e);
-
       let toast = this.toastCtrl.create({
         message: e,
         duration: 3000,
@@ -154,6 +155,18 @@ export class HomePage implements OnInit, OnDestroy
   {
     this.navCtrl.push(ConfigurationPage);
     this.navCtrl.setRoot(ConfigurationPage);
+  }
+
+  /**
+   *
+   * @param {string} [format]
+   * @returns {string}
+   */
+  getTodaysDate(format = null): String
+  {
+    let m = moment();
+    m.locale("it");
+    return m.format(format);
   }
 
   /**

@@ -148,6 +148,8 @@ export class UserService
 
     return new Promise(function (resolve, reject)
     {
+
+      //@todo: this only works if you are logged in on CRM
       if (!_.isUndefined(data.id))
       {
         data.avatar_uri = 'http://gsi.crm.mekit.it/index.php?entryPoint=download'
