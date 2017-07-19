@@ -1,6 +1,21 @@
 page-home {
   ion-header
   {
+    .toolbar-background
+    {
+      &.toolbar-background-md
+      {
+        background: none;
+      }
+      background: none;
+    }
+    .custom-background{
+      background: color($app-colors, app-bg);
+      &.paused{
+        background: color($colors, violet-light);
+      }
+    }
+
     ion-grid.header-content
     {
       ion-row

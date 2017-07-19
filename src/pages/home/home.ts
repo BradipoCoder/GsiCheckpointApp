@@ -51,6 +51,9 @@ export class HomePage implements OnInit, OnDestroy
     let barcodeData: any;
     let checkin: Checkin;
 
+    this.recalculateShiftTotalDuration(this);
+    this.recalculateLastCheckinDuration(this);
+
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((data) =>
     {
       barcodeData = data;
