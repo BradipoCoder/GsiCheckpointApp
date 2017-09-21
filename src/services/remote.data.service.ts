@@ -29,10 +29,12 @@ import {Promise} from '../../node_modules/bluebird'
 export class RemoteDataService
 {
   private last_checkin_operation: Checkin;
-  //private last_operation_type: string = Checkpoint.TYPE_OUT;
-  //private last_operation_date: string;
 
-  private CURRENT_SESSION_CHECKINS: any;
+  private CURRENT_SESSION_CHECKINS: Checkin[];
+
+  private CHECKPOINTS: Checkpoint[];
+
+
 
 
   constructor(private offlineCapableRestService: OfflineCapableRestService
@@ -97,6 +99,42 @@ export class RemoteDataService
 
   //----------------------------------------------------------------------------------------------------------CHECKPOINT
 
+  /**
+   *
+   *  @returns {Checkpoint[]}
+   */
+  public getCheckpoints(): any
+  {
+    return this.CHECKPOINTS;
+  }
+
+  /**
+   * Return checkins since last "IN" in chronologically reversed order - this is for home display
+   *
+   * @returns {Promise<any>}
+   */
+  private updateCheckpoints(): Promise<any>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject)
+    {
+      self.CHECKPOINTS = [];
+      self.checkpointProvider.getChkCheckpoints().then((checkpoints:Checkpoint[]) => {
+        if (_.size(checkpoints))
+        {
+          _.each(checkpoints, function (checkpoint)
+          {
+            self.CHECKPOINTS.push(new Checkpoint(checkpoint));
+          });
+        }
+        resolve();
+      }).catch((e) =>
+      {
+        return reject(e);
+      });
+    });
+  }
+
 
   //-------------------------------------------------------------------------------------------------------------CHECKIN
 
@@ -104,7 +142,7 @@ export class RemoteDataService
   /**
    * Return checkins since last "IN" in chronologically reversed order - this is for home display
    *
-   * @returns {any[]}
+   * @returns {Checkin[]}
    */
   public getCurrentSessionCheckins(): any
   {
@@ -375,8 +413,6 @@ export class RemoteDataService
   }
 
   /**
-   *
-   * @todo: this is shit - make it more solid!
    * Triggers data sync operation in every registered provider
    *
    * @param {boolean} pushOnly
@@ -445,6 +481,9 @@ export class RemoteDataService
       self.checkpointProvider.initialize().then(() =>
       {
         return self.checkinProvider.initialize();
+      }).then(() =>
+      {
+        return self.updateCheckpoints();
       }).then(() =>
       {
         return self.updateCurrentSessionCheckins();

@@ -1,0 +1,35 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title float-left>Elenco locali</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-grid>
+
+
+      <table class="table responsive checkpoints">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Checklist</th>
+            <th>Sync</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let checkpoint of remoteDataService.getCheckpoints()">
+            <td>{{checkpoint.code}}</td>
+            <td>{{checkpoint.name}}</td>
+            <td>{{checkpoint.checklist_c}}</td>
+            <td><ion-icon [name]="checkpoint.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon></td>
+          </tr>
+        </tbody>
+      </table>
+
+
+    </ion-grid>
+</ion-content>

@@ -1,0 +1,22 @@
+page-checkpoints
+{
+  ion-content.content
+  {
+    table.checkpoints
+    {
+      width: 100%;
+      font-size: 75%;
+      font-weight: normal;
+      tr{
+        border: 1px solid #ababab;
+      }
+      th{
+        border: 1px solid #ababab;
+        background: #ffffff;
+      }
+      td{
+        border: 1px solid #ababab;
+      }
+    }
+  }
+}

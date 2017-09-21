@@ -10,6 +10,7 @@ import {RemoteDataService} from '../services/remote.data.service';
 import {HomePage} from "../pages/home/home";
 import {ConfigurationPage} from "../pages/configuration/configuration";
 import {LogoutPage} from "../pages/logout/logout";
+import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
 
 //import _ from "lodash";
 
@@ -20,7 +21,7 @@ export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
   /* The page to start with */
-  startupPage: any = HomePage;
+  startupPage: any = CheckpointsPage;
   rootPage: any;
   pages: Array<{ title: string, icon: string, component: any }>;
 
@@ -36,6 +37,7 @@ export class MekitTracerApp
     this.pages = [
       {title: 'Home', icon: 'home', component: HomePage},
       {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage},
+      {title: 'Locali', icon: 'globe', component: CheckpointsPage},
       {title: 'Esci', icon: 'power', component: LogoutPage}
     ];
 

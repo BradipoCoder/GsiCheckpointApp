@@ -24,6 +24,7 @@ import {CheckinProvider} from '../providers/checkin.provider';
 /* Pages */
 import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
+import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
 import {LogoutPage} from "../pages/logout/logout";
 import {ConfigurationPage} from "../pages/configuration/configuration";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
@@ -35,6 +36,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     MekitTracerApp
     , HomePage
     , InfoPage
+    , CheckpointsPage
     , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage
@@ -49,6 +51,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     MekitTracerApp
     , HomePage
     , InfoPage
+    , CheckpointsPage
     , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage

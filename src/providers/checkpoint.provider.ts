@@ -71,6 +71,27 @@ export class CheckpointProvider extends RestDataProvider
   }
 
   /**
+   * Returns all CHK type checkpoints
+   *
+   * @returns {Promise<any>}
+   */
+  public getChkCheckpoints(): Promise<any>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject)
+    {
+      self.findDocuments({selector: {type: Checkpoint.TYPE_CHK}}).then((res) => {
+        let answer = _.concat([], res.docs);
+        resolve(answer);
+      }).catch((e) =>
+      {
+        console.error(e);
+        reject(e);
+      });
+    });
+  }
+
+  /**
    * Returns all IN and OUT type checkpoints
    *
    * @returns {Promise<any>}
