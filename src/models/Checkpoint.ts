@@ -17,6 +17,8 @@ export class Checkpoint extends CrmDataModel {
   public position: string = null;
   public account_id_c: string = null;
   public account_reference: string = null;
+  public checked_c: string = null;
+  public checklist_c: string = null;
 
   /**
    * Create an instance by mapping supplied data to existent properties
