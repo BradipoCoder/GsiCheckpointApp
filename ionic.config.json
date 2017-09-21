@@ -1,5 +1,8 @@
 {
   "name": "Traccia con Mekit",
   "app_id": "1c271157",
-  "type": "ionic-angular"
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
 }
