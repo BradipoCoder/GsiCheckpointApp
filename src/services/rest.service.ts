@@ -23,7 +23,7 @@ export class RestService
    *
    * @return {Promise}
    */
-  setRelationship(module_name:string, id:string, link_field_name:string, related_ids:any, parameters = {}): Promise<any>
+  setRelationship(module_name: string, id: string, link_field_name: string, related_ids: any, parameters = {}): Promise<any>
   {
     return this.consumer.setRelationship(module_name, id, link_field_name, related_ids, parameters);
   }
@@ -68,7 +68,7 @@ export class RestService
    * @param {object} [parameters]
    * @returns {Promise<any>}
    */
-  setEntry(module_name: string, id: string|boolean, parameters = {}): Promise<any>
+  setEntry(module_name: string, id: string | boolean, parameters = {}): Promise<any>
   {
     return this.consumer.setEntry(module_name, id, parameters);
   }
@@ -203,6 +203,6 @@ export class RestService
   initialize(rest_api_url: string, rest_api_version: string): void
   {
     this.consumer = new SugarCrmJsRestConsumer(rest_api_url, rest_api_version);
-    this.consumer.setAxiosConfig("timeout" , 15000);
+    this.consumer.setAxiosConfig("timeout", 15000);
   }
 }

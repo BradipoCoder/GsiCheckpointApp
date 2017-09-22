@@ -1,9 +1,10 @@
 /**
  * Checkpoint Provider
  */
+
 import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
-import {RestDataProvider} from './rest.data.provider';
+import {LocalDocumentProvider} from './local.document.provider';
 import {Checkpoint} from '../models/Checkpoint';
 import {Checkin} from '../models/Checkin';
 import {Promise} from '../../node_modules/bluebird'
@@ -11,7 +12,7 @@ import _ from "lodash";
 import * as moment from 'moment';
 
 @Injectable()
-export class CheckpointProvider extends RestDataProvider
+export class CheckpointProvider extends LocalDocumentProvider
 {
   database_name = "checkpoint";
   database_indices = [
@@ -49,22 +50,25 @@ export class CheckpointProvider extends RestDataProvider
    * @param {{}} options
    * @returns {Promise<Checkpoint>}
    */
-  public getCheckpoint(options:any): Promise<Checkpoint>
+  public getCheckpoint(options: any): Promise<Checkpoint>
   {
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.findDocuments(options).then((res) => {
-        if(_.size(res.docs) < 1)
+      self.findDocuments(options).then((res) =>
+      {
+        if (_.size(res.docs) < 1)
         {
           throw new Error("Codice locale sconosciuto!");
         }
-        if (_.size(res.docs) > 1) {
+        if (_.size(res.docs) > 1)
+        {
           throw new Error("Locali multipli per il codice!");
         }
         let checkpoint = new Checkpoint(res.docs[0]);
         resolve(checkpoint);
-      }).catch((e) => {
+      }).catch((e) =>
+      {
         reject(e);
       });
     });
@@ -80,7 +84,8 @@ export class CheckpointProvider extends RestDataProvider
     let self = this;
     return new Promise(function (resolve, reject)
     {
-      self.findDocuments({selector: {type: Checkpoint.TYPE_CHK}}).then((res) => {
+      self.findDocuments({selector: {type: Checkpoint.TYPE_CHK}}).then((res) =>
+      {
         let answer = _.concat([], res.docs);
         resolve(answer);
       }).catch((e) =>
@@ -105,10 +110,11 @@ export class CheckpointProvider extends RestDataProvider
       //@todo: for some reason index on 'type' does not work - when using combined selector
       findPromises.push(self.findDocuments({selector: {type: Checkpoint.TYPE_IN}}));
       findPromises.push(self.findDocuments({selector: {type: Checkpoint.TYPE_OUT}}));
-        Promise.all(findPromises).then((res) =>
+      Promise.all(findPromises).then((res) =>
       {
         let answer = [];
-        _.each(res, function(obj){
+        _.each(res, function (obj)
+        {
           answer = _.concat(answer, obj.docs);
         });
         resolve(answer);
@@ -132,10 +138,12 @@ export class CheckpointProvider extends RestDataProvider
     return new Promise(function (resolve, reject)
     {
       let promises = [];
-      _.each(documents, function(checkin){
+      _.each(documents, function (checkin)
+      {
         promises.push(self.setTypeOnCheckin(checkin));
       });
-      Promise.all(promises).then((newDocs) => {
+      Promise.all(promises).then((newDocs) =>
+      {
         resolve(newDocs);
       });
     });
@@ -146,13 +154,13 @@ export class CheckpointProvider extends RestDataProvider
    * @param {Checkin} checkin
    * @returns {Promise<any>}
    */
-  public setTypeOnCheckin(checkin:Checkin): Promise<any>
+  public setTypeOnCheckin(checkin: Checkin): Promise<any>
   {
     let self = this;
 
     return new Promise(function (resolve)
     {
-      self.db.get(checkin.mkt_checkpoint_id_c).then((checkpoint:Checkpoint) =>
+      self.db.get(checkin.mkt_checkpoint_id_c).then((checkpoint: Checkpoint) =>
       {
         checkin.setType(checkpoint.type);
         resolve(checkin);
@@ -168,7 +176,7 @@ export class CheckpointProvider extends RestDataProvider
    * @param {boolean} pushOnly
    * @returns {Promise<any>}
    */
-  public syncWithRemote(pushOnly:boolean = false): Promise<any>
+  public syncWithRemote(pushOnly: boolean = false): Promise<any>
   {
     let self = this;
     let batchSize = 100;
@@ -177,7 +185,8 @@ export class CheckpointProvider extends RestDataProvider
     return new Promise(function (resolve, reject)
     {
       //no need to do anything
-      if(pushOnly){
+      if (pushOnly)
+      {
         return resolve();
       }
 

@@ -20,6 +20,7 @@ export class HomePage implements OnInit, OnDestroy
   public is_network_connected: boolean;
 
   private shiftTotalDuration: string = "";
+
   private currentOperationDuration: string = "";
 
   protected presentLogoutScreen: boolean = false;

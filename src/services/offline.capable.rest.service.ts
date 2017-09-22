@@ -9,16 +9,15 @@
  * d) control when connection is available and empty buckets
  *
  */
-import {Injectable} from '@angular/core';
+
+import {Injectable} from "@angular/core";
 import {Platform} from "ionic-angular";
-import {Network} from '@ionic-native/network';
+import {Network} from "@ionic-native/network";
 import {RestService} from "./rest.service";
-/*import PouchDB from "pouchdb";*/
-import _ from "lodash";
 import Rx from "rxjs/Rx";
 import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
-
+import _ from "lodash";
 
 @Injectable()
 export class OfflineCapableRestService extends RestService

@@ -4,7 +4,7 @@
 import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {CheckpointProvider} from "../providers/checkpoint.provider";
-import {RestDataProvider} from './rest.data.provider';
+import {LocalDocumentProvider} from './local.document.provider';
 import {CrmDataModel} from '../models/crm.data.model';
 import {Checkin} from '../models/Checkin';
 import {Promise} from '../../node_modules/bluebird'
@@ -12,7 +12,7 @@ import _ from "lodash";
 import * as moment from 'moment';
 
 @Injectable()
-export class CheckinProvider extends RestDataProvider
+export class CheckinProvider extends LocalDocumentProvider
 {
   database_name = "checkin";
   database_indices = [

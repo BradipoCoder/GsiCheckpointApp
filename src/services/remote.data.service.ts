@@ -35,8 +35,6 @@ export class RemoteDataService
   private CHECKPOINTS: Checkpoint[];
 
 
-
-
   constructor(private offlineCapableRestService: OfflineCapableRestService
     , private userService: UserService
     , private network: Network
@@ -119,7 +117,8 @@ export class RemoteDataService
     return new Promise(function (resolve, reject)
     {
       self.CHECKPOINTS = [];
-      self.checkpointProvider.getChkCheckpoints().then((checkpoints:Checkpoint[]) => {
+      self.checkpointProvider.getChkCheckpoints().then((checkpoints: Checkpoint[]) =>
+      {
         if (_.size(checkpoints))
         {
           _.each(checkpoints, function (checkpoint)
@@ -161,7 +160,8 @@ export class RemoteDataService
     {
       self.CURRENT_SESSION_CHECKINS = [];
 
-      self.getLastInOutOperation().then((operation:Checkin) => {
+      self.getLastInOutOperation().then((operation: Checkin) =>
+      {
         if (_.isNull(operation) || _.isEmpty(operation))
         {
           return resolve();
@@ -189,7 +189,7 @@ export class RemoteDataService
 
           console.log("CURRENT_SESSION_CHECKINS: ", self.CURRENT_SESSION_CHECKINS);
 
-          if(!_.isUndefined(self.CURRENT_SESSION_CHECKINS[0]))
+          if (!_.isUndefined(self.CURRENT_SESSION_CHECKINS[0]))
           {
             self.last_checkin_operation = self.CURRENT_SESSION_CHECKINS[0];
             //console.log("LAST IN OUT OP: ", self.last_checkin_operation);
@@ -209,7 +209,7 @@ export class RemoteDataService
   private getLastInOutOperation(): Promise<Checkin>
   {
     let self = this;
-    let lastInOutCheckin:Checkin;
+    let lastInOutCheckin: Checkin;
 
     return new Promise(function (resolve, reject)
     {
@@ -240,7 +240,7 @@ export class RemoteDataService
       });
     }).finally(() =>
     {
-      if(lastInOutCheckin)
+      if (lastInOutCheckin)
       {
         console.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastInOutCheckin.type + " @ " + lastInOutCheckin.checkin_date);
       }
@@ -331,7 +331,7 @@ export class RemoteDataService
 
         let previousCheckin = new Checkin(res.docs[0]);
 
-        if(previousCheckin.type == Checkpoint.TYPE_OUT)
+        if (previousCheckin.type == Checkpoint.TYPE_OUT)
         {
           console.log("DURATION-UPDATE: Previous document is of type OUT - skipping.");
           resolve();
@@ -350,12 +350,12 @@ export class RemoteDataService
         previousCheckin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
         console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
         return self.checkinProvider.storeCheckin(previousCheckin, true);
-      }).then(() => {
+      }).then(() =>
+      {
         resolve();
       });
     });
   }
-
 
 
   //----------------------------------------------------------------------------------------------SIMPLE GETTERS/SETTERS
@@ -365,7 +365,7 @@ export class RemoteDataService
    */
   public getLastOperation(): Checkin
   {
-    if(_.isNull(this.last_checkin_operation))
+    if (_.isNull(this.last_checkin_operation))
     {
       throw new Error("Last Checkin operation has not been identified yet");
     }
@@ -379,14 +379,13 @@ export class RemoteDataService
    */
   public getSessionInOutOperation(): Checkin
   {
-    if(_.isEmpty(this.CURRENT_SESSION_CHECKINS))
+    if (_.isEmpty(this.CURRENT_SESSION_CHECKINS))
     {
       throw new Error("No Session Checkins");
     }
 
     return _.last(this.CURRENT_SESSION_CHECKINS) as Checkin;
   }
-
 
 
   /**
@@ -406,7 +405,8 @@ export class RemoteDataService
       Promise.all(promises).then(() =>
       {
         resolve();
-      }, (e) => {
+      }, (e) =>
+      {
         reject(e);
       });
     });
@@ -417,7 +417,7 @@ export class RemoteDataService
    *
    * @param {boolean} pushOnly
    */
-  public triggerProviderDataSync(pushOnly:boolean = false): Promise<any>
+  public triggerProviderDataSync(pushOnly: boolean = false): Promise<any>
   {
     let self = this;
 
@@ -439,12 +439,13 @@ export class RemoteDataService
             if (_.isFunction(provider.syncWithRemote))
             {
               hasFunctionToCall = true;
-              provider.syncWithRemote(pushOnly).then(() => {
+              provider.syncWithRemote(pushOnly).then(() =>
+              {
                 resolve();
               });
             }
           }
-          if(!hasFunctionToCall)
+          if (!hasFunctionToCall)
           {
             resolve();
           }
@@ -469,7 +470,7 @@ export class RemoteDataService
    * @param {boolean} [skipDataSync]
    * @returns {Promise<any>}
    */
-  public initialize(waitForProviderData:boolean = false, skipDataSync:boolean = false): Promise<any>
+  public initialize(waitForProviderData: boolean = false, skipDataSync: boolean = false): Promise<any>
   {
     let self = this;
 
@@ -489,11 +490,11 @@ export class RemoteDataService
         return self.updateCurrentSessionCheckins();
       }).then(() =>
       {
-        if(skipDataSync)
+        if (skipDataSync)
         {
           return resolve();
         }
-        if(!waitForProviderData)
+        if (!waitForProviderData)
         {
           resolve();
         }

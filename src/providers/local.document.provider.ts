@@ -1,6 +1,7 @@
 /**
  * Rest Data Provider
  */
+
 import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {CrmDataModel} from '../models/crm.data.model';
@@ -12,14 +13,13 @@ import _ from "lodash";
 import * as moment from 'moment';
 import {Promise} from '../../node_modules/bluebird'
 
-
 PouchDB.plugin(PouchDBFind);
 //PouchDB.debug.enable('pouchdb:find');
 PouchDB.debug.disable('pouchdb:find');
 
 
 @Injectable()
-export class RestDataProvider
+export class LocalDocumentProvider
 {
   protected database_name: string;
   protected database_options: any = {};
