@@ -6,6 +6,7 @@ import {SplashScreen} from "@ionic-native/splash-screen";
 import {ConfigurationService} from '../services/configuration.service';
 import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
+import {BackgroundService} from '../services/background.service';
 
 import {HomePage} from "../pages/home/home";
 import {ConfigurationPage} from "../pages/configuration/configuration";
@@ -30,6 +31,7 @@ export class MekitTracerApp
     , public splashScreen: SplashScreen
     , private configurationService: ConfigurationService
     , private userService: UserService
+    , private backgroundService: BackgroundService
     , private remoteDataService: RemoteDataService)
   {
 
@@ -62,6 +64,10 @@ export class MekitTracerApp
     }).then(() =>
     {
       console.log("RemoteData service initialized.");
+      return this.backgroundService.initialize();
+    }).then(() =>
+    {
+      console.log("BackgroundService service initialized.");
       this.presentStartupPage();
     }).catch((e) =>
     {

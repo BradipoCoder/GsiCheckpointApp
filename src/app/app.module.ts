@@ -15,6 +15,7 @@ import {ConfigurationService} from '../services/configuration.service';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
+import {BackgroundService} from '../services/background.service';
 import {CodeScanService} from '../services/code.scan.service';
 
 /* Providers */
@@ -64,6 +65,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , OfflineCapableRestService
     , UserService
     , RemoteDataService
+    , BackgroundService
     , CodeScanService
     , Network
     , CheckpointProvider
