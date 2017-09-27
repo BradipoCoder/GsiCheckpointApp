@@ -17,15 +17,19 @@
             <th>Code</th>
             <th>Name</th>
             <th>Checklist</th>
+            <th>Last Sync check</th>
             <th>Sync</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let checkpoint of remoteDataService.getCheckpoints()">
+          <tr *ngFor="let checkpoint of checkpoints">
             <td>{{checkpoint.code}}</td>
             <td>{{checkpoint.name}}</td>
             <td>{{checkpoint.checklist_c}}</td>
-            <td><ion-icon [name]="checkpoint.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon></td>
+            <td>{{checkpoint.sync_last_check}}</td>
+            <td>
+              <ion-icon [name]="checkpoint.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{checkpoint.sync_state}}" item-right></ion-icon>
+            </td>
           </tr>
         </tbody>
       </table>

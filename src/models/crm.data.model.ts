@@ -40,8 +40,10 @@ export class CrmDataModel
   public modified_user_id: string = null;
   public modified_by_name: string = null;
 
+  //
   public module_name: string = null;
   public sync_state: string = CrmDataModel.SYNC_STATE__IN_SYNC;
+  public sync_last_check: string = null;
 
   constructor()
   {
@@ -49,6 +51,7 @@ export class CrmDataModel
     this._id = this.id;
     this.date_entered = moment().format(CrmDataModel.CRM_DATE_FORMAT);
     this.date_modified = moment().format(CrmDataModel.CRM_DATE_FORMAT);
+    this.sync_last_check = moment().format(CrmDataModel.CRM_DATE_FORMAT);
     this.deleted = "0";
   }
 
@@ -129,7 +132,7 @@ export class CrmDataModel
    * @returns {string[]}
    */
   public getDefinedProperties(): any {
-    let exclude = ['_id', 'sync_state', 'module_name', 'deleted', 'date_entered', 'date_modified'
+    let exclude = ['_id', 'sync_state', 'sync_last_check', 'module_name', 'deleted', 'date_entered', 'date_modified'
       , 'assigned_user_name', 'created_by_name', 'created_by_name'
     ];
     let keys = _.keys(this);

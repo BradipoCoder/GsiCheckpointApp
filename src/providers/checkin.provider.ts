@@ -3,6 +3,7 @@
  */
 import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
+import {ConfigurationService} from '../services/configuration.service';
 import {CheckpointProvider} from "../providers/checkpoint.provider";
 import {LocalDocumentProvider} from './local.document.provider';
 import {CrmDataModel} from '../models/crm.data.model';
@@ -34,14 +35,16 @@ export class CheckinProvider extends LocalDocumentProvider
     }
   ];
 
+  //@todo: remove this!!! MOVED TO MODEL!
   remote_table_name = "mkt_Checkin";
 
   constructor(
-    protected offlineCapableRestService: OfflineCapableRestService
+    protected configurationService: ConfigurationService
+    , protected offlineCapableRestService: OfflineCapableRestService
     , private checkpointProvider: CheckpointProvider
   )
   {
-    super(offlineCapableRestService);
+    super(configurationService, offlineCapableRestService);
 
     let model = new Checkin();
     this.module_fields = model.getDefinedProperties();
@@ -108,7 +111,7 @@ export class CheckinProvider extends LocalDocumentProvider
    * @param {boolean} pushOnly
    * @returns {Promise<any>}
    */
-  public syncWithRemote(pushOnly: boolean = false): Promise<any>
+  public syncWithRemoteOLD(pushOnly: boolean = false): Promise<any>
   {
     let self = this;
 

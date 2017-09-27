@@ -4,6 +4,7 @@
 import {Injectable} from '@angular/core';
 import {ConfigurationService} from './configuration.service';
 import {OfflineCapableRestService} from './offline.capable.rest.service';
+import {Promise} from '../../node_modules/bluebird'
 import PouchDB from "pouchdb";
 import _ from "lodash";
 
@@ -62,35 +63,29 @@ export class UserService
   {
     let self = this;
     console.log("Logging out...");
-    return new Promise(function (resolve, reject)
-    {
-      self.offlineCapableRestService.logout().then(() =>
-      {
+    return new Promise(function (resolve, reject) {
+      self.offlineCapableRestService.logout().then(() => {
         self.authenticated = false;
         return self.db.destroy();
-      }).then(() =>
-      {
+      }).then(() => {
         console.log("User database has been destroyed.");
         self.user_data = {};
         self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
         console.log("User database created.");
         resolve();
-      }).catch((e) =>
-      {
+      }).catch((e) => {
         self.last_error = e;
         console.log("LOGOUT ERROR! " + e);
         self.authenticated = false;
         self.is_initialized = false;
         self.is_user_configured = false;
         self.user_data = {};
-        self.db.destroy().then(() =>
-        {
+        self.db.destroy().then(() => {
           console.log("User database has been destroyed.");
           self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
           console.log("User database created.");
           resolve();
-        }).catch((e) =>
-        {
+        }).catch((e) => {
           reject(e);
         });
       });
@@ -109,32 +104,32 @@ export class UserService
   {
     let self = this;
     console.log("Authenticating user: " + username);
-    return new Promise(function (resolve, reject)
-    {
-      self.offlineCapableRestService.login(username, password).then((res) =>
-      {
+    return new Promise(function (resolve, reject) {
+      self.offlineCapableRestService.login(username, password).then((res) => {
         //console.log("LOGIN DATA:", res);
         self.user_data = self.offlineCapableRestService.getAuthenticatedUser();
         self.user_data.id = self.user_data.user_id;
         return self.offlineCapableRestService.getEntry('Users', self.user_data.id);
-      }).then((user_full_data) =>
-      {
+      }).then((user_full_data) => {
         user_full_data = _.head(user_full_data.entry_list);
         _.assignIn(self.user_data, user_full_data);
         return self.storeUserData(self.user_data);
-      }).then(() =>
-      {
+      }, (e) => {
+        self.last_error = e;
+        console.log("LOGIN ERROR! " + e);
+        return reject(e);
+      }).then(() => {
         self.authenticated = true;
         self.is_user_configured = true;
         resolve();
-      }).catch((e) =>
-      {
+      }).catch((e) => {
         self.last_error = e;
-        console.log("LOGIN ERROR! " + e);
-        reject(e);
+        console.log("USER DATA STORAGE ERROR! " + e);
+        return reject(e);
       });
     });
   }
+
 
   /**
    * Store logged in user values for offline usage
@@ -146,8 +141,7 @@ export class UserService
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
 
       //@todo: this only works if you are logged in on CRM
       if (!_.isUndefined(data.id))
@@ -158,20 +152,16 @@ export class UserService
       }
 
 
-      self.db.get('userdata').then(function (doc)
-      {
+      self.db.get('userdata').then(function (doc) {
         _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
         return self.db.put(data);
-      }).then(function (res)
-      {
+      }).then(function (res) {
         //console.log("User data stored");
         resolve();
-      }).catch(function (err)
-      {
+      }).catch(function (err) {
         //console.log(err);
         _.assignIn(data, {_id: 'userdata'});
-        self.db.put(data).then((res) =>
-        {
+        self.db.put(data).then((res) => {
           //console.log("User data stored(new)");
           resolve();
         });
@@ -181,30 +171,39 @@ export class UserService
 
   /**
    * Log user in automatically
+   *  @returns {Promise<any>}
    */
-  autologin(): void
+  autologin(): Promise<any>
   {
-    let config;
-    this.configurationService.getConfigObject()
-      .then((cfg) =>
-      {
-        config = cfg;
-        if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
-        {
-          console.log("AUTOLOGIN - missing username or password");
-          return;
-        }
-        return this.login(cfg.crm_username, cfg.crm_password);
-      }).then(() => {
-      console.log("AUTOLOGIN SUCCESS");
-    }).catch((e) =>
-    {
-      console.log("AUTOLOGIN FAILED: ", e);
+    let self = this;
+
+    return new Promise(function (resolve, reject) {
+      let config;
+      self.configurationService.getConfigObject()
+        .then((cfg) => {
+          config = cfg;
+          if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
+          {
+            return reject(new Error("AUTOLOGIN - missing username or password"));
+          }
+          return self.login(cfg.crm_username, cfg.crm_password);
+        }, () => {
+          return reject(new Error("AUTOLOGIN - Configuration object is not available!"));
+        })
+        .then(() => {
+          console.log("AUTOLOGIN SUCCESS");
+          resolve();
+        }, (e) => {
+          console.log("AUTOLOGIN FAILED: " + e);
+          return reject(e);
+        });
     });
   }
 
   /**
-   * initialize the Rest service
+   * initialize the User service
+   *
+   * @returns {Promise<any>}
    */
   initialize(): Promise<any>
   {
@@ -214,44 +213,47 @@ export class UserService
     self.is_user_configured = false;
     self.user_data = {};
 
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
       self.configurationService.getConfigObject()
-        .then((cfg) =>
-        {
-          self.is_initialized = true;
-          config = cfg;
-          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
-          if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
-          {
-            self.last_error = new Error("Configuration is incomplete!");
-            console.warn("Configuration is incomplete!");
-            return resolve();
-          }
-          self.db.get('userdata').then((doc) => {
-            //console.log("CURRENT USER", doc);
-            self.user_data = doc;
-            self.is_user_configured = true;
-            resolve();
+        .then((cfg) => {
+            self.is_initialized = true;
+            config = cfg;
+            self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
+            if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
+            {
+              self.last_error = new Error("Configuration is incomplete!");
+              console.warn("Configuration is incomplete!");
+              return resolve();
+            }
+            return self.db.get('userdata');
           }, (e) => {
-            self.last_error = new Error("User data is not available! " + e);
+            self.last_error = new Error("Configuration object is not available! " + e);
             console.warn(self.last_error.message);
             return resolve();
-          });
-        }, (e) =>
-        {
-          self.last_error = e;
+          }
+        ).then((doc) => {
+          //console.log("CURRENT USER", doc);
+          self.user_data = doc;
+          self.is_user_configured = true;
+          return self.autologin();
+        }, (e) => {
+          self.last_error = new Error("User data is not available! " + e);
           console.warn(self.last_error.message);
           return resolve();
-        }).catch((e) =>
-      {
-        self.last_error = e;
-        console.warn(self.last_error.message);
-        return resolve();
-      });
+        }
+      ).then(() => {
+          resolve();
+        }, (e) => {
+          self.last_error = new Error("Unsuccessful autologin! " + e);
+          console.warn(self.last_error.message);
+          return resolve();
+        }
+      );
     });
   }
+
+
 }
 
 

@@ -8,6 +8,9 @@ import * as moment from 'moment';
 
 export class Checkin extends CrmDataModel
 {
+  /** DATABASE TABLE NAME */
+  public static readonly DB_TABLE_NAME: string = 'mkt_Checkin';
+
   /* the below properties must be initialized */
   public user_id_c: string = null;
   public checkin_user: string = null;

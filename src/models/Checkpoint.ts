@@ -5,7 +5,12 @@ import {CrmDataModel} from './crm.data.model';
 import _ from "lodash";
 import * as moment from 'moment';
 
-export class Checkpoint extends CrmDataModel {
+export class Checkpoint extends CrmDataModel
+{
+  /** DATABASE TABLE NAME */
+  public static readonly DB_TABLE_NAME: string = 'mkt_Checkpoint';
+
+  /** TYPES */
   public static readonly TYPE_IN: string = "IN";
   public static readonly TYPE_OUT: string = "OUT";
   public static readonly TYPE_CHK: string = "CHK";

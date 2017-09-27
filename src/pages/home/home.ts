@@ -322,13 +322,6 @@ export class HomePage implements OnInit, OnDestroy
           });
         }
       });
-
-    if (!this.isUserAuthenticated())
-    {
-      console.log("H-INIT - user is not logged in...");
-      //@todo: this would need an observable in userService to be notified on user login/logout status
-      this.userService.autologin();
-    }
   }
 
 

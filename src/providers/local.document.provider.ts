@@ -1,9 +1,11 @@
 /**
  * Rest Data Provider
  */
-
 import {Injectable} from '@angular/core';
+
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
+import {ConfigurationService} from '../services/configuration.service';
+
 import {CrmDataModel} from '../models/crm.data.model';
 
 import PouchDB from "pouchdb";
@@ -23,17 +25,59 @@ export class LocalDocumentProvider
 {
   protected database_name: string;
   protected database_options: any = {};
-  /*adapter: 'websql', revs_limit: 50*/
+
   protected database_indices: any = [];
 
+  //@todo: remove this!!! MOVED TO MODEL!
   protected remote_table_name: string;
 
   protected db: any;
 
   protected module_fields: any = [];
 
-  constructor(protected offlineCapableRestService: OfflineCapableRestService)
+  constructor(protected configurationService: ConfigurationService,
+              protected offlineCapableRestService: OfflineCapableRestService)
   {
+  }
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public syncWithRemote(): Promise<any>
+  {
+    let self = this;
+
+    let functions = [
+      'syncWithRemoteDownNew',
+      /*'syncWithRemoteDownChanged',
+      'syncWithRemoteDownDeleted'*/
+    ];
+
+    let maxItemsToSync = 500;
+
+    return Promise.reduce(functions, function(accu, fn, index)
+    {
+      return new Promise(function (resolve, reject) {
+        if (_.isFunction(self[fn]))
+        {
+          let promise = self[fn].call(self, maxItemsToSync);
+          promise.then((syncedItems:number) => {
+            maxItemsToSync = (syncedItems <= maxItemsToSync) ? maxItemsToSync - syncedItems : 0;
+
+            console.log("FN("+fn+") synced: " + syncedItems);
+            resolve();
+          }, (e) => {
+            console.warn("FN("+fn+") sync failed: " + e);
+            return reject(e);
+          })
+        } else
+        {
+          console.log("FN("+fn+") NOPE!");
+          resolve();
+        }
+      });
+    }, null);
   }
 
   /**
@@ -227,12 +271,27 @@ export class LocalDocumentProvider
       console.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
+
+      let changes = self.db.changes({
+        since: 'now',
+        live: true,
+        include_docs:true
+      }).on('change', function(change) {
+        console.log('DB CHANGE: ', change);
+        //put some observable here and trigger change
+      }).on('complete', function(info) {
+        console.log('DB COMPLETE: ', info);
+      }).on('error', function (err) {
+        console.error(err);
+      });
+
       //add index for 'id'
       self.database_indices.push(
         {
           name: 'idx_id',
           fields: ['id']
-        });
+        }
+      );
 
       let indexCreationPromises = [];
       _.each(self.database_indices, function (indexObject)

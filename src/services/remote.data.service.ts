@@ -22,17 +22,18 @@ import {CheckinProvider} from "../providers/checkin.provider";
 /* Utils */
 import _ from "lodash";
 import * as moment from 'moment';
-import {Promise} from '../../node_modules/bluebird'
+import { Promise } from '../../node_modules/bluebird'
 /*import md5 from '../../node_modules/blueimp-md5';*/
 
 @Injectable()
 export class RemoteDataService
 {
+  protected dataProviders: any = [];
+
   private last_checkin_operation: Checkin;
 
   private CURRENT_SESSION_CHECKINS: Checkin[];
 
-  private CHECKPOINTS: Checkpoint[];
 
 
   constructor(private offlineCapableRestService: OfflineCapableRestService
@@ -42,94 +43,41 @@ export class RemoteDataService
     , private checkpointProvider: CheckpointProvider
     , private checkinProvider: CheckinProvider)
   {
+    this.dataProviders = [
+      this.checkpointProvider,
+      /*this.checkinProvider*/
+    ];
   }
 
-  //-------------------------------------------------------------------------------------------------------REST API DATA
-  /**
-   *
-   * @param {string} module_name
-   * @param {string|boolean} id
-   * @param {object} [parameters]
-   * @returns {Promise<any>}
-   */
-  private setEntry(module_name: string, id: string | boolean, parameters = {}): Promise<any>
-  {
-    let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.offlineCapableRestService.setEntry(module_name, id, parameters)
-        .then((res) =>
-        {
-          //do something with res
-          resolve(res);
-        })
-        .catch((e) =>
-        {
-          reject(e);
-        });
-    });
-  }
 
-  /**
-   *
-   * @param {string} module_name
-   * @param {object} [parameters]
-   * @returns {Promise<any>}
-   */
-  private getEntryList(module_name: string, parameters = {}): Promise<any>
-  {
-    let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.offlineCapableRestService.getEntryList(module_name, parameters)
-        .then((res) =>
-        {
-          //do something with res
-          resolve(res);
-        })
-        .catch((e) =>
-        {
-          reject(e);
-        });
-    });
-  }
+
 
 
   //----------------------------------------------------------------------------------------------------------CHECKPOINT
 
   /**
-   *
-   *  @returns {Checkpoint[]}
-   */
-  public getCheckpoints(): any
-  {
-    return this.CHECKPOINTS;
-  }
-
-  /**
-   * Return checkins since last "IN" in chronologically reversed order - this is for home display
-   *
    * @returns {Promise<any>}
    */
-  private updateCheckpoints(): Promise<any>
+  public getRemoteIDList(): Promise<any>
   {
     let self = this;
+
     return new Promise(function (resolve, reject)
     {
-      self.CHECKPOINTS = [];
-      self.checkpointProvider.getChkCheckpoints().then((checkpoints: Checkpoint[]) =>
+      self.offlineCapableRestService.getEntryList(Checkpoint.DB_TABLE_NAME, {
+        select_fields: ['id'],
+        order_by: 'id ASC',
+        'max_results': 50000
+      }).then((res) =>
       {
-        if (_.size(checkpoints))
+        if(!_.isUndefined(res.entry_list))
         {
-          _.each(checkpoints, function (checkpoint)
-          {
-            self.CHECKPOINTS.push(new Checkpoint(checkpoint));
-          });
+          return resolve(res.entry_list);
+        } else {
+          resolve([]);
         }
-        resolve();
-      }).catch((e) =>
-      {
-        return reject(e);
+      }, (err) => {
+        resolve([]);
       });
     });
   }
@@ -415,7 +363,7 @@ export class RemoteDataService
   /**
    * Triggers data sync operation in every registered provider
    *
-   * @param {boolean} pushOnly
+   * @param {boolean} [pushOnly]
    */
   public triggerProviderDataSync(pushOnly: boolean = false): Promise<any>
   {
@@ -436,10 +384,10 @@ export class RemoteDataService
           if (_.has(self, item))
           {
             let provider = self[item];
-            if (_.isFunction(provider.syncWithRemote))
+            if (_.isFunction(provider.syncWithRemoteOLD))
             {
               hasFunctionToCall = true;
-              provider.syncWithRemote(pushOnly).then(() =>
+              provider.syncWithRemoteOLD(pushOnly).then(() =>
               {
                 resolve();
               });
@@ -464,6 +412,22 @@ export class RemoteDataService
   }
 
 
+  //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public syncDataProviders(): Promise<any>
+  {
+    return Promise.reduce(this.dataProviders, function(accu, provider, index)
+    {
+      console.log("PROVIDER #"+index);
+      return provider.syncWithRemote();
+    }, null);
+  }
+
+
   /**
    *
    * @param {boolean} [waitForProviderData]
@@ -482,9 +446,6 @@ export class RemoteDataService
       self.checkpointProvider.initialize().then(() =>
       {
         return self.checkinProvider.initialize();
-      }).then(() =>
-      {
-        return self.updateCheckpoints();
       }).then(() =>
       {
         return self.updateCurrentSessionCheckins();

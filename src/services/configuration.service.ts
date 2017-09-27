@@ -70,11 +70,12 @@ export class ConfigurationService
    * Return the value of a single configuration item
    *
    * @param {string} key
+   * @param {any} defaultValue
    * @returns {Promise<any>}
    */
-  getConfig(key): Promise<any>
+  getConfig(key, defaultValue = null): Promise<any>
   {
-    let answer = null;
+    let answer = defaultValue;
     let self = this;
 
     return new Promise(function (resolve, reject)
@@ -86,9 +87,9 @@ export class ConfigurationService
           answer = doc.cfg_value;
         }
         resolve(answer);
-      }).catch((e) =>
+      }).catch(() =>
       {
-        reject(e);
+        resolve(answer);
       });
     });
   };
@@ -99,29 +100,30 @@ export class ConfigurationService
    * @param {string} key
    * @param {any} value
    * @param {boolean} skip_if_exists
+   * @param {boolean} override_code
    * @returns {Promise<any>}
    */
-  setConfig(key, value, skip_if_exists = false): Promise<any>
+  setConfig(key, value, skip_if_exists = false, override_code = false): Promise<any>
   {
     let self = this;
 
     return new Promise(function (resolve, reject)
     {
-      if (!self.isUnlocked())
+      if (!override_code && !self.isUnlocked())
       {
         return reject(new Error("Configuration service is locked! Unlock first."));
       }
 
-      if (_.isNull(value) || _.isEmpty(value))
+      if (_.isNil(value) && _.has(self.default_config,key))
       {
         value = _.get(self.default_config, key);
       }
 
       self.db.get(key).then((doc) =>
       {
-        if (skip_if_exists || doc.cfg_value == value)
+        if (skip_if_exists || (!_.isUndefined(doc.cfg_value) && doc.cfg_value == value))
         {
-          resolve();
+          resolve(value);
         } else
         {
           self.db.put({
@@ -139,7 +141,7 @@ export class ConfigurationService
             }
           }).catch((e) =>
           {
-            reject(e);
+            return reject(e);
           });
         }
       }).catch(() =>
@@ -159,7 +161,7 @@ export class ConfigurationService
           }
         }).catch((e) =>
         {
-          reject(e);
+          return reject(e);
         });
       });
     });

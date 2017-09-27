@@ -14,6 +14,7 @@ import {Injectable} from "@angular/core";
 import {Platform} from "ionic-angular";
 import {Network} from "@ionic-native/network";
 import {RestService} from "./rest.service";
+import {Promise} from '../../node_modules/bluebird';
 import Rx from "rxjs/Rx";
 import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
