@@ -50,11 +50,11 @@ export class LocalDocumentProvider
 
     let functions = [
       'syncWithRemoteDownNew',
-      /*'syncWithRemoteDownChanged',
-      'syncWithRemoteDownDeleted'*/
+      'syncWithRemoteDownChanged',
+      /*'syncWithRemoteDownDeleted'*/
     ];
 
-    let maxItemsToSync = 500;
+    let maxItemsToSync = 250;
 
     return Promise.reduce(functions, function(accu, fn, index)
     {

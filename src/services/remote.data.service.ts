@@ -46,7 +46,7 @@ export class RemoteDataService
   {
     this.dataProviders = [
       this.checkpointProvider,
-      this.checkinProvider
+      /*this.checkinProvider*/
     ];
   }
 
