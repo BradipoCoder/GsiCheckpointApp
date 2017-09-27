@@ -209,81 +209,74 @@ export class CheckpointProvider extends LocalDocumentProvider
     return new Promise(function (resolve, reject) {
       self.configurationService.getConfig(configCheckKey, 0)
         .then((lastDownNewOffset: string) => {
-          console.log("lastDownNewOffset: " + lastDownNewOffset);
+          //console.log("lastDownNewOffset: " + lastDownNewOffset);
           configCheckValue = lastDownNewOffset;
 
           // console.log("syncWithRemoteDownNew maxItemsToSync: " + maxItemsToSync);
-          return self.offlineCapableRestService.getEntryList(Checkpoint.DB_TABLE_NAME, {
+          self.offlineCapableRestService.getEntryList(Checkpoint.DB_TABLE_NAME, {
             select_fields: ['id'],
             order_by: 'date_modified ASC',
             'offset': lastDownNewOffset,
             'max_results': maxItemsToSync
+          }).then((res) => {
+            let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
+            //console.log("RECORDS: ", records);
+
+            remoteIdArray = _.map(records, 'id');
+            //console.log("REMOTE ID ARRAY: ", remoteIdArray);
+
+            configCheckValue = _.size(remoteIdArray) ? configCheckValue + _.size(remoteIdArray) : 0;
+
+            self.findDocuments({
+              selector: {id: {'$in': remoteIdArray}},
+              fields: ['id'],
+            }).then((docs) => {
+              let records = !_.isUndefined(docs.docs) ? docs.docs : [];
+              //console.log("EntryList records: ", records);
+              localIdArray = _.map(records, 'id');
+              //console.log("LOCAL ID ARRAY: ", localIdArray);
+
+              missingIdArray = _.difference(remoteIdArray, localIdArray);
+              //console.log("MISSING ID ARRAY: ", missingIdArray);
+
+              //store new configCheckValue
+              self.configurationService.setConfig(
+                configCheckKey, configCheckValue, false, true
+              ).then(() => {
+                self.offlineCapableRestService.getEntries(self.remote_table_name, {
+                  select_fields: self.module_fields,
+                  ids: missingIdArray
+                }).then((res) => {
+                  let records = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
+                  //console.log("RECORDS: ", records);
+
+                  let documents = [];
+                  _.each(records, function (record) {
+                    documents.push(new Checkpoint(record));
+                  });
+                  console.log("DOCS: ", documents);
+                  syncCount = _.size(documents);
+
+                  self.storeDocuments(documents)
+                    .then(() => {
+                      resolve(syncCount);
+                    }, (e) => {
+                      return reject(new Error("store local docs error - " + e));
+                    });
+                }, (e) => {
+                  return reject(new Error("load missing remote docs error - " + e));
+                });
+              }, (e) => {
+                return reject(new Error("store Config[" + configCheckKey + "] error - " + e));
+              });
+            }, (e) => {
+              return reject(new Error("get local Id array error - " + e));
+            });
+          }, (e) => {
+            return reject(new Error("getEntryList error - " + e));
           });
         }, (e) => {
-          return reject(new Error("get Config["+configCheckKey+"] error - " + e));
-        })
-        .then((res) => {
-          console.log("-----0");
-          let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
-          //console.log("RECORDS: ", records);
-
-          remoteIdArray = _.map(records, 'id');
-          //console.log("REMOTE ID ARRAY: ", remoteIdArray);
-
-          configCheckValue = _.size(remoteIdArray) ? configCheckValue + _.size(remoteIdArray) : 0;
-
-          return self.findDocuments({
-            selector: {id: {'$in': remoteIdArray}},
-            fields: ['id'],
-          });
-        }, (e) => {
-          return reject(new Error("getEntryList error - " + e));
-        })
-        .then((docs) => {
-          console.log("-----1");
-          let records = !_.isUndefined(docs.docs) ? docs.docs : [];
-          console.log("EntryList records: ", records);
-          localIdArray = _.map(records, 'id');
-          //console.log("LOCAL ID ARRAY: ", localIdArray);
-
-          missingIdArray = _.difference(remoteIdArray, localIdArray);
-          console.log("MISSING ID ARRAY: ", missingIdArray);
-
-          //store new configCheckValue
-          return self.configurationService.setConfig(configCheckKey, configCheckValue, false, true);
-        }, (e) => {
-          return reject(new Error("get local Id array error - " + e));
-        })
-        .then(() => {
-          console.log("-----2");
-          return self.offlineCapableRestService.getEntries(self.remote_table_name, {
-            select_fields: self.module_fields,
-            ids: missingIdArray
-          });
-        }, (e) => {
-          return reject(new Error("store Config["+configCheckKey+"] error - " + e));
-        })
-        .then((res) => {
-          console.log("-----3");
-          let records = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
-          //console.log("RECORDS: ", records);
-
-          let documents = [];
-          _.each(records, function (record) {
-            documents.push(new Checkpoint(record));
-          });
-          console.log("DOCS: ", documents);
-          syncCount = _.size(documents);
-
-          return self.storeDocuments(documents);
-        }, (e) => {
-          return reject(new Error("load missing remote docs error - " + e));
-        })
-        .then(() => {
-          console.log("-----4");
-          resolve(syncCount);
-        }, (e) => {
-          return reject(new Error("store local docs error - " + e));
+          return reject(new Error("get Config[" + configCheckKey + "] error - " + e));
         });
     });
   }

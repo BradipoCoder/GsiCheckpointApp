@@ -18,6 +18,9 @@ export class UserService
   public last_error: Error;
   private db: any;
 
+  private autologin_skips = 0;
+  private max_autologin_skips = 5;
+
 
   constructor(private configurationService: ConfigurationService
     , private offlineCapableRestService: OfflineCapableRestService)
@@ -92,7 +95,6 @@ export class UserService
     });
   }
 
-
   /**
    *
    * @param {string} username
@@ -104,32 +106,50 @@ export class UserService
   {
     let self = this;
     console.log("Authenticating user: " + username);
+
     return new Promise(function (resolve, reject) {
-      self.offlineCapableRestService.login(username, password).then((res) => {
-        //console.log("LOGIN DATA:", res);
-        self.user_data = self.offlineCapableRestService.getAuthenticatedUser();
-        self.user_data.id = self.user_data.user_id;
-        return self.offlineCapableRestService.getEntry('Users', self.user_data.id);
-      }).then((user_full_data) => {
-        user_full_data = _.head(user_full_data.entry_list);
-        _.assignIn(self.user_data, user_full_data);
-        return self.storeUserData(self.user_data);
-      }, (e) => {
-        self.last_error = e;
-        console.log("LOGIN ERROR! " + e);
-        return reject(e);
-      }).then(() => {
-        self.authenticated = true;
-        self.is_user_configured = true;
-        resolve();
-      }).catch((e) => {
-        self.last_error = e;
-        console.log("USER DATA STORAGE ERROR! " + e);
-        return reject(e);
-      });
+      self.offlineCapableRestService.login(username, password)
+        .then((res) => {
+            //console.log("LOGIN DATA:", res);
+            self.user_data = self.offlineCapableRestService.getAuthenticatedUser();
+            self.user_data.id = self.user_data.user_id;
+            self.offlineCapableRestService.getEntry('Users', self.user_data.id)
+              .then((user_full_data) => {
+                  user_full_data = _.head(user_full_data.entry_list);
+                  _.assignIn(self.user_data, user_full_data);
+                  self.storeUserData(self.user_data).then(() => {
+                      self.authenticated = true;
+                      self.is_user_configured = true;
+                      resolve();
+                    }, (e) => {
+                      console.log("LOGIN ERROR! " + e);
+                      self.authenticated = false;
+                      self.is_initialized = false;
+                      self.is_user_configured = false;
+                      self.user_data = {};
+                      return reject(e);
+                    }
+                  );
+                }, (e) => {
+                  console.log("LOGIN ERROR! " + e);
+                  self.authenticated = false;
+                  self.is_initialized = false;
+                  self.is_user_configured = false;
+                  self.user_data = {};
+                  return reject(e);
+                }
+              );
+          }, (e) => {
+            console.log("LOGIN ERROR! " + e);
+            self.authenticated = false;
+            self.is_initialized = false;
+            self.is_user_configured = false;
+            self.user_data = {};
+            return reject(e);
+          }
+        );
     });
   }
-
 
   /**
    * Store logged in user values for offline usage
@@ -173,30 +193,39 @@ export class UserService
    * Log user in automatically
    *  @returns {Promise<any>}
    */
-  autologin(): Promise<any>
+  public autologin(): Promise<any>
   {
     let self = this;
 
     return new Promise(function (resolve, reject) {
-      let config;
-      self.configurationService.getConfigObject()
-        .then((cfg) => {
-          config = cfg;
-          if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
-          {
-            return reject(new Error("AUTOLOGIN - missing username or password"));
-          }
-          return self.login(cfg.crm_username, cfg.crm_password);
-        }, () => {
-          return reject(new Error("AUTOLOGIN - Configuration object is not available!"));
-        })
-        .then(() => {
-          console.log("AUTOLOGIN SUCCESS");
-          resolve();
-        }, (e) => {
-          console.log("AUTOLOGIN FAILED: " + e);
-          return reject(e);
-        });
+      if (!self.isAuthenticated() || self.autologin_skips >= self.max_autologin_skips)
+      {
+        self.autologin_skips = 0;
+        let config;
+        self.configurationService.getConfigObject()
+          .then((cfg) => {
+            config = cfg;
+            if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
+            {
+              return reject(new Error("AUTOLOGIN - missing username or password"));
+            }
+            return self.login(cfg.crm_username, cfg.crm_password);
+          }, () => {
+            return reject(new Error("AUTOLOGIN - Configuration object is not available!"));
+          })
+          .then(() => {
+            console.log("AUTOLOGIN SUCCESS");
+            resolve();
+          }, (e) => {
+            console.log("AUTOLOGIN FAILED: " + e);
+            return reject(e);
+          });
+      } else
+      {
+        self.autologin_skips++;
+        console.log("AUTOLOGIN SUCCESS(NOT NECESSARY)["+self.autologin_skips+"]");
+        resolve();
+      }
     });
   }
 

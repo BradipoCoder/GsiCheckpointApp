@@ -23,6 +23,7 @@ import {CheckinProvider} from "../providers/checkin.provider";
 import _ from "lodash";
 import * as moment from 'moment';
 import { Promise } from '../../node_modules/bluebird'
+//import * as Bluebird from "bluebird";
 /*import md5 from '../../node_modules/blueimp-md5';*/
 
 @Injectable()
@@ -45,7 +46,7 @@ export class RemoteDataService
   {
     this.dataProviders = [
       this.checkpointProvider,
-      /*this.checkinProvider*/
+      this.checkinProvider
     ];
   }
 
@@ -422,7 +423,7 @@ export class RemoteDataService
   {
     return Promise.reduce(this.dataProviders, function(accu, provider, index)
     {
-      console.log("PROVIDER #"+index);
+      console.log("PROVIDER #" + index + " - " + provider.constructor.name);
       return provider.syncWithRemote();
     }, null);
   }
