@@ -10,7 +10,7 @@ export class BackgroundService
   private execution_count = 0;
   private execution_count_max = 0;
 
-  private execution_interval_ms = (3 * 1000);
+  private execution_interval_ms = (1 * 1000);
 
   private auto_update_timeout: number;
 

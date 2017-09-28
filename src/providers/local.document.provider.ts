@@ -23,6 +23,8 @@ PouchDB.debug.disable('pouchdb:find');
 @Injectable()
 export class LocalDocumentProvider
 {
+  protected underlying_model: any;
+
   protected database_name: string;
   protected database_options: any = {};
 
@@ -48,36 +50,218 @@ export class LocalDocumentProvider
   {
     let self = this;
 
-    let functions = [
-      'syncWithRemoteDownNew',
-      'syncWithRemoteDownChanged',
-      /*'syncWithRemoteDownDeleted'*/
+    let syncFunctions = [
+      'syncDownNew',
+      /*'syncDownChanged',*/
+      /*'syncDownDeleted'*/
     ];
 
-    let maxItemsToSync = 250;
+    let dbTableName = self.underlying_model.DB_TABLE_NAME;
+    let numberOfItemsToSyncAtOnce = 50;
+    let query = "";
+    let remoteItems = [];
 
-    return Promise.reduce(functions, function(accu, fn, index)
-    {
-      return new Promise(function (resolve, reject) {
-        if (_.isFunction(self[fn]))
-        {
-          let promise = self[fn].call(self, maxItemsToSync);
-          promise.then((syncedItems:number) => {
-            maxItemsToSync = (syncedItems <= maxItemsToSync) ? maxItemsToSync - syncedItems : 0;
+    return new Promise(function (resolve, reject) {
+      self.syncWithRemoteGetItems(dbTableName, numberOfItemsToSyncAtOnce, query)
+        .then((records: any) => {
+            remoteItems = records;
+            //console.log("REMOTE-ITEMS: ", remoteItems);
 
-            console.log("FN("+fn+") synced: " + syncedItems);
-            resolve();
+            Promise.reduce(syncFunctions, function (accu, syncFunction, index) {
+              return new Promise(function (resolve, reject) {
+                if (!_.isFunction(self[syncFunction]))
+                {
+                  console.warn("NO FN(" + syncFunction + ")!!!");
+                  resolve();
+                  return;
+                }
+
+                let syncPromise = self[syncFunction].call(self, remoteItems);
+
+                syncPromise.then(() => {
+                  console.log("FN(" + syncFunction + ") done.");
+                  resolve();
+                }, (e) => {
+                  console.warn("FN(" + syncFunction + ") fail: " + e);
+                  return reject(e);
+                })
+
+              });
+            }, null)
+              .then(() => {
+                  console.log("Promise Reduce done.");
+                  resolve();
+                }, (e) => {
+                  return reject(new Error("syncWithRemote error: " + e));
+                }
+              );
           }, (e) => {
-            console.warn("FN("+fn+") sync failed: " + e);
-            return reject(e);
-          })
-        } else
+            return reject(new Error("Get Remote Items error: " + e));
+          }
+        );
+    });
+  }
+
+  /**
+   * [ called by localDocumentProvider.syncWithRemote ]
+   *
+   * @param {any} itemsToCheck
+   * @returns {Promise<any>}
+   */
+  public syncDownNew(itemsToCheck: any = []): Promise<any>
+  {
+    let self = this;
+    let dbTableName = self.underlying_model.DB_TABLE_NAME;
+    let remoteIdArray, localIdArray, missingIdArray;
+
+    return new Promise(function (resolve, reject) {
+      console.log("syncDownNew");
+
+      remoteIdArray = _.map(itemsToCheck, 'id');
+      //console.log("REMOTE ID ARRAY: ", remoteIdArray);
+
+      self.findDocuments({
+        selector: {id: {'$in': remoteIdArray}},
+        fields: ['id'],
+      }).then((docs) => {
+
+        docs = !_.isUndefined(docs.docs) ? docs.docs : [];
+        //console.log("EntryList records: ", docs);
+
+        localIdArray = _.map(docs, 'id');
+        //console.log("LOCAL ID ARRAY: ", localIdArray);
+
+        missingIdArray = _.difference(remoteIdArray, localIdArray);
+
+        if (!_.size(missingIdArray))
         {
-          console.log("FN("+fn+") NOPE!");
+          console.log("No new records.");
           resolve();
+          return;
         }
+
+        console.log("MISSING ID ARRAY: ", missingIdArray);
+        self.offlineCapableRestService.getEntries(dbTableName, {
+          select_fields: self.module_fields,
+          ids: missingIdArray
+        }).then((res) => {
+            let records = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
+
+            let documents = [];
+            let model;
+            _.each(records, function (record) {
+              model = new self.underlying_model(record);
+              documents.push(model);
+            });
+
+            if (!_.size(documents))
+            {
+              console.log("No new documents to register.");
+              resolve();
+              return;
+            }
+
+            console.log("NEW DOCS TO REGISTER: ", documents);
+            self.storeDocuments(documents)
+              .then(() => {
+                resolve();
+              }, (e) => {
+                return reject(new Error("Store Local Documents error - " + e));
+              });
+          }, (e) => {
+            return reject(new Error("Get Remote Entries error: " + e));
+          }
+        );
+      }, (e) => {
+        return reject(new Error("Get Local Documents error: " + e));
       });
-    }, null);
+    });
+  }
+
+  /**
+   * [ called by localDocumentProvider.syncWithRemote ]
+   *
+   * @param {any} itemsToCheck
+   * @returns {Promise<any>}
+   */
+  public syncDownChanged(itemsToCheck: any = []): Promise<any>
+  {
+    let self = this;
+    let dbTableName = self.underlying_model.DB_TABLE_NAME;
+    return new Promise(function (resolve, reject) {
+      console.log("syncDownChanged");
+      resolve();
+    });
+  }
+
+  /**
+   * [ called by localDocumentProvider.syncWithRemote ]
+   *
+   * @param {any} itemsToCheck
+   * @returns {Promise<any>}
+   */
+  public syncDownDeleted(itemsToCheck: any = []): Promise<any>
+  {
+    let self = this;
+    let dbTableName = self.underlying_model.DB_TABLE_NAME;
+    return new Promise(function (resolve, reject) {
+      console.log("syncDownDeleted");
+      resolve();
+    });
+  }
+
+  /**
+   * Returns number of NEW items synced DOWN from remote
+   * [ called by localDocumentProvider.syncWithRemote ]
+   *
+   * @param {string} dbTableName
+   * @param {number} [itemLimit]
+   * @param {string} [query]
+   * @returns {Promise<any>}
+   */
+  public syncWithRemoteGetItems(dbTableName: string, itemLimit: number = 0, query: string = ""): Promise<any>
+  {
+    let self = this;
+    let config: any;
+
+    let configCheckKey = dbTableName + "_sync_offset";
+    let syncOffset = 0;
+
+    return new Promise(function (resolve, reject) {
+      self.configurationService.getConfigObject()
+        .then((cfg) => {
+            config = cfg;
+            syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
+            //console.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
+
+            self.offlineCapableRestService.getEntryList(dbTableName, {
+              select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
+              order_by: 'date_entered ASC',
+              deleted: '1',
+              query: query,
+              offset: syncOffset,
+              max_results: itemLimit
+            }).then((res) => {
+                let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
+                //console.log("RECORDS: ", records);
+                let newSyncOffset = _.size(records) == itemLimit ? syncOffset + itemLimit : 0;
+                self.configurationService.setConfig(configCheckKey, newSyncOffset, false, true)
+                  .then(() => {
+                    //console.log("CFGKEY written");
+                  }, (e) => {
+                    return reject(new Error("Set Config item error: " + e));
+                  });
+
+                resolve(records);
+              }, (e) => {
+                return reject(new Error("Get remote Items error: " + e));
+              }
+            );
+          }, (e) => {
+            return reject(new Error("Get ConfigObject error: " + e));
+          }
+        );
+    });
   }
 
   /**
@@ -93,19 +277,16 @@ export class LocalDocumentProvider
     let key: string = findById || document.id;
     let doUpdate = false;
 
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       let registeredDocument: any;
-      self.getDocumentById(key).then((registeredDocument: any) =>
-      {
+      self.getDocumentById(key).then((registeredDocument: any) => {
         //console.log("Docs found:", key, registeredDocument);
         doUpdate = document.isNewer(moment(registeredDocument.date_modified).toDate());
         if (doUpdate || forceUpdate)
         {
           document._id = registeredDocument._id;
           document._rev = registeredDocument._rev;
-          self.db.put(document).then((res) =>
-          {
+          self.db.put(document).then((res) => {
             //console.log("Doc updated:", key, document);
             resolve(key);
           });
@@ -115,15 +296,12 @@ export class LocalDocumentProvider
           resolve(key);
         }
 
-      }).catch((e) =>
-      {
+      }).catch((e) => {
         document._id = key;
-        self.db.put(document).then((res) =>
-        {
+        self.db.put(document).then((res) => {
           //console.log("Doc registered:", key, document);
           resolve(key);
-        }).catch((e) =>
-        {
+        }).catch((e) => {
           console.error("Store Document Error - document", document);
           console.error("Store Document Error - forceUpdate", forceUpdate);
           console.error("Store Document Error - findById", findById);
@@ -143,15 +321,12 @@ export class LocalDocumentProvider
   protected storeDocuments(documents: any, forceUpdate: boolean = false): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       let promises = [];
-      _.each(documents, function (document)
-      {
+      _.each(documents, function (document) {
         promises.push(self.storeDocument(document, forceUpdate));
       });
-      Promise.all(promises).then(() =>
-      {
+      Promise.all(promises).then(() => {
         resolve();
       });
     });
@@ -174,23 +349,19 @@ export class LocalDocumentProvider
   public getDocumentById(id: string): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       let isTemporaryId = _.startsWith(id, CrmDataModel.TEMPORARY_ID_PREFIX);
       if (isTemporaryId)
       {
-        self.db.get(id).then((doc) =>
-        {
+        self.db.get(id).then((doc) => {
           resolve(doc);
-        }).catch((e) =>
-        {
+        }).catch((e) => {
           reject(e);
         });
       } else
       {
         let options = {selector: {id: id}};
-        self.findDocuments(options).then((res) =>
-        {
+        self.findDocuments(options).then((res) => {
           if (_.size(res.docs) < 1)
           {
             throw new Error("Checkin was not found!");
@@ -201,8 +372,7 @@ export class LocalDocumentProvider
           }
           let doc = _.first(res.docs);
           resolve(doc);
-        }).catch((e) =>
-        {
+        }).catch((e) => {
           reject(e);
         });
       }
@@ -228,8 +398,7 @@ export class LocalDocumentProvider
    */
   protected promiseWhile(data, condition, action): Promise<any>
   {
-    let whilst = (data): Promise<any> =>
-    {
+    let whilst = (data): Promise<any> => {
       return condition(data)
         ? action(data).then(whilst)
         : Promise.resolve(data);
@@ -245,14 +414,11 @@ export class LocalDocumentProvider
   public destroyDatabase(): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.db.destroy().then((res) =>
-      {
+    return new Promise(function (resolve, reject) {
+      self.db.destroy().then((res) => {
         console.log("DB destroyed: " + self.database_name, res);
         resolve();
-      }).catch((e) =>
-      {
+      }).catch((e) => {
         reject(e);
       });
     });
@@ -266,8 +432,7 @@ export class LocalDocumentProvider
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       console.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
@@ -275,11 +440,11 @@ export class LocalDocumentProvider
       let changes = self.db.changes({
         since: 'now',
         live: true,
-        include_docs:true
-      }).on('change', function(change) {
+        include_docs: true
+      }).on('change', function (change) {
         console.log('DB CHANGE: ', change);
         //put some observable here and trigger change
-      }).on('complete', function(info) {
+      }).on('complete', function (info) {
         console.log('DB COMPLETE: ', info);
       }).on('error', function (err) {
         console.error(err);
@@ -294,14 +459,12 @@ export class LocalDocumentProvider
       );
 
       let indexCreationPromises = [];
-      _.each(self.database_indices, function (indexObject)
-      {
+      _.each(self.database_indices, function (indexObject) {
         //console.log("Creating INDEX["+self.database_name+"]: ", indexObject);
         indexCreationPromises.push(self.db.createIndex({index: indexObject}));
       });
 
-      Promise.all(indexCreationPromises).then((res) =>
-      {
+      Promise.all(indexCreationPromises).then((res) => {
         //console.log("INDEXES OK: ", res);
         resolve();
       });

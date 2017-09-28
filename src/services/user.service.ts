@@ -19,7 +19,7 @@ export class UserService
   private db: any;
 
   private autologin_skips = 0;
-  private max_autologin_skips = 5;
+  private max_autologin_skips = 150;
 
 
   constructor(private configurationService: ConfigurationService

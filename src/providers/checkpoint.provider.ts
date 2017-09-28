@@ -16,6 +16,8 @@ import {CrmDataModel} from "../models/crm.data.model";
 @Injectable()
 export class CheckpointProvider extends LocalDocumentProvider
 {
+  protected underlying_model:any = Checkpoint;
+
   protected database_name = "checkpoint";
 
   protected database_indices = [
@@ -197,7 +199,7 @@ export class CheckpointProvider extends LocalDocumentProvider
    * @param {number} [maxItemsToSync]
    * @returns {Promise<number>}
    */
-  public syncWithRemoteDownNew(maxItemsToSync: number = 0): Promise<number>
+  public syncWithRemoteDownNew___OLD(maxItemsToSync: number = 0): Promise<number>
   {
     let self = this;
     let syncCount = 0;
@@ -213,14 +215,20 @@ export class CheckpointProvider extends LocalDocumentProvider
           configCheckValue = lastDownNewOffset;
 
           // console.log("syncWithRemoteDownNew maxItemsToSync: " + maxItemsToSync);
+
+          let query = "account_id_c = '" + "3aaaca35-bf86-5e1b-488b-591abe50a893" + "'";
+
           self.offlineCapableRestService.getEntryList(Checkpoint.DB_TABLE_NAME, {
-            select_fields: ['id'],
-            order_by: 'date_modified ASC',
-            'offset': lastDownNewOffset,
-            'max_results': maxItemsToSync
+            select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
+            order_by: 'date_entered ASC',
+            deleted: '1',
+            query: query,
+            offset: lastDownNewOffset,
+            max_results: maxItemsToSync
           }).then((res) => {
             let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
-            //console.log("RECORDS: ", records);
+            console.log("RECORDS: ", records);
+
 
             remoteIdArray = _.map(records, 'id');
             //console.log("REMOTE ID ARRAY: ", remoteIdArray);
@@ -280,41 +288,6 @@ export class CheckpointProvider extends LocalDocumentProvider
         });
     });
   }
-
-  /**
-   * Returns number of NEW items synced DOWN from remote
-   * [ called by localDocumentProvider.syncWithRemote ]
-   *
-   * @param {number} [maxItemsToSync]
-   * @returns {Promise<number>}
-   */
-  public syncWithRemoteDownChanged(maxItemsToSync: number = 0): Promise<number>
-  {
-    let self = this;
-    let syncCount = 0;
-    return new Promise(function (resolve, reject) {
-      console.log("syncWithRemoteDownChanged maxItemsToSync: " + maxItemsToSync);
-      resolve(syncCount);
-    });
-  }
-
-  /**
-   * Returns number of NEW items synced DOWN from remote
-   * [ called by localDocumentProvider.syncWithRemote ]
-   *
-   * @param {number} [maxItemsToSync]
-   * @returns {Promise<number>}
-   */
-  public syncWithRemoteDownDeleted(maxItemsToSync: number = 0): Promise<number>
-  {
-    let self = this;
-    let syncCount = 0;
-    return new Promise(function (resolve, reject) {
-      console.log("syncWithRemoteDownDeleted maxItemsToSync: " + maxItemsToSync);
-      resolve(syncCount);
-    });
-  }
-
 
   /**
    *

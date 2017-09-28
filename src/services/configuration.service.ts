@@ -1,5 +1,10 @@
 /**
  * Configuration Service
+ *
+ *  @todo: configure to:
+ *  1) on init load config object into memory
+ *  2) make get/set become synchronous methods on in-memory object
+ *  3) on set trigger db.put (with optional wait-for-storage param/option)
  */
 import {Injectable} from '@angular/core';
 import PouchDB from "pouchdb";
@@ -22,7 +27,7 @@ export class ConfigurationService
   };
 
 
-  unlockWithCode(code: string): boolean
+  public unlockWithCode(code: string): boolean
   {
     this.is_unlocked = (code === this.UNLOCK_CODE);
     return this.is_unlocked;
@@ -32,7 +37,7 @@ export class ConfigurationService
    *
    * @returns {boolean}
    */
-  isUnlocked(): boolean
+  public isUnlocked(): boolean
   {
     return this.is_unlocked;
   }
@@ -42,7 +47,7 @@ export class ConfigurationService
    *
    * @returns {Promise<any>}
    */
-  getConfigObject(): Promise<any>
+  public getConfigObject(): Promise<any>
   {
     let self = this;
     let answer = {};
@@ -73,7 +78,7 @@ export class ConfigurationService
    * @param {any} defaultValue
    * @returns {Promise<any>}
    */
-  getConfig(key, defaultValue = null): Promise<any>
+  public getConfig(key, defaultValue = null): Promise<any>
   {
     let answer = defaultValue;
     let self = this;
@@ -103,7 +108,7 @@ export class ConfigurationService
    * @param {boolean} override_code
    * @returns {Promise<any>}
    */
-  setConfig(key, value, skip_if_exists = false, override_code = false): Promise<any>
+  public setConfig(key, value, skip_if_exists = false, override_code = false): Promise<any>
   {
     let self = this;
 
@@ -172,7 +177,7 @@ export class ConfigurationService
    *
    * @returns {Promise}
    */
-  initialize(): Promise<any>
+  public initialize(): Promise<any>
   {
     let self = this;
 

@@ -15,6 +15,8 @@ import * as moment from 'moment';
 @Injectable()
 export class CheckinProvider extends LocalDocumentProvider
 {
+  protected underlying_model:any = Checkin;
+
   database_name = "checkin";
   database_indices = [
     {
