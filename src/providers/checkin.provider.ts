@@ -57,7 +57,7 @@ export class CheckinProvider extends LocalDocumentProvider
     //this.database_options.revs_limit = 1;
 
     this.sync_configuration = {
-      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
+      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted', 'syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY'],
       remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
       remoteQuery: "",//Will be set in initialize method - NOT - role based - no need to filter by user id
       processRecordsAtOnce: 25
@@ -73,26 +73,12 @@ export class CheckinProvider extends LocalDocumentProvider
   public storeCheckin(checkin: Checkin, forceUpdate: boolean = false): Promise<string>
   {
     let self = this;
-    let storedDocumentId: string;
     return new Promise(function (resolve, reject)
     {
       self.storeDocument(checkin, forceUpdate).then((docId) =>
       {
-        storedDocumentId = docId;
-        if (self.offlineCapableRestService.isNetworkConnected())
-        {
-          return self.syncWithRemote_PUSH();
-        } else
-        {
-          console.log("No network connection - skipping rest updates...");
-          resolve(storedDocumentId);
-        }
-      }).then(() =>
-      {
-        resolve(storedDocumentId);
-      }).catch((e) =>
-      {
-        console.error(e);
+        resolve(docId);
+      }, (e) => {
         reject(e);
       });
     });
@@ -119,64 +105,11 @@ export class CheckinProvider extends LocalDocumentProvider
     });
   }
 
-
-  /**
-   *
-   * @param {boolean} pushOnly
-   * @returns {Promise<any>}
-   */
-  public syncWithRemoteOLD(pushOnly: boolean = false): Promise<any>
-  {
-    let self = this;
-
-    return new Promise(function (resolve, reject)
-    {
-      let syncMethods = [''];
-      syncMethods.push('syncWithRemote_PUSH');
-      if (pushOnly == false)
-      {
-        syncMethods.push('syncWithRemote_PULL');
-      }
-
-      Promise.reduce(syncMethods, function (accu, item, index, length)
-      {
-        return new Promise(function (resolve, reject)
-        {
-          let hasFunctionToCall = false;
-
-          if (_.isFunction(self[item]))
-          {
-            let fn = self[item];
-            hasFunctionToCall = true;
-            fn.apply(self).then(() =>
-            {
-              resolve();
-            });
-          }
-
-          if (!hasFunctionToCall)
-          {
-            resolve();
-          }
-        });
-      }).then(() =>
-      {
-        //console.log("All providers are in sync now");
-        resolve();
-      }).catch((e) =>
-      {
-        //console.error("Error when syncing providers: " + e);
-        reject(e);
-      });
-    });
-  }
-
-
   /**
    *
    * @returns {Promise<any>}
    */
-  private syncWithRemote_PUSH(): Promise<any>
+  private syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY(): Promise<any>
   {
     let self = this;
 
@@ -248,92 +181,6 @@ export class CheckinProvider extends LocalDocumentProvider
       {
         console.warn("syncWithRemote_PUSH[find doc] error!", e);
         resolve();
-      });
-    });
-  }
-
-  /**
-   *
-   * @returns {Promise<any>}
-   */
-  private syncWithRemote_PULL(): Promise<any>
-  {
-    let self = this;
-    let forceUpdate = false;
-    let batchSize = 50;
-    let maxRecords = 100;
-    let recordCount = 0;
-
-    //we need these dates to confront later for sync
-    let fixedModuleFields = self.module_fields;
-    fixedModuleFields.push('date_entered');
-    fixedModuleFields.push('date_modified');
-
-    return new Promise(function (resolve, reject)
-    {
-      let sequence = 0;
-      let offset = 0;
-      let hasMore = true;
-      self.promiseWhile(hasMore, function (hasMore)
-      {
-        return hasMore;
-      }, function (hasMore)
-      {
-        return new Promise(function (resolve, reject)
-        {
-          offset = sequence * batchSize;
-          self.offlineCapableRestService.getEntryList(self.remote_table_name, {
-            select_fields: fixedModuleFields,
-            order_by: 'checkin_date ASC',
-            max_results: batchSize,
-            offset: offset
-          }).then((res) =>
-          {
-            //console.log("CHECKIN LIST[" + sequence + "]["+offset+"]", res);
-            sequence++;
-            recordCount += _.size(res.entry_list);
-            hasMore = (res.next_offset < res.total_count) && (recordCount < maxRecords) && _.size(res.entry_list) > 0;
-            if (!_.isEmpty(res.entry_list))
-            {
-              let documents = [];
-              _.each(res.entry_list, function (remoteData)
-              {
-                //@todo: DATE TIME - UTC OFFSET FIX
-                if (!_.isUndefined(remoteData.checkin_date))
-                {
-                  remoteData.checkin_date = moment(remoteData.checkin_date).add(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
-                }
-
-                let checkin = new Checkin(remoteData);
-                documents.push(checkin);
-              });
-
-              self.checkpointProvider.setTypeOnCheckins(documents).then((documents) =>
-              {
-                return self.storeDocuments(documents, forceUpdate);
-              }).then(() =>
-              {
-                resolve(hasMore);
-              }).catch((e) =>
-              {
-                reject(e);
-              });
-            } else
-            {
-              resolve(hasMore);
-            }
-          })
-        });
-      }).then(() =>
-      {
-        self.getDatabaseInfo().then((res) =>
-        {
-          console.log("Checkin provider synced: " + res.doc_count + " records");
-          resolve();
-        });
-      }).catch((e) =>
-      {
-        console.error(e);
       });
     });
   }

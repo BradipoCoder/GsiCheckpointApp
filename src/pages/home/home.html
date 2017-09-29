@@ -174,6 +174,16 @@
               <ion-icon name="pause"></ion-icon>
               Pausa
             </ion-label>
+
+            <button ion-button icon-left float-right (click)="fakeNetworkStateChange(true)" color="dark">
+              <ion-icon name="play"></ion-icon>
+              <ion-label>NET-ON</ion-label>
+            </button>
+            <button ion-button icon-left float-right (click)="fakeNetworkStateChange(false)" color="dark">
+              <ion-icon name="square"></ion-icon>
+              <ion-label>NET-OFF</ion-label>
+            </button>
+
           </div>
         </ion-col>
       </ion-row>

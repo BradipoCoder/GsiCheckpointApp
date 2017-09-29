@@ -33,14 +33,14 @@ export class CheckpointsPage implements OnInit, OnDestroy
   private refreshCheckpoints(): void
   {
     if(this.is_refreshing) {
-      console.warn("Refresh is already on the way...(skipping);)");
+      //console.warn("Refresh is already on the way...(skipping);)");
       return;
     }
 
     let fiveSecondsAgo = moment().subtract(5, 'seconds');
     if (this.lastRefresh && this.lastRefresh.isAfter(fiveSecondsAgo))
     {
-      console.warn("Skipping refresh - too early ;)");
+      //console.warn("Skipping refresh - too early ;)");
       return;
     }
 

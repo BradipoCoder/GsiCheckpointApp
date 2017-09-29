@@ -350,58 +350,6 @@ export class RemoteDataService
   }
 
   /**
-   * Triggers data sync operation in every registered provider
-   *
-   * @param {boolean} [pushOnly]
-   */
-  public triggerProviderDataSync(pushOnly: boolean = false): Promise<any>
-  {
-    let self = this;
-
-    return new Promise(function (resolve, reject)
-    {
-      let providers = [''];
-      providers.push('checkpointProvider');
-      providers.push('checkinProvider');
-
-
-      Promise.reduce(providers, function (accu, item, index, length)
-      {
-        return new Promise(function (resolve, reject)
-        {
-          let hasFunctionToCall = false;
-          if (_.has(self, item))
-          {
-            let provider = self[item];
-            if (_.isFunction(provider.syncWithRemoteOLD))
-            {
-              hasFunctionToCall = true;
-              provider.syncWithRemoteOLD(pushOnly).then(() =>
-              {
-                resolve();
-              });
-            }
-          }
-          if (!hasFunctionToCall)
-          {
-            resolve();
-          }
-        });
-
-      }).then(() =>
-      {
-        //console.log("All providers are in sync now");
-        resolve();
-      }).catch((e) =>
-      {
-        //console.error("Error when syncing providers: " + e);
-        reject(e);
-      });
-    });
-  }
-
-
-  /**
    *
    * @param {boolean} [waitForProviderData]
    * @param {boolean} [skipDataSync]
@@ -422,7 +370,6 @@ export class RemoteDataService
       }).then(() =>
       {
         resolve();
-        //return self.updateCurrentSessionCheckins();
       }, (e) => {
         return reject(e);
       })

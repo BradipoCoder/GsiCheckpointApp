@@ -144,7 +144,7 @@ export class Checkin extends CrmDataModel
    */
   public getDefinedProperties(additionalExcludeFields:any = []): any
   {
-    let nonModuleFields = ['css_class', 'type', 'icon'];
+    let nonModuleFields = ['css_class', 'icon'];
     let properties = super.getDefinedProperties();
     return _.difference(_.difference(properties, nonModuleFields), additionalExcludeFields);
   }

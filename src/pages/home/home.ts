@@ -3,12 +3,14 @@ import {Platform, NavController, ToastController, LoadingController} from 'ionic
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
+import {CheckinProvider} from "../../providers/checkin.provider";
 import {CodeScanService} from '../../services/code.scan.service';
 import {Checkpoint} from '../../models/Checkpoint';
 import {Checkin} from "../../models/Checkin";
 import {ConfigurationPage} from '../configuration/configuration';
 import _ from "lodash";
 import * as moment from 'moment';
+import {Subscription} from "rxjs/Subscription";
 
 
 @Component({
@@ -27,6 +29,13 @@ export class HomePage implements OnInit, OnDestroy
 
   private auto_update_timeout: number;
 
+  private is_refreshing = false;
+  private lastRefresh;
+
+  private networkStateSubscription: Subscription;
+  private dataChangeSubscription: Subscription;
+
+
 
   constructor(public navCtrl: NavController
     , private platform: Platform
@@ -35,7 +44,8 @@ export class HomePage implements OnInit, OnDestroy
     , public userService: UserService
     , public codeScanService: CodeScanService
     , public remoteDataService: RemoteDataService
-    , public offlineCapableRestService: OfflineCapableRestService)
+    , public offlineCapableRestService: OfflineCapableRestService
+    , public checkinProvider: CheckinProvider)
   {
   }
 
@@ -55,8 +65,7 @@ export class HomePage implements OnInit, OnDestroy
     this.recalculateShiftTotalDuration(this);
     this.recalculateLastCheckinDuration(this);
 
-    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((data) =>
-    {
+    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((data) => {
       barcodeData = data;
       //console.log("BARCODE", barcodeData);
       loader = this.loadingCtrl.create({
@@ -64,16 +73,13 @@ export class HomePage implements OnInit, OnDestroy
         duration: (30 * 1000)
       });
       return loader.present();
-    }).then(() =>
-    {
+    }).then(() => {
 
       return this.remoteDataService.storeNewCheckin(barcodeData.text);
-    }).then((newCheckin) =>
-    {
+    }).then((newCheckin) => {
       checkin = newCheckin;
       return loader.dismiss();
-    }).then(() =>
-    {
+    }).then(() => {
       console.log("CHECKIN REGISTERED", checkin);
 
       let toastMessage = "Sei entrato in: " + checkin.name + "(" + barcodeData.text + ")";
@@ -97,7 +103,7 @@ export class HomePage implements OnInit, OnDestroy
       toast.present();
 
       //timeout to hide end of session screen
-      if(this.presentLogoutScreen)
+      if (this.presentLogoutScreen)
       {
         setTimeout((self) => {
           console.log("time is up!");
@@ -105,8 +111,7 @@ export class HomePage implements OnInit, OnDestroy
         }, 15000, this);
       }
 
-    }).catch((e) =>
-    {
+    }).catch((e) => {
       console.error("Errore scansione: " + e);
       if (!_.isUndefined(loader))
       {
@@ -126,11 +131,9 @@ export class HomePage implements OnInit, OnDestroy
    */
   activatePause(): void
   {
-    this.remoteDataService.storeNewCheckin("PAUSA").then((checkin: Checkin) =>
-    {
+    this.remoteDataService.storeNewCheckin("PAUSA").then((checkin: Checkin) => {
       console.log("CHECKIN REGISTERED", checkin);
-    }).catch((e) =>
-    {
+    }).catch((e) => {
       console.error("Errore pausa: " + e);
       let toast = this.toastCtrl.create({
         message: e,
@@ -288,40 +291,69 @@ export class HomePage implements OnInit, OnDestroy
 
   }
 
-  protected fakeNetworkStateChange()
+  /**
+   *
+   * @param {boolean} state
+   */
+  protected fakeNetworkStateChange(state:boolean)
   {
-    this.offlineCapableRestService.setIsNetworkConnected(this.is_network_connected);
+    this.offlineCapableRestService.setIsNetworkConnected(state);
   }
 
+  /**
+   * @todo: we should implement an id based refresh where we substitute documents singularly
+   * @todo: last triggered update could be skipped never updating to final list :....?
+   */
+  private refreshHomeData(): void
+  {
+    if(this.is_refreshing) {
+      console.warn("Refresh is already on the way...(skipping);)");
+      return;
+    }
+
+    let fiveSecondsAgo = moment().subtract(5, 'seconds');
+    if (this.lastRefresh && this.lastRefresh.isAfter(fiveSecondsAgo))
+    {
+      console.warn("Skipping refresh - too early ;)");
+      return;
+    }
+
+    this.is_refreshing = true;
+
+    this.remoteDataService.updateCurrentSessionCheckins().then(() => {
+      console.warn("HOMEDATA refresh - done");
+      this.lastRefresh = moment();
+      this.is_refreshing = false;
+    });
+  }
 
   //------------------------------------------------------------------------------------------------------INIT & DESTROY
   ngOnInit(): void
   {
     let self = this;
-    console.log("HOME INIT");
 
     this.autoUpdateIntevalExecution(this);
 
-    self.is_network_connected = this.offlineCapableRestService.isNetworkConnected();
+    this.is_network_connected = this.offlineCapableRestService.isNetworkConnected();
 
-    this.offlineCapableRestService.networkConnectedObservable.subscribe(
-      function (is_network_connected)
-      {
+    this.networkStateSubscription = this.offlineCapableRestService.networkConnectedObservable.subscribe
+    (
+      (is_network_connected) => {
         console.log('Connection state: ' + is_network_connected);
         self.is_network_connected = is_network_connected;
+      }
+    );
 
-        if (is_network_connected)
-        {
-          self.remoteDataService.triggerProviderDataSync(true).then(() =>
-          {
-            //console.log("AFTER NETWORK ON DATA SYNC OK");
-            return self.remoteDataService.updateCurrentSessionCheckins();
-          }).then(() =>
-          {
-            //console.log("AFTER NETWORK ON DATA SYNC OK - #2");
-          });
-        }
-      });
+    this.dataChangeSubscription = this.checkinProvider.databaseChangeObservable.subscribe
+    ((data:any) => {
+      if(_.includes(['checkpoint', 'checkin'], data.db))
+      {
+        console.log('HOME - DB CHANGE!');
+        this.refreshHomeData();
+      }
+    });
+
+    this.refreshHomeData();
   }
 
 
@@ -330,6 +362,9 @@ export class HomePage implements OnInit, OnDestroy
    */
   ngOnDestroy(): void
   {
+    this.networkStateSubscription.unsubscribe();
+    this.dataChangeSubscription.unsubscribe();
+
     if (this.auto_update_timeout)
     {
       clearTimeout(this.auto_update_timeout);
