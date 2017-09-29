@@ -1,111 +1,110 @@
-import { Component } from '@angular/core';
-import { CheckpointProvider } from '../../providers/checkpoint.provider';
+import {Component, OnInit, OnDestroy} from '@angular/core';
+import {CheckpointProvider} from '../../providers/checkpoint.provider';
+import {BackgroundService} from "../../services/background.service";
 import {Checkpoint} from "../../models/Checkpoint";
+import * as moment from 'moment';
+import {Subscription} from "rxjs/Subscription";
 
 @Component({
   selector: 'page-checkpoints',
   templateUrl: 'checkpoints.html'
 })
-export class CheckpointsPage {
+export class CheckpointsPage implements OnInit, OnDestroy
+{
 
   /**
-   *
    * @type {Checkpoint[]}
    */
   private checkpoints: any = [];
 
-  constructor(public checkpointProvider: CheckpointProvider)
+  private is_refreshing = false;
+  private lastRefresh;
+
+  private dataChangeSubscription: Subscription;
+
+  constructor(private checkpointProvider: CheckpointProvider, private backgroundService: BackgroundService)
   {
-    this.refreshCheckpoints();
   }
 
-  private refreshCheckpoints():void
+  /**
+   * @todo: we should implement an id based refresh where we substitute documents singularly
+   * @todo: last triggered update could be skipped never updating to final list :....?
+   */
+  private refreshCheckpoints(): void
   {
-    //this.checkpoints = this.checkpointProvider.getInMemoryDocuments(['sync_last_check'], false, 10);
+    if(this.is_refreshing) {
+      console.warn("Refresh is already on the way...(skipping);)");
+      return;
+    }
+
+    let fiveSecondsAgo = moment().subtract(5, 'seconds');
+    if (this.lastRefresh && this.lastRefresh.isAfter(fiveSecondsAgo))
+    {
+      console.warn("Skipping refresh - too early ;)");
+      return;
+    }
+
+    this.is_refreshing = true;
+
     let findOptions =
       {
-        selector: {sync_last_check: {"$gt": null}},
-        sort: [{'sync_last_check': 'asc'}],
-        limit: 25
+        selector: {code: {"$gt": null}},
+        sort: [{'code': 'asc'}],
+        /*limit: 25*/
       };
     this.checkpointProvider.find(findOptions).then(
-      (checkpoints:Checkpoint[]) => {
-      this.checkpoints = checkpoints;
-    })
-  }
-
-
-  /**
-   * Updates the in-memory list of documents from local data storage
-   *
-   * @returns {Promise<number>}
-   */
-  /*
-  public refreshInMemoryDocuments(): Promise<number>
-  {
-    let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.IN_MEMORY_DOCUMENTS = [];
-
-      let findOptions =
-        {
-          selector: {sync_last_check: {"$gt": null}},
-          sort: ['sync_last_check'],
-          limit: self.IN_MEMORY_DOCUMENTS_HARD_LIMIT
-        };
-      self.findDocuments(findOptions).then((res) =>
-      {
-        if (!_.isUndefined(res.docs) && _.size(res.docs))
-        {
-          let docs = _.concat([], res.docs);
-          //_.reverse(docs);
-
-          _.each(docs, function (doc)
-          {
-            self.IN_MEMORY_DOCUMENTS.push(new Checkpoint(doc));
-          });
-        }
-
-        resolve(_.size(self.IN_MEMORY_DOCUMENTS));
-      }).catch((e) =>
-      {
-        console.error(e);
-        reject(e);
+      (checkpoints: Checkpoint[]) => {
+        this.checkpoints = checkpoints;
+        this.lastRefresh = moment();
+        this.is_refreshing = false;
       });
-    });
   }
-  */
+
+  public action1(): void
+  {
+    console.log("A1 - START");
+    this.backgroundService.start().then(() => {
+        console.log("A1 - START DONE.");
+      }, (e) => {
+        console.error("A1 - START ERROR - " + e);
+      }
+    );
+  }
+
+  public action2(): void
+  {
+    console.log("A2 - STOP");
+    this.backgroundService.stop().then(() => {
+        console.log("A2 - STOP DONE.");
+      }, (e) => {
+        console.error("A2 - STOP ERROR - " + e);
+      }
+    );
+  }
+
+  //------------------------------------------------------------------------------------------------------INIT & DESTROY
+  /**
+   * INIT COMPONENT
+   */
+  ngOnInit(): void
+  {
+    this.refreshCheckpoints();
+
+    this.dataChangeSubscription = this.checkpointProvider.databaseChangeObservable.subscribe(
+      (data: any) => {
+        if(data.db == 'checkpoint') {
+          //console.log('CHECKPOINT DB CHANGE Observed: ', data);
+          this.refreshCheckpoints();
+        }
+      });
+  }
+
 
   /**
-   *  @param {any} [sortBy]
-   *  @param {boolean} [reverse]
-   *  @param {number} [limit]
-   *
-   *  @returns {any}
+   * DESTROY COMPONENT
    */
-  /*
-  public getInMemoryDocuments(sortBy:any = [], reverse:boolean = false, limit:number = 0): any
+  ngOnDestroy(): void
   {
-    let answer =  this.IN_MEMORY_DOCUMENTS;
-
-    if(_.size(sortBy))
-    {
-      answer = _.sortBy(answer, sortBy);
-    }
-
-    if(reverse)
-    {
-      _.reverse(answer);
-    }
-
-    if(limit)
-    {
-      answer = _.slice(answer, 0, limit);
-    }
-
-    return answer;
+    this.dataChangeSubscription.unsubscribe();
   }
-  */
-
 }

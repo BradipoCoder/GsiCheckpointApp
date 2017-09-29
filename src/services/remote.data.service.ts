@@ -29,13 +29,9 @@ import { Promise } from '../../node_modules/bluebird'
 @Injectable()
 export class RemoteDataService
 {
-  protected dataProviders: any = [];
-
   private last_checkin_operation: Checkin;
 
   private CURRENT_SESSION_CHECKINS: Checkin[];
-
-
 
   constructor(private offlineCapableRestService: OfflineCapableRestService
     , private userService: UserService
@@ -44,15 +40,7 @@ export class RemoteDataService
     , private checkpointProvider: CheckpointProvider
     , private checkinProvider: CheckinProvider)
   {
-    this.dataProviders = [
-      this.checkpointProvider,
-      /*this.checkinProvider*/
-    ];
   }
-
-
-
-
 
   //----------------------------------------------------------------------------------------------------------CHECKPOINT
 
@@ -410,22 +398,6 @@ export class RemoteDataService
         reject(e);
       });
     });
-  }
-
-
-  //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
-
-  /**
-   *
-   * @returns {Promise<any>}
-   */
-  public syncDataProviders(): Promise<any>
-  {
-    return Promise.reduce(this.dataProviders, function(accu, provider, index)
-    {
-      console.log("PROVIDER #" + index + " - " + provider.constructor.name);
-      return provider.syncWithRemote();
-    }, null);
   }
 
 

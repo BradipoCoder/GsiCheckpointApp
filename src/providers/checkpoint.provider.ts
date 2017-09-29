@@ -63,6 +63,13 @@ export class CheckpointProvider extends LocalDocumentProvider
 
     //{auto_compaction: true, revs_limit: 10}
     this.database_options.revs_limit = 1;
+
+    this.sync_configuration = {
+      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
+      remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
+      remoteQuery: "account_id_c = '3aaaca35-bf86-5e1b-488b-591abe50a893'",//CSI checkpoints
+      processRecordsAtOnce: 25
+    };
   }
 
   /**

@@ -4,7 +4,8 @@
 import {Injectable} from '@angular/core';
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {ConfigurationService} from '../services/configuration.service';
-import {CheckpointProvider} from "../providers/checkpoint.provider";
+import {UserService} from "../services/user.service";
+import {CheckpointProvider} from "./checkpoint.provider";
 import {LocalDocumentProvider} from './local.document.provider';
 import {CrmDataModel} from '../models/crm.data.model';
 import {Checkin} from '../models/Checkin';
@@ -42,14 +43,25 @@ export class CheckinProvider extends LocalDocumentProvider
 
   constructor(
     protected configurationService: ConfigurationService
+    , protected userService: UserService
     , protected offlineCapableRestService: OfflineCapableRestService
-    , private checkpointProvider: CheckpointProvider
+    , protected checkpointProvider: CheckpointProvider
   )
   {
     super(configurationService, offlineCapableRestService);
 
     let model = new Checkin();
     this.module_fields = model.getDefinedProperties();
+
+    //{auto_compaction: true, revs_limit: 10}
+    //this.database_options.revs_limit = 1;
+
+    this.sync_configuration = {
+      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
+      remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
+      remoteQuery: "",//Will be set in initialize method - NOT - role based - no need to filter by user id
+      processRecordsAtOnce: 25
+    };
   }
 
   /**
@@ -336,6 +348,10 @@ export class CheckinProvider extends LocalDocumentProvider
     {
       self.setupDatabase().then(() =>
       {
+
+        // MY checkins - this cannot be done in constructor because userService is not yet inited
+        /*self.sync_configuration.remoteQuery = "user_id_c = '" + self.userService.getUserData("user_id") + "'";*/
+
         resolve();
       }).catch((e) =>
       {

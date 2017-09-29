@@ -1,11 +1,18 @@
 import {Injectable} from '@angular/core';
+
+/* Services */
 import {UserService} from '../services/user.service';
-import {RemoteDataService} from '../services/remote.data.service';
+
+/* Data Providers */
+import {CheckpointProvider} from "../providers/checkpoint.provider";
+import {CheckinProvider} from "../providers/checkin.provider";
+
 import {Promise} from '../../node_modules/bluebird'
 
 @Injectable()
 export class BackgroundService
 {
+
 
   private is_running = false;
   private stop_requested = false;
@@ -13,13 +20,21 @@ export class BackgroundService
   private execution_count = 0;
   private execution_count_max = 0;
 
-  private execution_interval_ms = (5 * 1000);
+  private startup_delay_ms = (15 * 1000);
+  private execution_interval_ms = (10 * 1000);
 
   private auto_update_timeout: number;
 
-  constructor(private remoteDataService: RemoteDataService,
-              private userService: UserService)
+  protected dataProviders: any = [];
+
+  constructor(private checkpointProvider: CheckpointProvider
+              , private checkinProvider: CheckinProvider
+              ,private userService: UserService)
   {
+    this.dataProviders = [
+      this.checkpointProvider,
+      this.checkinProvider
+    ];
   }
 
 
@@ -48,7 +63,7 @@ export class BackgroundService
         return;
       }
 
-      self.auto_update_timeout = setTimeout(self.intervalExecution, (self.execution_interval_ms), self);
+      self.auto_update_timeout = setTimeout(self.intervalExecution, self.execution_interval_ms, self);
     };
 
     if (self.stop_requested)
@@ -92,7 +107,7 @@ export class BackgroundService
           return reject(e);
         }
       ).then(() => {
-          return self.remoteDataService.syncDataProviders();
+          return self.syncDataProviders();
         }, (e) => {
           return reject(e);
         }
@@ -104,6 +119,22 @@ export class BackgroundService
       );
     });
   }
+
+  //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public syncDataProviders(): Promise<any>
+  {
+    return Promise.reduce(this.dataProviders, function(accu, provider, index)
+    {
+      console.log("PROVIDER #" + index + " - " + provider.constructor.name);
+      return provider.syncWithRemote();
+    }, null);
+  }
+
 
 
   public stop(): Promise<any>
@@ -161,15 +192,10 @@ export class BackgroundService
   {
     let self = this;
 
+    setTimeout(self.intervalExecution, self.startup_delay_ms, self);
+
     return new Promise(function (resolve, reject) {
       resolve();
-      /*
-      self.start().then(() => {
-          resolve();
-        }, (e) => {
-          return reject(e);
-        }
-      );*/
     });
   }
 }

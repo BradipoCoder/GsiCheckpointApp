@@ -223,7 +223,7 @@ export class UserService
       } else
       {
         self.autologin_skips++;
-        console.log("AUTOLOGIN SUCCESS(NOT NECESSARY)["+self.autologin_skips+"]");
+        //console.log("AUTOLOGIN SUCCESS(NOT NECESSARY)["+self.autologin_skips+"]");
         resolve();
       }
     });

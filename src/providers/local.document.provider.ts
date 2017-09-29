@@ -15,6 +15,11 @@ import _ from "lodash";
 import * as moment from 'moment';
 import {Promise} from '../../node_modules/bluebird'
 
+import Rx from "rxjs/Rx";
+import {Observable} from "rxjs/Observable";
+import {Subject} from "rxjs/Subject";
+
+
 PouchDB.plugin(PouchDBFind);
 //PouchDB.debug.enable('pouchdb:find');
 PouchDB.debug.disable('pouchdb:find');
@@ -33,9 +38,19 @@ export class LocalDocumentProvider
   //@todo: remove this!!! MOVED TO MODEL!
   protected remote_table_name: string;
 
+  protected sync_configuration: any = {
+    syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
+    remoteDbTableName: 'some_table',
+    remoteQuery: '',
+    processRecordsAtOnce: 25
+  };
+
   protected db: any;
 
   protected module_fields: any = [];
+
+  private databaseChangeSubject: Subject<any> = new Rx.Subject();
+  public databaseChangeObservable: Observable<any> = Rx.Observable.create(e => this.databaseChangeSubject = e);
 
   constructor(protected configurationService: ConfigurationService,
               protected offlineCapableRestService: OfflineCapableRestService)
@@ -44,25 +59,23 @@ export class LocalDocumentProvider
 
   /**
    *
+   * @todo: all this sync business is to be moved to background sync service
+   *
    * @returns {Promise<any>}
    */
   public syncWithRemote(): Promise<any>
   {
     let self = this;
 
-    let syncFunctions = [
-      'syncDownNew',
-      'syncDownChanged',
-      'syncDownDeleted'
-    ];
+    let syncFunctions = self.sync_configuration.syncFunctions;
+    let remoteDbTableName = self.sync_configuration.remoteDbTableName;
+    let remoteQuery = self.sync_configuration.remoteQuery;
+    let processRecordsAtOnce = self.sync_configuration.processRecordsAtOnce;
 
-    let dbTableName = self.underlying_model.DB_TABLE_NAME;
-    let numberOfItemsToSyncAtOnce = 25;
-    let query = ""; //"account_id_c = '3aaaca35-bf86-5e1b-488b-591abe50a893'";//CSI checkpoints
     let remoteItems = [];
 
     return new Promise(function (resolve, reject) {
-      self.syncWithRemoteGetItems(dbTableName, numberOfItemsToSyncAtOnce, query)
+      self.syncWithRemoteGetItems(remoteDbTableName, processRecordsAtOnce, remoteQuery)
         .then((records: any) => {
             remoteItems = records;
             //console.log("REMOTE-ITEMS: ", remoteItems);
@@ -79,7 +92,7 @@ export class LocalDocumentProvider
                 let syncPromise = self[syncFunction].call(self, remoteItems);
 
                 syncPromise.then(() => {
-                  console.log("FN(" + syncFunction + ") done.");
+                  //console.log("FN(" + syncFunction + ") done.");
                   resolve();
                 }, (e) => {
                   console.warn("FN(" + syncFunction + ") fail: " + e);
@@ -89,7 +102,7 @@ export class LocalDocumentProvider
               });
             }, null)
               .then(() => {
-                  console.log("Promise Reduce done.");
+                  //console.log("Promise Reduce done.");
                   resolve();
                 }, (e) => {
                   return reject(new Error("syncWithRemote error: " + e));
@@ -103,6 +116,7 @@ export class LocalDocumentProvider
   }
 
   /**
+   * @todo: use self.sync_configuration
    * [ called by localDocumentProvider.syncWithRemote ]
    *
    * @param {any} itemsToCheck
@@ -119,9 +133,9 @@ export class LocalDocumentProvider
     fixedModuleFields.push('date_entered');
     fixedModuleFields.push('date_modified');
 
-    //keep only items that are note deleted
+    //keep only items that are not deleted
     itemsToCheck = _.filter(itemsToCheck, {deleted: '0'});
-    console.log("FILTERED ITEMS: " + _.size(itemsToCheck));
+    //console.log("FILTERED ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve, reject) {
       remoteIdArray = _.map(itemsToCheck, 'id');
@@ -142,12 +156,12 @@ export class LocalDocumentProvider
 
         if (!_.size(missingIdArray))
         {
-          console.log("No new records.");
+          //console.log("No new records.");
           resolve();
           return;
         }
 
-        console.log("MISSING ID ARRAY: ", missingIdArray);
+        //console.log("MISSING ID ARRAY: ", missingIdArray);
         self.offlineCapableRestService.getEntries(dbTableName, {
           select_fields: fixedModuleFields,
           ids: missingIdArray
@@ -163,12 +177,14 @@ export class LocalDocumentProvider
 
             if (!_.size(documents))
             {
-              console.log("No new documents to register.");
+              //console.log("No new documents to register.");
               resolve();
               return;
             }
 
-            console.log("NEW DOCS TO REGISTER: ", documents);
+            console.log("NEW DOCS : #", _.size(documents));
+            //console.log("NEW DOCS TO REGISTER: ", documents);
+
             self.storeDocuments(documents)
               .then(() => {
                 resolve();
@@ -186,6 +202,7 @@ export class LocalDocumentProvider
   }
 
   /**
+   * @todo: use self.sync_configuration
    * [ called by localDocumentProvider.syncWithRemote ]
    *
    * @param {any} itemsToCheck
@@ -201,6 +218,10 @@ export class LocalDocumentProvider
     let fixedModuleFields = self.module_fields;
     fixedModuleFields.push('date_entered');
     fixedModuleFields.push('date_modified');
+
+    //keep only items that are not deleted
+    itemsToCheck = _.filter(itemsToCheck, {deleted: '0'});
+    //console.log("FILTERED ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve, reject) {
       remoteIdArray = _.map(itemsToCheck, 'id');
@@ -234,12 +255,12 @@ export class LocalDocumentProvider
 
         if (!_.size(updateIdArray))
         {
-          console.log("No records to update.");
+          //console.log("No records to update.");
           resolve();
           return;
         }
 
-        console.log("Records to update: ", updateIdArray);
+        //console.log("Records to update: ", updateIdArray);
 
         self.offlineCapableRestService.getEntries(dbTableName, {
           select_fields: fixedModuleFields,
@@ -256,12 +277,13 @@ export class LocalDocumentProvider
 
           if (!_.size(documents))
           {
-            console.log("No changed documents to update.");
+            //console.log("No changed documents to update.");
             resolve();
             return;
           }
+          console.log("CHANGED DOCS : #", _.size(documents));
+          //console.log("CHANGED DOCS TO UPDATE: ", documents);
 
-          console.log("CHANGED DOCS TO UPDATE: ", documents);
           self.storeDocuments(documents)
             .then(() => {
               resolve();
@@ -278,6 +300,7 @@ export class LocalDocumentProvider
   }
 
   /**
+   * @todo: use self.sync_configuration
    * [ called by localDocumentProvider.syncWithRemote ]
    *
    * @param {any} itemsToCheck
@@ -288,8 +311,12 @@ export class LocalDocumentProvider
     let self = this;
     let dbTableName = self.underlying_model.DB_TABLE_NAME;
 
+    //keep only items that are deleted
+    itemsToCheck = _.filter(itemsToCheck, {deleted: '1'});
+    //console.log("FILTERED (DELETED)ITEMS: " + _.size(itemsToCheck));
+
     return new Promise(function (resolve, reject) {
-      console.log("syncDownDeleted");
+      //console.log("syncDownDeleted");
       resolve();
     });
   }
@@ -316,7 +343,9 @@ export class LocalDocumentProvider
         .then((cfg) => {
             config = cfg;
             syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
-            console.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
+            //console.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
+
+            //console.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
 
             self.offlineCapableRestService.getEntryList(dbTableName, {
               select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
@@ -527,20 +556,26 @@ export class LocalDocumentProvider
       console.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
-      /*
+
       let changes = self.db.changes({
         since: 'now',
         live: true,
-        include_docs: true
+        include_docs: false
       }).on('change', function (change) {
-        console.log('DB CHANGE: ', change);
+        //console.log('DB CHANGE: ', change);
+        let data = {
+          db: self.database_name,
+          id: change.id
+        };
+        self.databaseChangeSubject.next(data);
         //put some observable here and trigger change
       }).on('complete', function (info) {
-        console.log('DB COMPLETE: ', info);
+        //console.log('DB COMPLETE: ', info);
+        self.databaseChangeSubject.complete();
       }).on('error', function (err) {
-        console.error(err);
+        console.error('DB ERROR: ' + err);
+        self.databaseChangeSubject.error(err);
       });
-      */
 
 
       //add index for 'id'

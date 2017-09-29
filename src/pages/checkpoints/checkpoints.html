@@ -3,7 +3,18 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title float-left>Elenco locali</ion-title>
+    <ion-title float-left>Elenco locali({{checkpoints.length}})</ion-title>
+
+    <button ion-button icon-left float-right (click)="action1()" color="dark">
+      <ion-icon name="play"></ion-icon>
+      <ion-label>START</ion-label>
+    </button>
+
+    <button ion-button icon-left float-right (click)="action2()" color="dark">
+      <ion-icon name="square"></ion-icon>
+      <ion-label>STOP</ion-label>
+    </button>
+
   </ion-navbar>
 </ion-header>
 

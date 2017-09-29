@@ -3,6 +3,7 @@ import {NavController, ModalController, ToastController, LoadingController} from
 import {ConfigurationService} from '../../services/configuration.service';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
+import { BackgroundService } from "../../services/background.service";
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
 import {HomePage} from "../home/home";
@@ -25,6 +26,7 @@ export class ConfigurationPage implements OnInit
     , private configurationService: ConfigurationService
     , private userService: UserService
     , private remoteDataService: RemoteDataService
+    , private backgroundService: BackgroundService
     , public offlineCapableRestService: OfflineCapableRestService)
   {
     this.viewIsReady = false;
@@ -49,13 +51,19 @@ export class ConfigurationPage implements OnInit
 
     let loaderContent = "<strong>Eliminazione cache</strong><br />";
     let msg;
-    let self = this;
 
     let loader = this.loadingCtrl.create({
       content: loaderContent,
       duration: (5 * 60 * 1000)
     });
+
     loader.present().then(() =>
+    {
+      msg = "Stopping background service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.backgroundService.stop();
+    }).then(() =>
     {
       msg = "Logging out user...";
       console.log(msg);
@@ -79,6 +87,12 @@ export class ConfigurationPage implements OnInit
       console.log(msg);
       loader.setContent(loaderContent + msg);
       return this.remoteDataService.initialize(true);
+    }).then(() =>
+    {
+      msg = "Starting background service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.backgroundService.start();
     }).then(() =>
     {
       msg = "Cache cleared.";
@@ -125,6 +139,10 @@ export class ConfigurationPage implements OnInit
     });
     loader.present().then(() =>
     {
+      console.log("Stopping background service...");
+      return this.backgroundService.stop();
+    }).then(() =>
+    {
       //save all config values
       let setPromises = [];
       _.each(this.cfg, function (val, key)
@@ -149,7 +167,10 @@ export class ConfigurationPage implements OnInit
         return this.userService.initialize();
       }).then(() =>
       {
-        console.log("User service initialized.");
+        console.log("Starting background service...");
+        return this.backgroundService.start();
+      }).then(() =>
+      {
         return loader.dismiss();
       }).then(() =>
       {
