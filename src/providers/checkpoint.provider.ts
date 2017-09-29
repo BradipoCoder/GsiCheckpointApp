@@ -60,6 +60,9 @@ export class CheckpointProvider extends LocalDocumentProvider
 
     let model = new Checkpoint();
     this.module_fields = model.getDefinedProperties();
+
+    //{auto_compaction: true, revs_limit: 10}
+    this.database_options.revs_limit = 1;
   }
 
   /**
@@ -191,104 +194,6 @@ export class CheckpointProvider extends LocalDocumentProvider
     });
   }
 
-
-  /**
-   * Returns number of NEW items synced DOWN from remote
-   * [ called by localDocumentProvider.syncWithRemote ]
-   *
-   * @param {number} [maxItemsToSync]
-   * @returns {Promise<number>}
-   */
-  public syncWithRemoteDownNew___OLD(maxItemsToSync: number = 0): Promise<number>
-  {
-    let self = this;
-    let syncCount = 0;
-    let dbTableName = Checkpoint.DB_TABLE_NAME;
-    let configCheckKey = dbTableName + "_last_down_new_offset";
-    let configCheckValue;
-    let remoteIdArray, localIdArray, missingIdArray;
-
-    return new Promise(function (resolve, reject) {
-      self.configurationService.getConfig(configCheckKey, 0)
-        .then((lastDownNewOffset: string) => {
-          //console.log("lastDownNewOffset: " + lastDownNewOffset);
-          configCheckValue = lastDownNewOffset;
-
-          // console.log("syncWithRemoteDownNew maxItemsToSync: " + maxItemsToSync);
-
-          let query = "account_id_c = '" + "3aaaca35-bf86-5e1b-488b-591abe50a893" + "'";
-
-          self.offlineCapableRestService.getEntryList(Checkpoint.DB_TABLE_NAME, {
-            select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
-            order_by: 'date_entered ASC',
-            deleted: '1',
-            query: query,
-            offset: lastDownNewOffset,
-            max_results: maxItemsToSync
-          }).then((res) => {
-            let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
-            console.log("RECORDS: ", records);
-
-
-            remoteIdArray = _.map(records, 'id');
-            //console.log("REMOTE ID ARRAY: ", remoteIdArray);
-
-            configCheckValue = _.size(remoteIdArray) ? configCheckValue + _.size(remoteIdArray) : 0;
-
-            self.findDocuments({
-              selector: {id: {'$in': remoteIdArray}},
-              fields: ['id'],
-            }).then((docs) => {
-              let records = !_.isUndefined(docs.docs) ? docs.docs : [];
-              //console.log("EntryList records: ", records);
-              localIdArray = _.map(records, 'id');
-              //console.log("LOCAL ID ARRAY: ", localIdArray);
-
-              missingIdArray = _.difference(remoteIdArray, localIdArray);
-              //console.log("MISSING ID ARRAY: ", missingIdArray);
-
-              //store new configCheckValue
-              self.configurationService.setConfig(
-                configCheckKey, configCheckValue, false, true
-              ).then(() => {
-                self.offlineCapableRestService.getEntries(self.remote_table_name, {
-                  select_fields: self.module_fields,
-                  ids: missingIdArray
-                }).then((res) => {
-                  let records = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
-                  //console.log("RECORDS: ", records);
-
-                  let documents = [];
-                  _.each(records, function (record) {
-                    documents.push(new Checkpoint(record));
-                  });
-                  console.log("DOCS: ", documents);
-                  syncCount = _.size(documents);
-
-                  self.storeDocuments(documents)
-                    .then(() => {
-                      resolve(syncCount);
-                    }, (e) => {
-                      return reject(new Error("store local docs error - " + e));
-                    });
-                }, (e) => {
-                  return reject(new Error("load missing remote docs error - " + e));
-                });
-              }, (e) => {
-                return reject(new Error("store Config[" + configCheckKey + "] error - " + e));
-              });
-            }, (e) => {
-              return reject(new Error("get local Id array error - " + e));
-            });
-          }, (e) => {
-            return reject(new Error("getEntryList error - " + e));
-          });
-        }, (e) => {
-          return reject(new Error("get Config[" + configCheckKey + "] error - " + e));
-        });
-    });
-  }
-
   /**
    *
    * @param {boolean} pushOnly
@@ -299,6 +204,11 @@ export class CheckpointProvider extends LocalDocumentProvider
     let self = this;
     let batchSize = 100;
     let forceUpdate = false;
+
+    //we need these dates to confront later for sync
+    let fixedModuleFields = self.module_fields;
+    fixedModuleFields.push('date_entered');
+    fixedModuleFields.push('date_modified');
 
     return new Promise(function (resolve, reject) {
       //no need to do anything
@@ -317,7 +227,7 @@ export class CheckpointProvider extends LocalDocumentProvider
         return new Promise(function (resolve, reject) {
           offset = sequence * batchSize;
           self.offlineCapableRestService.getEntryList(self.remote_table_name, {
-            select_fields: self.module_fields,
+            select_fields: fixedModuleFields,
             order_by: 'code ASC',
             max_results: batchSize,
             offset: offset

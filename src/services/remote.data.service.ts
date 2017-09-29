@@ -449,25 +449,11 @@ export class RemoteDataService
         return self.checkinProvider.initialize();
       }).then(() =>
       {
-        return self.updateCurrentSessionCheckins();
-      }).then(() =>
-      {
-        if (skipDataSync)
-        {
-          return resolve();
-        }
-        if (!waitForProviderData)
-        {
-          resolve();
-        }
-        return self.triggerProviderDataSync();
-      }).then(() =>
-      {
         resolve();
-      }).catch((e) =>
-      {
-        reject(e);
-      });
+        //return self.updateCurrentSessionCheckins();
+      }, (e) => {
+        return reject(e);
+      })
     });
   }
 }

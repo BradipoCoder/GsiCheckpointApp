@@ -28,10 +28,10 @@ export class Checkpoint extends CrmDataModel
   /**
    * Create an instance by mapping supplied data to existent properties
    *
-   * @param {{id:string}} data
+   * @param {any} data
    */
   constructor(data: any = {}) {
-    super();
+    super(data);
 
     //console.log("Undefined keys", _.difference(_.keys(data), _.keys(this)));
     let self = this;
@@ -43,6 +43,9 @@ export class Checkpoint extends CrmDataModel
       }
     });
 
+    //date checks
+    this.checkPropertyDate('date_entered');
+    this.checkPropertyDate('date_modified');
   }
 
 

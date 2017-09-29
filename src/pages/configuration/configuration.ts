@@ -75,16 +75,10 @@ export class ConfigurationPage implements OnInit
       return this.remoteDataService.destroyLocalDataStorages();
     }).then(() =>
     {
-      msg = "Loading data...";
-      console.log(msg);
-      loader.setContent(loaderContent + msg);
-      return this.remoteDataService.initialize(true);
-    }).then(() =>
-    {
       msg = "Initializing remote data service...";
       console.log(msg);
       loader.setContent(loaderContent + msg);
-      return this.remoteDataService.initialize(false, true);
+      return this.remoteDataService.initialize(true);
     }).then(() =>
     {
       msg = "Cache cleared.";
@@ -106,73 +100,6 @@ export class ConfigurationPage implements OnInit
     });
   }
 
-  /**
-   * !!! NETWORK CONNECTION REQUIRED !!!
-   * destroy and recreate databases and load remote data
-   */
-  cleanCacheOld(): void
-  {
-    if(!this.offlineCapableRestService.isNetworkConnected())
-    {
-      let toast = this.toastCtrl.create({
-        message: "Nessuna connessione! Connettiti alla rete e riprova.",
-        duration: 5000,
-        position: 'top'
-      });
-      toast.present();
-      return;
-    }
-
-    let loaderContent = "<strong>Eliminazione cache</strong><br />";
-    let msg;
-    let self = this;
-    let loader = this.loadingCtrl.create({
-      content: loaderContent,
-      duration: (5 * 60 * 1000)
-    });
-    loader.present().then(() =>
-    {
-      msg = "Destroying databases...";
-      console.log(msg);
-      loader.setContent(loaderContent + msg);
-      return this.remoteDataService.destroyLocalDataStorages();
-    }).then(() =>
-    {
-      msg = "Loading data...";
-      console.log(msg);
-      loader.setContent(loaderContent + msg);
-
-      return this.remoteDataService.initialize(true);
-    }).then(() =>
-    {
-      msg = "Initializing...";
-      console.log(msg);
-      loader.setContent(loaderContent + msg);
-
-      return this.remoteDataService.initialize(false, true);
-    }).then(() =>
-    {
-      msg = "Cache cleared.";
-      console.log(msg);
-      loader.dismiss().then(() => {
-        this.navCtrl.push(HomePage).then(() => {
-          this.navCtrl.setRoot(HomePage).then(() => {
-            console.log("going home...");
-          });
-        });
-      });
-    }).catch((e) =>
-    {
-      loader.dismiss();
-      let toast = this.toastCtrl.create({
-        message: e,
-        duration: 15000,
-        position: 'top'
-      });
-      toast.present();
-      console.log("Cache clean error: " + e);
-    });
-  }
 
 
   /**

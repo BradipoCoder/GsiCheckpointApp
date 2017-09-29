@@ -26,7 +26,7 @@ export class LocalDocumentProvider
   protected underlying_model: any;
 
   protected database_name: string;
-  protected database_options: any = {};
+  protected database_options: any = {auto_compaction: true};
 
   protected database_indices: any = [];
 
@@ -52,13 +52,13 @@ export class LocalDocumentProvider
 
     let syncFunctions = [
       'syncDownNew',
-      /*'syncDownChanged',*/
-      /*'syncDownDeleted'*/
+      'syncDownChanged',
+      'syncDownDeleted'
     ];
 
     let dbTableName = self.underlying_model.DB_TABLE_NAME;
-    let numberOfItemsToSyncAtOnce = 50;
-    let query = "";
+    let numberOfItemsToSyncAtOnce = 25;
+    let query = ""; //"account_id_c = '3aaaca35-bf86-5e1b-488b-591abe50a893'";//CSI checkpoints
     let remoteItems = [];
 
     return new Promise(function (resolve, reject) {
@@ -112,11 +112,18 @@ export class LocalDocumentProvider
   {
     let self = this;
     let dbTableName = self.underlying_model.DB_TABLE_NAME;
-    let remoteIdArray, localIdArray, missingIdArray;
+    let remoteIdArray, localIdArray, missingIdArray = [];
+
+    //we need these dates to confront later for sync
+    let fixedModuleFields = self.module_fields;
+    fixedModuleFields.push('date_entered');
+    fixedModuleFields.push('date_modified');
+
+    //keep only items that are note deleted
+    itemsToCheck = _.filter(itemsToCheck, {deleted: '0'});
+    console.log("FILTERED ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve, reject) {
-      console.log("syncDownNew");
-
       remoteIdArray = _.map(itemsToCheck, 'id');
       //console.log("REMOTE ID ARRAY: ", remoteIdArray);
 
@@ -126,7 +133,7 @@ export class LocalDocumentProvider
       }).then((docs) => {
 
         docs = !_.isUndefined(docs.docs) ? docs.docs : [];
-        //console.log("EntryList records: ", docs);
+        //console.log("Local documents: ", docs);
 
         localIdArray = _.map(docs, 'id');
         //console.log("LOCAL ID ARRAY: ", localIdArray);
@@ -142,7 +149,7 @@ export class LocalDocumentProvider
 
         console.log("MISSING ID ARRAY: ", missingIdArray);
         self.offlineCapableRestService.getEntries(dbTableName, {
-          select_fields: self.module_fields,
+          select_fields: fixedModuleFields,
           ids: missingIdArray
         }).then((res) => {
             let records = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
@@ -188,9 +195,85 @@ export class LocalDocumentProvider
   {
     let self = this;
     let dbTableName = self.underlying_model.DB_TABLE_NAME;
+    let remoteIdArray, updateIdArray = [];
+
+    //we need these dates to confront later for sync
+    let fixedModuleFields = self.module_fields;
+    fixedModuleFields.push('date_entered');
+    fixedModuleFields.push('date_modified');
+
     return new Promise(function (resolve, reject) {
-      console.log("syncDownChanged");
-      resolve();
+      remoteIdArray = _.map(itemsToCheck, 'id');
+      //console.log("REMOTE ID ARRAY: ", remoteIdArray);
+      //console.log("Remote documents: ", itemsToCheck);
+
+      self.findDocuments({
+        selector: {id: {'$in': remoteIdArray}},
+        fields: ['id', 'date_modified'],
+      }).then((localDocs) => {
+
+        localDocs = !_.isUndefined(localDocs.docs) ? localDocs.docs : [];
+
+        //create date objects
+        _.each(localDocs, (localDoc) => {
+          localDoc.date_modified = moment(localDoc.date_modified);
+        });
+        //console.log("Local documents: ", localDocs);
+
+        let remoteDoc;
+        _.each(localDocs, (localDoc) => {
+          remoteDoc = _.find(itemsToCheck, {id: localDoc.id});
+          if(remoteDoc)
+          {
+            if(remoteDoc.date_modified.isAfter(localDoc.date_modified))
+            {
+              updateIdArray.push(localDoc.id);
+            }
+          }
+        });
+
+        if (!_.size(updateIdArray))
+        {
+          console.log("No records to update.");
+          resolve();
+          return;
+        }
+
+        console.log("Records to update: ", updateIdArray);
+
+        self.offlineCapableRestService.getEntries(dbTableName, {
+          select_fields: fixedModuleFields,
+          ids: updateIdArray
+        }).then((res) => {
+          let records = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
+
+          let documents = [];
+          let model;
+          _.each(records, function (record) {
+            model = new self.underlying_model(record);
+            documents.push(model);
+          });
+
+          if (!_.size(documents))
+          {
+            console.log("No changed documents to update.");
+            resolve();
+            return;
+          }
+
+          console.log("CHANGED DOCS TO UPDATE: ", documents);
+          self.storeDocuments(documents)
+            .then(() => {
+              resolve();
+            }, (e) => {
+              return reject(new Error("Store Local Documents error - " + e));
+            });
+        }, (e) => {
+          return reject(new Error("Get Remote Entries error: " + e));
+        });
+      }, (e) => {
+        return reject(new Error("Get Local Documents error: " + e));
+      });
     });
   }
 
@@ -204,6 +287,7 @@ export class LocalDocumentProvider
   {
     let self = this;
     let dbTableName = self.underlying_model.DB_TABLE_NAME;
+
     return new Promise(function (resolve, reject) {
       console.log("syncDownDeleted");
       resolve();
@@ -232,7 +316,7 @@ export class LocalDocumentProvider
         .then((cfg) => {
             config = cfg;
             syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
-            //console.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
+            console.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
 
             self.offlineCapableRestService.getEntryList(dbTableName, {
               select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
@@ -243,6 +327,13 @@ export class LocalDocumentProvider
               max_results: itemLimit
             }).then((res) => {
                 let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
+
+                //create date objects
+                _.each(records, (record) => {
+                  record.date_entered = moment(record.date_entered);
+                  record.date_modified = moment(record.date_modified);
+                });
+
                 //console.log("RECORDS: ", records);
                 let newSyncOffset = _.size(records) == itemLimit ? syncOffset + itemLimit : 0;
                 self.configurationService.setConfig(configCheckKey, newSyncOffset, false, true)
@@ -436,7 +527,7 @@ export class LocalDocumentProvider
       console.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
-
+      /*
       let changes = self.db.changes({
         since: 'now',
         live: true,
@@ -449,6 +540,8 @@ export class LocalDocumentProvider
       }).on('error', function (err) {
         console.error(err);
       });
+      */
+
 
       //add index for 'id'
       self.database_indices.push(

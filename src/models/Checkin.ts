@@ -31,7 +31,7 @@ export class Checkin extends CrmDataModel
    */
   constructor(data: any = {})
   {
-    super();
+    super(data);
 
     //console.log("Undefined keys", _.difference(_.keys(data), _.keys(this)));
     let self = this;

@@ -252,6 +252,11 @@ export class CheckinProvider extends LocalDocumentProvider
     let maxRecords = 100;
     let recordCount = 0;
 
+    //we need these dates to confront later for sync
+    let fixedModuleFields = self.module_fields;
+    fixedModuleFields.push('date_entered');
+    fixedModuleFields.push('date_modified');
+
     return new Promise(function (resolve, reject)
     {
       let sequence = 0;
@@ -266,7 +271,7 @@ export class CheckinProvider extends LocalDocumentProvider
         {
           offset = sequence * batchSize;
           self.offlineCapableRestService.getEntryList(self.remote_table_name, {
-            select_fields: self.module_fields,
+            select_fields: fixedModuleFields,
             order_by: 'checkin_date ASC',
             max_results: batchSize,
             offset: offset
