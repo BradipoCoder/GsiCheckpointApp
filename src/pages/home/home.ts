@@ -36,7 +36,6 @@ export class HomePage implements OnInit, OnDestroy
   private dataChangeSubscription: Subscription;
 
 
-
   constructor(public navCtrl: NavController
     , private platform: Platform
     , public toastCtrl: ToastController
@@ -256,6 +255,9 @@ export class HomePage implements OnInit, OnDestroy
       }
       durationStr += minutes + " min";
       //durationStr += " " + seconds + "s";
+    } else
+    {
+      console.log("NSC");
     }
 
     self.shiftTotalDuration = durationStr;
@@ -276,6 +278,9 @@ export class HomePage implements OnInit, OnDestroy
 
         this.currentOperationDuration = lastCheckin.getFormattedDuration();
       }
+    } else
+    {
+      console.log("NSC");
     }
   }
 
@@ -295,7 +300,7 @@ export class HomePage implements OnInit, OnDestroy
    *
    * @param {boolean} state
    */
-  protected fakeNetworkStateChange(state:boolean)
+  protected fakeNetworkStateChange(state: boolean)
   {
     this.offlineCapableRestService.setIsNetworkConnected(state);
   }
@@ -303,27 +308,34 @@ export class HomePage implements OnInit, OnDestroy
   /**
    * @todo: we should implement an id based refresh where we substitute documents singularly
    * @todo: last triggered update could be skipped never updating to final list :....?
+   *
+   * @returns {Promise<any>}
    */
-  private refreshHomeData(): void
+  private refreshHomeData(): Promise<any>
   {
-    if(this.is_refreshing) {
-      console.warn("Refresh is already on the way...(skipping);)");
-      return;
-    }
+    let self = this;
 
-    let fiveSecondsAgo = moment().subtract(5, 'seconds');
-    if (this.lastRefresh && this.lastRefresh.isAfter(fiveSecondsAgo))
-    {
-      console.warn("Skipping refresh - too early ;)");
-      return;
-    }
+    return new Promise(function (resolve, reject) {
 
-    this.is_refreshing = true;
+      if (self.is_refreshing)
+      {
+        return reject(new Error("Refresh is already on the way...(skipping)"));
+      }
 
-    this.remoteDataService.updateCurrentSessionCheckins().then(() => {
-      console.warn("HOMEDATA refresh - done");
-      this.lastRefresh = moment();
-      this.is_refreshing = false;
+      let fiveSecondsAgo = moment().subtract(5, 'seconds');
+      if (self.lastRefresh && self.lastRefresh.isAfter(fiveSecondsAgo))
+      {
+        return reject(new Error("Skipping refresh - too many!"));
+      }
+
+      self.is_refreshing = true;
+
+      self.remoteDataService.updateCurrentSessionCheckins().then(() => {
+        //console.warn("HOMEDATA refresh - done");
+        self.lastRefresh = moment();
+        self.is_refreshing = false;
+        resolve();
+      });
     });
   }
 
@@ -331,8 +343,6 @@ export class HomePage implements OnInit, OnDestroy
   ngOnInit(): void
   {
     let self = this;
-
-    this.autoUpdateIntevalExecution(this);
 
     this.is_network_connected = this.offlineCapableRestService.isNetworkConnected();
 
@@ -345,15 +355,23 @@ export class HomePage implements OnInit, OnDestroy
     );
 
     this.dataChangeSubscription = this.checkinProvider.databaseChangeObservable.subscribe
-    ((data:any) => {
-      if(_.includes(['checkpoint', 'checkin'], data.db))
+    ((data: any) => {
+      if (_.includes(['checkpoint', 'checkin'], data.db))
       {
         console.log('HOME - DB CHANGE!');
-        this.refreshHomeData();
+        self.refreshHomeData().then(() => {
+            self.autoUpdateIntevalExecution(self);
+          }
+        );
       }
     });
 
-    this.refreshHomeData();
+    this.refreshHomeData().then(() => {
+        this.autoUpdateIntevalExecution(this);
+      }
+    );
+
+
   }
 
 

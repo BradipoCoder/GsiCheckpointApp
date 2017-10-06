@@ -28,6 +28,22 @@ export class UserService
   }
 
   /**
+   * For some special users we can show special stuff/buttons
+   * @returns {boolean}
+   */
+  public isTrustedUser(): boolean
+  {
+    let answer;
+
+    let trustedUsers = ['jakabadambalazs'];
+    let username = this.getUserData('user_name', false);
+
+    answer = false; //_.includes(trustedUsers, username);
+
+    return answer;
+  }
+
+  /**
    *
    * @returns {boolean}
    */
@@ -76,7 +92,7 @@ export class UserService
   {
     let self = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
 
       //@todo: this only works if you are logged in on CRM
       if (!_.isUndefined(data.id))
@@ -86,16 +102,16 @@ export class UserService
           + '&type=Users'
       }
 
-      self.db.get('userdata').then(function (doc) {
+      self.db.get('userdata').then((doc) => {
         _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
         return self.db.put(data);
-      }).then(function (res) {
+      }).then(() => {
         //console.log("User data stored");
         resolve();
-      }).catch(function (err) {
+      }).catch(() => {
         //console.log(err);
         _.assignIn(data, {_id: 'userdata'});
-        self.db.put(data).then((res) => {
+        self.db.put(data).then(() => {
           //console.log("User data stored(new)");
           resolve();
         });
@@ -107,20 +123,19 @@ export class UserService
   /**
    *
    * @param {string} key
+   * @param {any} default_value
    * @returns {any}
    */
-  public getUserData(key: string): any
+  public getUserData(key: string, default_value: any = ''): any
   {
-    let answer;
+    let answer = default_value;
+
     if (_.has(this.user_data, key))
     {
       answer = _.get(this.user_data, key);
     } else if (key == '*')
     {
       answer = this.user_data;
-    } else
-    {
-      answer = '';
     }
 
     return answer;
@@ -135,7 +150,7 @@ export class UserService
     let self = this;
     self.unsetOfflineUserData();
     console.log("Logging out...");
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       self.offlineCapableRestService.logout().then(() => {
         self.authenticated = false;
         self.db.destroy().then(() => {
@@ -165,7 +180,7 @@ export class UserService
 
     return new Promise(function (resolve, reject) {
       self.offlineCapableRestService.login(username, password)
-        .then((res) => {
+        .then(() => {
             //console.log("LOGIN DATA:", res);
             self.user_data = self.offlineCapableRestService.getAuthenticatedUser();
             self.user_data.id = self.user_data.user_id;
@@ -244,7 +259,7 @@ export class UserService
     this.is_initialized = false;
     this.unsetOfflineUserData();
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
       self.configurationService.getConfigObject()
         .then((cfg) => {
@@ -271,7 +286,7 @@ export class UserService
               resolve()
             }
           );
-        }, (e) => {
+        }, () => {
 
           self.autologin().then(() => {
               resolve()

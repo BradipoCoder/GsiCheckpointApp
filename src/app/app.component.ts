@@ -10,10 +10,7 @@ import {BackgroundService} from '../services/background.service';
 
 import {HomePage} from "../pages/home/home";
 import {ConfigurationPage} from "../pages/configuration/configuration";
-import {LogoutPage} from "../pages/logout/logout";
 import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
-
-//import _ from "lodash";
 
 @Component({
   templateUrl: 'app.html'
@@ -48,29 +45,23 @@ export class MekitTracerApp
 
   initializeApp()
   {
-    this.platform.ready().then(() =>
-    {
+    this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       console.log("Platform is ready. Let's go!");
       return this.configurationService.initialize();
-    }).then(() =>
-    {
+    }).then(() => {
       console.log("Configuration service initialized.");
       return this.userService.initialize();
-    }).then(() =>
-    {
+    }).then(() => {
       console.log("User service initialized.");
       return this.remoteDataService.initialize(false, true);//do NOT load data
-    }).then(() =>
-    {
+    }).then(() => {
       console.log("RemoteData service initialized.");
       return this.backgroundService.initialize();
-    }).then(() =>
-    {
+    }).then(() => {
       console.log("BackgroundService service initialized.");
       this.presentStartupPage();
-    }).catch((e) =>
-    {
+    }).catch((e) => {
       console.error("App initialization error: " + e);
     });
   }
@@ -96,7 +87,10 @@ export class MekitTracerApp
    */
   openPage(page)
   {
-    this.nav.setRoot(page.component);
+    this.nav.setRoot(page.component).then(() => {
+        //root is set
+      }
+    );
   }
 }
 
