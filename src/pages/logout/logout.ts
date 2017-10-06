@@ -10,17 +10,33 @@ import {HomePage} from '../home/home'
 export class LogoutPage
 {
 
+  /**
+   *
+   * @param {NavController} navCtrl
+   * @param {UserService} userService
+   */
   constructor(public navCtrl: NavController
     , private userService: UserService)
   {
   }
 
-  logout(): void
+  /**
+   * Log out
+   */
+  public logout(): void
   {
     this.userService.logout().then(() => {
       console.log("Now logged out");
-      this.navCtrl.push(HomePage);
-      this.navCtrl.setRoot(HomePage);
+      this.userService.initialize().then(() => {
+        console.log("Init done");
+        this.navCtrl.push(HomePage).then(() => {
+          console.log("Going home #1");
+          this.navCtrl.setRoot(HomePage).then(() => {
+            console.log("Going home #2");
+          });
+        });
+      });
     });
   }
+
 }

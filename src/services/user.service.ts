@@ -31,17 +31,85 @@ export class UserService
    *
    * @returns {boolean}
    */
-  isAuthenticated(): boolean
+  public isAuthenticated(): boolean
   {
     return this.authenticated;
   }
 
   /**
    *
+   */
+  private unsetOfflineUserData(): void
+  {
+    this.is_user_configured = false;
+    this.user_data = {};
+  }
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  private configureWithOfflineUserData(): Promise<any>
+  {
+    let self = this;
+    this.unsetOfflineUserData();
+
+    return new Promise(function (resolve, reject) {
+      self.db.get('userdata').then((doc) => {
+          self.user_data = doc;
+          self.is_user_configured = true;
+          resolve();
+        }, (e) => {
+          return reject(e);
+        }
+      );
+    });
+  }
+
+  /**
+   * Store logged in user values for offline usage
+   *
+   * @param {any} data
+   * @returns {Promise<any>}
+   */
+  public storeOfflineUserData(data): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject) {
+
+      //@todo: this only works if you are logged in on CRM
+      if (!_.isUndefined(data.id))
+      {
+        data.avatar_uri = 'http://gsi.crm.mekit.it/index.php?entryPoint=download'
+          + '&id=' + data.id + '_photo'
+          + '&type=Users'
+      }
+
+      self.db.get('userdata').then(function (doc) {
+        _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
+        return self.db.put(data);
+      }).then(function (res) {
+        //console.log("User data stored");
+        resolve();
+      }).catch(function (err) {
+        //console.log(err);
+        _.assignIn(data, {_id: 'userdata'});
+        self.db.put(data).then((res) => {
+          //console.log("User data stored(new)");
+          resolve();
+        });
+      });
+    });
+  };
+
+
+  /**
+   *
    * @param {string} key
    * @returns {any}
    */
-  getUserData(key: string): any
+  public getUserData(key: string): any
   {
     let answer;
     if (_.has(this.user_data, key))
@@ -62,35 +130,23 @@ export class UserService
    * Log out user and delete "user" database
    * @returns {Promise<any>}
    */
-  logout(): Promise<any>
+  public logout(): Promise<any>
   {
     let self = this;
+    self.unsetOfflineUserData();
     console.log("Logging out...");
     return new Promise(function (resolve, reject) {
       self.offlineCapableRestService.logout().then(() => {
         self.authenticated = false;
-        return self.db.destroy();
-      }).then(() => {
-        console.log("User database has been destroyed.");
-        self.user_data = {};
-        self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
-        console.log("User database created.");
-        resolve();
+        self.db.destroy().then(() => {
+          console.log("User database has been destroyed.");
+          resolve();
+        });
       }).catch((e) => {
         self.last_error = e;
         console.log("LOGOUT ERROR! " + e);
         self.authenticated = false;
         self.is_initialized = false;
-        self.is_user_configured = false;
-        self.user_data = {};
-        self.db.destroy().then(() => {
-          console.log("User database has been destroyed.");
-          self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
-          console.log("User database created.");
-          resolve();
-        }).catch((e) => {
-          reject(e);
-        });
       });
     });
   }
@@ -117,77 +173,29 @@ export class UserService
               .then((user_full_data) => {
                   user_full_data = _.head(user_full_data.entry_list);
                   _.assignIn(self.user_data, user_full_data);
-                  self.storeUserData(self.user_data).then(() => {
+                  self.storeOfflineUserData(self.user_data).then(() => {
                       self.authenticated = true;
-                      self.is_user_configured = true;
                       resolve();
                     }, (e) => {
                       console.log("LOGIN ERROR! " + e);
                       self.authenticated = false;
-                      self.is_initialized = false;
-                      self.is_user_configured = false;
-                      self.user_data = {};
                       return reject(e);
                     }
                   );
                 }, (e) => {
                   console.log("LOGIN ERROR! " + e);
                   self.authenticated = false;
-                  self.is_initialized = false;
-                  self.is_user_configured = false;
-                  self.user_data = {};
                   return reject(e);
                 }
               );
           }, (e) => {
             console.log("LOGIN ERROR! " + e);
             self.authenticated = false;
-            self.is_initialized = false;
-            self.is_user_configured = false;
-            self.user_data = {};
             return reject(e);
           }
         );
     });
   }
-
-  /**
-   * Store logged in user values for offline usage
-   *
-   * @param {any} data
-   * @returns {Promise<any>}
-   */
-  storeUserData(data): Promise<any>
-  {
-    let self = this;
-
-    return new Promise(function (resolve, reject) {
-
-      //@todo: this only works if you are logged in on CRM
-      if (!_.isUndefined(data.id))
-      {
-        data.avatar_uri = 'http://gsi.crm.mekit.it/index.php?entryPoint=download'
-          + '&id=' + data.id + '_photo'
-          + '&type=Users'
-      }
-
-
-      self.db.get('userdata').then(function (doc) {
-        _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
-        return self.db.put(data);
-      }).then(function (res) {
-        //console.log("User data stored");
-        resolve();
-      }).catch(function (err) {
-        //console.log(err);
-        _.assignIn(data, {_id: 'userdata'});
-        self.db.put(data).then((res) => {
-          //console.log("User data stored(new)");
-          resolve();
-        });
-      });
-    });
-  };
 
   /**
    * Log user in automatically
@@ -229,60 +237,56 @@ export class UserService
     });
   }
 
-  /**
-   * initialize the User service
-   *
-   * @returns {Promise<any>}
-   */
-  initialize(): Promise<any>
+
+  public initialize(): Promise<any>
   {
     let self = this;
-    let config;
-    self.is_initialized = false;
-    self.is_user_configured = false;
-    self.user_data = {};
+    this.is_initialized = false;
+    this.unsetOfflineUserData();
 
     return new Promise(function (resolve, reject) {
       self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
       self.configurationService.getConfigObject()
         .then((cfg) => {
-            self.is_initialized = true;
-            config = cfg;
-            self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
-            if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
-            {
-              self.last_error = new Error("Configuration is incomplete!");
-              console.warn("Configuration is incomplete!");
+          self.is_initialized = true;
+          self.offlineCapableRestService.initialize(cfg.crm_url, cfg.api_version);
+
+          if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
+          {
+            self.last_error = new Error("Configuration is incomplete!");
+            console.warn("Configuration is incomplete!");
+            resolve();
+          }
+
+          return self.configureWithOfflineUserData();
+        }, (e) => {
+          self.last_error = new Error("Configuration object is not available! " + e);
+          console.warn(self.last_error.message);
+          resolve();
+        }).then(() => {
+          self.autologin().then(() => {
+              resolve()
+            }, (e) => {
+              console.warn("Unsuccessful autologin! " + e);
+              resolve()
+            }
+          );
+        }, (e) => {
+
+          self.autologin().then(() => {
+              resolve()
+            }, (e) => {
+              self.last_error = new Error("User data is not available! " + e);
+              console.warn(self.last_error.message);
               return resolve();
             }
-            return self.db.get('userdata');
-          }, (e) => {
-            self.last_error = new Error("Configuration object is not available! " + e);
-            console.warn(self.last_error.message);
-            return resolve();
-          }
-        ).then((doc) => {
-          //console.log("CURRENT USER", doc);
-          self.user_data = doc;
-          self.is_user_configured = true;
-          return self.autologin();
-        }, (e) => {
-          self.last_error = new Error("User data is not available! " + e);
-          console.warn(self.last_error.message);
-          return resolve();
-        }
-      ).then(() => {
-          resolve();
-        }, (e) => {
-          self.last_error = new Error("Unsuccessful autologin! " + e);
-          console.warn(self.last_error.message);
-          return resolve();
+          );
+
         }
       );
+
     });
   }
-
-
 }
 
 

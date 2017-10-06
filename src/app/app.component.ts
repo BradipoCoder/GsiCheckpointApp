@@ -37,10 +37,10 @@ export class MekitTracerApp
 
     // Main menu items
     this.pages = [
-      {title: 'Home', icon: 'home', component: HomePage},
-      {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage},
-      {title: 'Locali', icon: 'globe', component: CheckpointsPage},
-      {title: 'Esci', icon: 'power', component: LogoutPage}
+      {title: 'Home', icon: 'home', component: HomePage}
+      , {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage}
+      , {title: 'Locali', icon: 'globe', component: CheckpointsPage}
+      /*, {title: 'Esci', icon: 'power', component: LogoutPage}*/
     ];
 
     this.initializeApp();
