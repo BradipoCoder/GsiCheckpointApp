@@ -32,6 +32,8 @@ export class ConfigurationPage implements OnInit
     this.viewIsReady = false;
   }
 
+
+
   /**
    * !!! NETWORK CONNECTION REQUIRED !!!
    * destroy and recreate databases and load remote data
@@ -71,10 +73,111 @@ export class ConfigurationPage implements OnInit
       return this.userService.logout();
     }).then(() =>
     {
+      msg = "Initializing user service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.userService.initialize();
+    }).then(() =>
+    {
       msg = "Logging in user...";
       console.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
+    }).then(() =>
+    {
+      msg = "Destroying databases...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.remoteDataService.destroyLocalDataStorages();
+    }).then(() =>
+    {
+      msg = "Initializing remote data service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.remoteDataService.initialize(true);
+    }).then(() =>
+    {
+      msg = "Starting background service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.backgroundService.start();
+    }).then(() =>
+    {
+      msg = "Cache cleared.";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      this.navCtrl.push(HomePage);
+      this.navCtrl.setRoot(HomePage);
+      loader.dismiss();
+    }).catch((e) => {
+      let toast = this.toastCtrl.create({
+        message: e,
+        duration: 15000,
+        position: 'top'
+      });
+      toast.present().then(() => {
+        console.log("Cache clean error: " + e);
+        loader.dismiss();
+      });
+    });
+  }
+
+
+  /**
+   * !!! NETWORK CONNECTION REQUIRED !!!
+   * destroy and recreate databases and load remote data
+   */
+  cleanCacheOld(): void
+  {
+    if (!this.offlineCapableRestService.isNetworkConnected())
+    {
+      let toast = this.toastCtrl.create({
+        message: "Nessuna connessione! Connettiti alla rete e riprova.",
+        duration: 5000,
+        position: 'top'
+      });
+      toast.present();
+      return;
+    }
+
+    let loaderContent = "<strong>Eliminazione cache</strong><br />";
+    let msg;
+
+    let loader = this.loadingCtrl.create({
+      content: loaderContent,
+      duration: (5 * 60 * 1000)
+    });
+
+    loader.present().then(() =>
+    {
+      msg = "Stopping background service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.backgroundService.stop();
+    }).then(() =>
+    {
+      msg = "Logging out user...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.userService.logout();
+    }).then(() =>
+    {
+      msg = "Initializing user service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.userService.initialize();
+    }).then(() =>
+    {
+      msg = "Logging in user...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
+    }).then(() =>
+    {
+      msg = "Initializing user service...";
+      console.log(msg);
+      loader.setContent(loaderContent + msg);
+      return this.userService.initialize();
     }).then(() =>
     {
       msg = "Destroying databases...";

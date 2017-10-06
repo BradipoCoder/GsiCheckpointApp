@@ -360,18 +360,14 @@ export class HomePage implements OnInit, OnDestroy
       {
         console.log('HOME - DB CHANGE!');
         self.refreshHomeData().then(() => {
-            self.autoUpdateIntevalExecution(self);
-          }
-        );
+          self.autoUpdateIntevalExecution(self);
+        });
       }
     });
 
     this.refreshHomeData().then(() => {
-        this.autoUpdateIntevalExecution(this);
-      }
-    );
-
-
+      this.autoUpdateIntevalExecution(this);
+    });
   }
 
 

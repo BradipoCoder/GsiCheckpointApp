@@ -56,10 +56,13 @@ export class CheckinProvider extends LocalDocumentProvider
     //{auto_compaction: true, revs_limit: 10}
     //this.database_options.revs_limit = 1;
 
+    /*
+    * remoteQuery - CRM is role based - no need to filter by user id (it will NOT work)
+    */
     this.sync_configuration = {
       syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted', 'syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY'],
       remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
-      remoteQuery: "",//Will be set in initialize method - NOT - role based - no need to filter by user id
+      remoteQuery: "",
       processRecordsAtOnce: 25
     };
   }
@@ -68,17 +71,36 @@ export class CheckinProvider extends LocalDocumentProvider
    *
    * @param {Checkin} checkin
    * @param {Boolean} [forceUpdate]
+   * @param {String} [findById] - when document contains the new id - you need to use this param to find the document
    * @returns {Promise<string>}
    */
-  public storeCheckin(checkin: Checkin, forceUpdate: boolean = false): Promise<string>
+  public store(checkin: Checkin, forceUpdate: boolean = false, findById: any = false): Promise<string>
+  {
+    return super.storeDocument(checkin, forceUpdate, findById);
+  }
+
+
+  /**
+   * Returns checkpoints found by options
+   *
+   * @returns {Promise<any>}
+   */
+  public find(options: any): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.storeDocument(checkin, forceUpdate).then((docId) =>
-      {
-        resolve(docId);
-      }, (e) => {
+    return new Promise(function (resolve, reject) {
+      self.findDocuments(options).then((res) => {
+        let answer = [];
+        if (!_.isUndefined(res.docs) && _.size(res.docs))
+        {
+          let docs = _.concat([], res.docs);
+          _.each(docs, function (doc) {
+            answer.push(new Checkin(doc));
+          });
+        }
+        resolve(answer);
+      }).catch((e) => {
+        console.error(e);
         reject(e);
       });
     });

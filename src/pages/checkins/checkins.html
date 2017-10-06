@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title float-left>Elenco tracciature({{checkins.length}})</ion-title>
+
+    <button ion-button icon-left float-right (click)="action1()" color="dark">
+      <ion-icon name="play"></ion-icon>
+      <ion-label>START</ion-label>
+    </button>
+
+    <button ion-button icon-left float-right (click)="action2()" color="dark">
+      <ion-icon name="square"></ion-icon>
+      <ion-label>STOP</ion-label>
+    </button>
+
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-grid>
+
+
+      <table class="table responsive checkins">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Sync</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let checkin of checkins">
+            <td>{{checkin.name}}</td>
+            <td>
+              <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{checkin.sync_state}}" item-right></ion-icon>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+
+    </ion-grid>
+</ion-content>

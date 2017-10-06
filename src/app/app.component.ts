@@ -11,6 +11,8 @@ import {BackgroundService} from '../services/background.service';
 import {HomePage} from "../pages/home/home";
 import {ConfigurationPage} from "../pages/configuration/configuration";
 import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
+import {CheckinsPage} from "../pages/checkins/checkins";
+
 
 @Component({
   templateUrl: 'app.html'
@@ -19,7 +21,7 @@ export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
   /* The page to start with */
-  startupPage: any = HomePage;
+  startupPage: any = CheckinsPage;
   rootPage: any;
   pages: Array<{ title: string, icon: string, component: any }>;
 
@@ -37,6 +39,7 @@ export class MekitTracerApp
       {title: 'Home', icon: 'home', component: HomePage}
       , {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage}
       , {title: 'Locali', icon: 'globe', component: CheckpointsPage}
+      , {title: 'Tracciature', icon: 'globe', component: CheckinsPage}
       /*, {title: 'Esci', icon: 'power', component: LogoutPage}*/
     ];
 

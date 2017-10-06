@@ -29,6 +29,7 @@ import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
 import {LogoutPage} from "../pages/logout/logout";
 import {ConfigurationPage} from "../pages/configuration/configuration";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
+import {CheckinsPage} from "../pages/checkins/checkins";
 
 /* Other/Utils/Tools */
 
@@ -38,6 +39,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , HomePage
     , InfoPage
     , CheckpointsPage
+    , CheckinsPage
     , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage
@@ -53,6 +55,7 @@ import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.un
     , HomePage
     , InfoPage
     , CheckpointsPage
+    , CheckinsPage
     , LogoutPage
     , ConfigurationPage
     , ConfigurationUnlockerPage

@@ -38,7 +38,7 @@ export class UserService
     let trustedUsers = ['jakabadambalazs'];
     let username = this.getUserData('user_name', false);
 
-    answer = false; //_.includes(trustedUsers, username);
+    answer = _.includes(trustedUsers, username);
 
     return answer;
   }
@@ -190,7 +190,14 @@ export class UserService
                   _.assignIn(self.user_data, user_full_data);
                   self.storeOfflineUserData(self.user_data).then(() => {
                       self.authenticated = true;
-                      resolve();
+                      self.storeOfflineUserData(self.user_data).then(() => {
+                          resolve();
+                        }, (e) => {
+                          console.log("LOGIN ERROR! " + e);
+                          self.authenticated = false;
+                          return reject(e);
+                        }
+                      );
                     }, (e) => {
                       console.log("LOGIN ERROR! " + e);
                       self.authenticated = false;

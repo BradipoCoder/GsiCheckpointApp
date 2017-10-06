@@ -85,32 +85,6 @@ export class CheckpointProvider extends LocalDocumentProvider
   }
 
   /**
-   *
-   * @param {{}} options
-   * @returns {Promise<Checkpoint>}
-   */
-  public getCheckpoint(options: any): Promise<Checkpoint>
-  {
-    let self = this;
-    return new Promise(function (resolve, reject) {
-      self.findDocuments(options).then((res) => {
-        if (_.size(res.docs) < 1)
-        {
-          throw new Error("Codice locale sconosciuto!");
-        }
-        if (_.size(res.docs) > 1)
-        {
-          throw new Error("Locali multipli per il codice!");
-        }
-        let checkpoint = new Checkpoint(res.docs[0]);
-        resolve(checkpoint);
-      }).catch((e) => {
-        reject(e);
-      });
-    });
-  }
-
-  /**
    * Returns checkpoints found by options
    *
    * @returns {Promise<any>}
@@ -131,6 +105,32 @@ export class CheckpointProvider extends LocalDocumentProvider
         resolve(answer);
       }).catch((e) => {
         console.error(e);
+        reject(e);
+      });
+    });
+  }
+
+  /**
+   *
+   * @param {{}} options
+   * @returns {Promise<Checkpoint>}
+   */
+  public getCheckpoint(options: any): Promise<Checkpoint>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject) {
+      self.findDocuments(options).then((res) => {
+        if (_.size(res.docs) < 1)
+        {
+          throw new Error("Codice locale sconosciuto!");
+        }
+        if (_.size(res.docs) > 1)
+        {
+          throw new Error("Locali multipli per il codice!");
+        }
+        let checkpoint = new Checkpoint(res.docs[0]);
+        resolve(checkpoint);
+      }).catch((e) => {
         reject(e);
       });
     });
@@ -167,6 +167,7 @@ export class CheckpointProvider extends LocalDocumentProvider
    * @param {any} documents
    * @returns {Promise<any>}
    */
+  /*
   public setTypeOnCheckins(documents): Promise<any>
   {
     let self = this;
@@ -180,13 +181,14 @@ export class CheckpointProvider extends LocalDocumentProvider
         resolve(newDocs);
       });
     });
-  }
+  }*/
 
   /**
    *
    * @param {Checkin} checkin
    * @returns {Promise<any>}
    */
+  /*
   public setTypeOnCheckin(checkin: Checkin): Promise<any>
   {
     let self = this;
@@ -199,7 +201,7 @@ export class CheckpointProvider extends LocalDocumentProvider
         resolve(checkin);
       });
     });
-  }
+  }*/
 
   /**
    * @returns {Promise<any>}

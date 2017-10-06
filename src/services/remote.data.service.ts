@@ -211,7 +211,7 @@ export class RemoteDataService
           type: relativeCheckpoint.type,
           sync_state: CrmDataModel.SYNC_STATE__NEW
         });
-        return self.checkinProvider.storeCheckin(checkin);
+        return self.checkinProvider.store(checkin);
       }).then((checkinId) =>
       {
         console.log("New Checkin stored with id: ", checkinId);
@@ -286,7 +286,7 @@ export class RemoteDataService
         previousCheckin.duration = prevCheckinDuration.toString();
         previousCheckin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
         console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
-        return self.checkinProvider.storeCheckin(previousCheckin, true);
+        return self.checkinProvider.store(previousCheckin, true);
       }).then(() =>
       {
         resolve();
