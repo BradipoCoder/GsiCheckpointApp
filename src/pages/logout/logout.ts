@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {HomePage} from '../home/home'
+import {LogService} from "../../services/log.service";
 
 @Component({
   selector: 'page-logout',
@@ -26,13 +27,13 @@ export class LogoutPage
   public logout(): void
   {
     this.userService.logout().then(() => {
-      console.log("Now logged out");
+      LogService.log("Now logged out");
       this.userService.initialize().then(() => {
-        console.log("Init done");
+        LogService.log("Init done");
         this.navCtrl.push(HomePage).then(() => {
-          console.log("Going home #1");
+          LogService.log("Going home #1");
           this.navCtrl.setRoot(HomePage).then(() => {
-            console.log("Going home #2");
+            LogService.log("Going home #2");
           });
         });
       });

@@ -7,6 +7,7 @@ import {OfflineCapableRestService} from './offline.capable.rest.service';
 import {Promise} from '../../node_modules/bluebird'
 import PouchDB from "pouchdb";
 import _ from "lodash";
+import {LogService} from "./log.service";
 
 @Injectable()
 export class UserService
@@ -106,13 +107,13 @@ export class UserService
         _.assignIn(data, {_id: 'userdata', _rev: doc._rev});
         return self.db.put(data);
       }).then(() => {
-        //console.log("User data stored");
+        //LogService.log("User data stored");
         resolve();
       }).catch(() => {
-        //console.log(err);
+        //LogService.log(err);
         _.assignIn(data, {_id: 'userdata'});
         self.db.put(data).then(() => {
-          //console.log("User data stored(new)");
+          //LogService.log("User data stored(new)");
           resolve();
         });
       });
@@ -149,17 +150,17 @@ export class UserService
   {
     let self = this;
     self.unsetOfflineUserData();
-    console.log("Logging out...");
+    LogService.log("Logging out...");
     return new Promise(function (resolve) {
       self.offlineCapableRestService.logout().then(() => {
         self.authenticated = false;
         self.db.destroy().then(() => {
-          console.log("User database has been destroyed.");
+          LogService.log("User database has been destroyed.");
           resolve();
         });
       }).catch((e) => {
         self.last_error = e;
-        console.log("LOGOUT ERROR! " + e);
+        LogService.log("LOGOUT ERROR! " + e);
         self.authenticated = false;
         self.is_initialized = false;
       });
@@ -176,12 +177,12 @@ export class UserService
   public login(username: string, password: string): Promise<any>
   {
     let self = this;
-    console.log("Authenticating user: " + username);
+    LogService.log("Authenticating user: " + username);
 
     return new Promise(function (resolve, reject) {
       self.offlineCapableRestService.login(username, password)
         .then(() => {
-            //console.log("LOGIN DATA:", res);
+            //LogService.log("LOGIN DATA:", res);
             self.user_data = self.offlineCapableRestService.getAuthenticatedUser();
             self.user_data.id = self.user_data.user_id;
             self.offlineCapableRestService.getEntry('Users', self.user_data.id)
@@ -193,25 +194,25 @@ export class UserService
                       self.storeOfflineUserData(self.user_data).then(() => {
                           resolve();
                         }, (e) => {
-                          console.log("LOGIN ERROR! " + e);
+                          LogService.log("LOGIN ERROR! " + e);
                           self.authenticated = false;
                           return reject(e);
                         }
                       );
                     }, (e) => {
-                      console.log("LOGIN ERROR! " + e);
+                      LogService.log("LOGIN ERROR! " + e);
                       self.authenticated = false;
                       return reject(e);
                     }
                   );
                 }, (e) => {
-                  console.log("LOGIN ERROR! " + e);
+                  LogService.log("LOGIN ERROR! " + e);
                   self.authenticated = false;
                   return reject(e);
                 }
               );
           }, (e) => {
-            console.log("LOGIN ERROR! " + e);
+            LogService.log("LOGIN ERROR! " + e);
             self.authenticated = false;
             return reject(e);
           }
@@ -244,16 +245,16 @@ export class UserService
             return reject(new Error("AUTOLOGIN - Configuration object is not available!"));
           })
           .then(() => {
-            console.log("AUTOLOGIN SUCCESS");
+            LogService.log("AUTOLOGIN SUCCESS");
             resolve();
           }, (e) => {
-            console.log("AUTOLOGIN FAILED: " + e);
+            LogService.log("AUTOLOGIN FAILED: " + e);
             return reject(e);
           });
       } else
       {
         self.autologin_skips++;
-        //console.log("AUTOLOGIN SUCCESS(NOT NECESSARY)["+self.autologin_skips+"]");
+        //LogService.log("AUTOLOGIN SUCCESS(NOT NECESSARY)["+self.autologin_skips+"]");
         resolve();
       }
     });
@@ -276,20 +277,20 @@ export class UserService
           if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
           {
             self.last_error = new Error("Configuration is incomplete!");
-            console.warn("Configuration is incomplete!");
+            LogService.log("Configuration is incomplete!", LogService.LEVEL_WARN);
             resolve();
           }
 
           return self.configureWithOfflineUserData();
         }, (e) => {
           self.last_error = new Error("Configuration object is not available! " + e);
-          console.warn(self.last_error.message);
+          LogService.log(self.last_error.message, LogService.LEVEL_WARN);
           resolve();
         }).then(() => {
           self.autologin().then(() => {
               resolve()
             }, (e) => {
-              console.warn("Unsuccessful autologin! " + e);
+              LogService.log("Unsuccessful autologin! " + e, LogService.LEVEL_WARN);
               resolve()
             }
           );
@@ -299,7 +300,7 @@ export class UserService
               resolve()
             }, (e) => {
               self.last_error = new Error("User data is not available! " + e);
-              console.warn(self.last_error.message);
+              LogService.log(self.last_error.message, LogService.LEVEL_WARN);
               return resolve();
             }
           );

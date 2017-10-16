@@ -24,6 +24,7 @@ export class ConfigurationService
     , api_version: 'v4_1'
     , crm_username: ''
     , crm_password: ''
+    , log_level: 'NONE'
   };
 
 

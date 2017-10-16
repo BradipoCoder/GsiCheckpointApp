@@ -6,6 +6,7 @@ import {BackgroundService} from "../../services/background.service";
 import {Checkin} from "../../models/Checkin";
 import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
+import {LogService} from "../../services/log.service";
 
 @Component({
   selector: 'page-checkins',
@@ -66,12 +67,12 @@ export class CheckinsPage implements OnInit, OnDestroy
 
   public action1(): void
   {
-    console.log("A1 - START");
+    LogService.log("A1 - START");
   }
 
   public action2(): void
   {
-    console.log("A2 - STOP");
+    LogService.log("A2 - STOP");
   }
 
   //------------------------------------------------------------------------------------------------------INIT & DESTROY

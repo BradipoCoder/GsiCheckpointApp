@@ -1,19 +1,19 @@
 import {Injectable} from '@angular/core';
 
 /* Services */
-import {UserService} from '../services/user.service';
+import {UserService} from './user.service';
 
 /* Data Providers */
 import {CheckpointProvider} from "../providers/checkpoint.provider";
 import {CheckinProvider} from "../providers/checkin.provider";
 
+/* Other */
 import {Promise} from '../../node_modules/bluebird'
+import {LogService} from "./log.service";
 
 @Injectable()
 export class BackgroundService
 {
-
-
   private is_running = false;
   private stop_requested = false;
 
@@ -59,7 +59,7 @@ export class BackgroundService
       {
         self.is_running = false;
         self.execution_count = 0;
-        console.warn("BackgroundService max execution limit " + self.execution_count_max + " reached. Interval execution stopped.");
+        LogService.log("BackgroundService max execution limit " + self.execution_count_max + " reached. Interval execution stopped.", LogService.LEVEL_WARN);
         return;
       }
 
@@ -79,14 +79,14 @@ export class BackgroundService
       self.execution_count = 0;
     }
     self.execution_count++;
-    console.log("BSE[" + self.execution_count + "/" + self.execution_count_max + "].");
+    LogService.log("BSE[" + self.execution_count + "/" + self.execution_count_max + "].");
     self.executionRun(self)
       .then(() => {
-        //console.log("executionRun: DONE!");
+        //LogService.log("executionRun: DONE!");
       }, (e) => {
-        //console.warn("executionRun: ERROR! - " + e);
+        //LogService.warn("executionRun: ERROR! - " + e);
       }).then(() => {
-      console.log("BSE RUN[" + self.execution_count + "]: DONE.");
+      LogService.log("BSE RUN[" + self.execution_count + "]: DONE.");
       reprogram(self);
     });
 
@@ -130,7 +130,7 @@ export class BackgroundService
   {
     return Promise.reduce(this.dataProviders, function(accu, provider, index)
     {
-      console.log("PROVIDER #" + index + " - " + provider.constructor.name);
+      LogService.log("PROVIDER #" + index + " - " + provider.constructor.name);
       return provider.syncWithRemote();
     }, null);
   }
@@ -149,7 +149,7 @@ export class BackgroundService
     return new Promise(function (resolve, reject) {
       waitInterval = setInterval(() => {
         waitCount++;
-        console.log("waiting to stop[" + waitCount + "/" + waitMaxCount + "]...");
+        LogService.log("waiting to stop[" + waitCount + "/" + waitMaxCount + "]...");
         if (self.is_running == false)
         {
           clearInterval(waitInterval);
@@ -192,7 +192,7 @@ export class BackgroundService
   {
     let self = this;
 
-    //setTimeout(self.intervalExecution, self.startup_delay_ms, self);
+    setTimeout(self.intervalExecution, self.startup_delay_ms, self);
 
     return new Promise(function (resolve, reject) {
       resolve();

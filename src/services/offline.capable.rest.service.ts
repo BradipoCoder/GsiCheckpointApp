@@ -19,6 +19,7 @@ import Rx from "rxjs/Rx";
 import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
 import _ from "lodash";
+import {LogService} from "./log.service";
 
 @Injectable()
 export class OfflineCapableRestService extends RestService
@@ -42,7 +43,7 @@ export class OfflineCapableRestService extends RestService
   {
     if (this.is_network_connected !== is_connected)
     {
-      console.log("NETWORK: " + (is_connected ? "ON" : "OFF"));
+      LogService.log("NETWORK: " + (is_connected ? "ON" : "OFF"));
       this.is_network_connected = is_connected;
       this.networkStateEventStream.next(is_connected);
     }

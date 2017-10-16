@@ -4,6 +4,7 @@ import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 
 import {ConfigurationService} from '../services/configuration.service';
+import {LogService} from "../services/log.service";
 import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
 import {BackgroundService} from '../services/background.service';
@@ -21,7 +22,7 @@ export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
   /* The page to start with */
-  startupPage: any = CheckinsPage;
+  startupPage: any = HomePage;
   rootPage: any;
   pages: Array<{ title: string, icon: string, component: any }>;
 
@@ -29,6 +30,7 @@ export class MekitTracerApp
     , public statusBar: StatusBar
     , public splashScreen: SplashScreen
     , private configurationService: ConfigurationService
+    , private logService: LogService
     , private userService: UserService
     , private backgroundService: BackgroundService
     , private remoteDataService: RemoteDataService)
@@ -50,22 +52,25 @@ export class MekitTracerApp
   {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
-      console.log("Platform is ready. Let's go!");
+      LogService.log("Platform is ready. Let's go!");
       return this.configurationService.initialize();
     }).then(() => {
-      console.log("Configuration service initialized.");
+      LogService.log("Configuration service initialized.");
+      return this.logService.initialize();
+    }).then(() => {
+      LogService.log("Log service initialized.");
       return this.userService.initialize();
     }).then(() => {
-      console.log("User service initialized.");
+      LogService.log("User service initialized.");
       return this.remoteDataService.initialize(false, true);//do NOT load data
     }).then(() => {
-      console.log("RemoteData service initialized.");
+      LogService.log("RemoteData service initialized.");
       return this.backgroundService.initialize();
     }).then(() => {
-      console.log("BackgroundService service initialized.");
+      LogService.log("BackgroundService service initialized.");
       this.presentStartupPage();
     }).catch((e) => {
-      console.error("App initialization error: " + e);
+      LogService.log("App initialization error: " + e, LogService.LEVEL_ERROR);
     });
   }
 

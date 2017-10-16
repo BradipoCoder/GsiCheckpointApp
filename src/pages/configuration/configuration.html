@@ -25,7 +25,6 @@
           <ion-icon name="nuclear"></ion-icon>
           <ion-label>Cancella la cache</ion-label>
         </button>
-
         <ion-list>
 
           <ion-list-header>Applicazione</ion-list-header>
@@ -33,7 +32,6 @@
             <ion-label stacked>Url applicazione</ion-label>
             <ion-input [(ngModel)]="cfg.crm_url" [disabled]="isFormDisabled()"></ion-input>
           </ion-item>
-
           <ion-item>
             <ion-label stacked>Versione Rest API</ion-label>
             <ion-input [(ngModel)]="cfg.api_version" [disabled]="isFormDisabled()"></ion-input>
@@ -47,6 +45,17 @@
           <ion-item>
             <ion-label stacked>Password</ion-label>
             <ion-input type="password" [(ngModel)]="cfg.crm_password" [disabled]="isFormDisabled()"></ion-input>
+          </ion-item>
+
+          <ion-list-header>Altro</ion-list-header>
+          <ion-item>
+            <ion-label stacked>Livello di logging</ion-label>
+            <ion-select [(ngModel)]="cfg.log_level" [disabled]="isFormDisabled()">
+              <ion-option value="NONE">Nessuno</ion-option>
+              <ion-option value="INFO">Info</ion-option>
+              <ion-option value="WARN">Avviso</ion-option>
+              <ion-option value="ERROR">Errore</ion-option>
+            </ion-select>
           </ion-item>
 
         </ion-list>

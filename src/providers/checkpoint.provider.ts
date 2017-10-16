@@ -12,6 +12,7 @@ import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
 import * as moment from 'moment';
 import {CrmDataModel} from "../models/crm.data.model";
+import {LogService} from "../services/log.service";
 
 @Injectable()
 export class CheckpointProvider extends LocalDocumentProvider
@@ -104,7 +105,7 @@ export class CheckpointProvider extends LocalDocumentProvider
         }
         resolve(answer);
       }).catch((e) => {
-        console.error(e);
+        LogService.log(e, LogService.LEVEL_ERROR);
         reject(e);
       });
     });
@@ -156,7 +157,7 @@ export class CheckpointProvider extends LocalDocumentProvider
         });
         resolve(answer);
       }).catch((e) => {
-        console.error(e);
+        LogService.log(e, LogService.LEVEL_ERROR);
         reject(e);
       });
     });

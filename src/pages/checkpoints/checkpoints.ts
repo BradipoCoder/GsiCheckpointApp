@@ -4,6 +4,7 @@ import {BackgroundService} from "../../services/background.service";
 import {Checkpoint} from "../../models/Checkpoint";
 import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
+import {LogService} from "../../services/log.service";
 
 @Component({
   selector: 'page-checkpoints',
@@ -33,14 +34,14 @@ export class CheckpointsPage implements OnInit, OnDestroy
   private refreshCheckpoints(): void
   {
     if(this.is_refreshing) {
-      //console.warn("Refresh is already on the way...(skipping);)");
+      //LogService.warn("Refresh is already on the way...(skipping);)");
       return;
     }
 
     let fiveSecondsAgo = moment().subtract(5, 'seconds');
     if (this.lastRefresh && this.lastRefresh.isAfter(fiveSecondsAgo))
     {
-      //console.warn("Skipping refresh - too early ;)");
+      //LogService.warn("Skipping refresh - too early ;)");
       return;
     }
 
@@ -62,22 +63,22 @@ export class CheckpointsPage implements OnInit, OnDestroy
 
   public action1(): void
   {
-    console.log("A1 - START");
+    LogService.log("A1 - START");
     this.backgroundService.start().then(() => {
-        console.log("A1 - START DONE.");
+      LogService.log("A1 - START DONE.");
       }, (e) => {
-        console.error("A1 - START ERROR - " + e);
+      LogService.log("A1 - START ERROR - " + e, LogService.LEVEL_ERROR);
       }
     );
   }
 
   public action2(): void
   {
-    console.log("A2 - STOP");
+    LogService.log("A2 - STOP");
     this.backgroundService.stop().then(() => {
-        console.log("A2 - STOP DONE.");
+        LogService.log("A2 - STOP DONE.");
       }, (e) => {
-        console.error("A2 - STOP ERROR - " + e);
+        LogService.log("A2 - STOP ERROR - " + e, LogService.LEVEL_ERROR);
       }
     );
   }
@@ -93,7 +94,7 @@ export class CheckpointsPage implements OnInit, OnDestroy
     this.dataChangeSubscription = this.checkpointProvider.databaseChangeObservable.subscribe(
       (data: any) => {
         if(data.db == 'checkpoint') {
-          //console.log('CHECKPOINT DB CHANGE Observed: ', data);
+          //LogService.log('CHECKPOINT DB CHANGE Observed: ', data);
           this.refreshCheckpoints();
         }
       });

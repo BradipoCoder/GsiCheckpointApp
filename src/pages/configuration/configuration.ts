@@ -8,6 +8,7 @@ import {OfflineCapableRestService} from '../../services/offline.capable.rest.ser
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
 import {HomePage} from "../home/home";
 import _ from "lodash";
+import {LogService} from "../../services/log.service";
 
 
 @Component({
@@ -62,49 +63,49 @@ export class ConfigurationPage implements OnInit
     loader.present().then(() =>
     {
       msg = "Stopping background service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.backgroundService.stop();
     }).then(() =>
     {
       msg = "Logging out user...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.logout();
     }).then(() =>
     {
       msg = "Initializing user service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.initialize();
     }).then(() =>
     {
       msg = "Logging in user...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
     }).then(() =>
     {
       msg = "Destroying databases...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.remoteDataService.destroyLocalDataStorages();
     }).then(() =>
     {
       msg = "Initializing remote data service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.remoteDataService.initialize(true);
     }).then(() =>
     {
       msg = "Starting background service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.backgroundService.start();
     }).then(() =>
     {
       msg = "Cache cleared.";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
@@ -116,7 +117,7 @@ export class ConfigurationPage implements OnInit
         position: 'top'
       });
       toast.present().then(() => {
-        console.log("Cache clean error: " + e);
+        LogService.log("Cache clean error: " + e);
         loader.dismiss();
       });
     });
@@ -151,55 +152,55 @@ export class ConfigurationPage implements OnInit
     loader.present().then(() =>
     {
       msg = "Stopping background service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.backgroundService.stop();
     }).then(() =>
     {
       msg = "Logging out user...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.logout();
     }).then(() =>
     {
       msg = "Initializing user service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.initialize();
     }).then(() =>
     {
       msg = "Logging in user...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
     }).then(() =>
     {
       msg = "Initializing user service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.userService.initialize();
     }).then(() =>
     {
       msg = "Destroying databases...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.remoteDataService.destroyLocalDataStorages();
     }).then(() =>
     {
       msg = "Initializing remote data service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.remoteDataService.initialize(true);
     }).then(() =>
     {
       msg = "Starting background service...";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       return this.backgroundService.start();
     }).then(() =>
     {
       msg = "Cache cleared.";
-      console.log(msg);
+      LogService.log(msg);
       loader.setContent(loaderContent + msg);
       this.navCtrl.push(HomePage);
       this.navCtrl.setRoot(HomePage);
@@ -211,7 +212,7 @@ export class ConfigurationPage implements OnInit
         position: 'top'
       });
       toast.present().then(() => {
-        console.log("Cache clean error: " + e);
+        LogService.log("Cache clean error: " + e);
         loader.dismiss();
       });
     });
@@ -242,7 +243,7 @@ export class ConfigurationPage implements OnInit
     });
     loader.present().then(() =>
     {
-      console.log("Stopping background service...");
+      LogService.log("Stopping background service...");
       return this.backgroundService.stop();
     }).then(() =>
     {
@@ -256,34 +257,34 @@ export class ConfigurationPage implements OnInit
       Promise.all(setPromises).then(() =>
       {
         this.configurationService.unlockWithCode("");//lock it
-        console.log("Configuration values were saved.");
+        LogService.log("Configuration values were saved.");
 
         return this.userService.logout();
       }).then(() =>
       {
-        console.log("User is now logged out.");
+        LogService.log("User is now logged out.");
 
         return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
       }).then(() =>
       {
-        console.log("User is now logged in.");
+        LogService.log("User is now logged in.");
         return this.userService.initialize();
       }).then(() =>
       {
-        console.log("Starting background service...");
+        LogService.log("Starting background service...");
         return this.backgroundService.start();
       }).then(() =>
       {
         return loader.dismiss();
       }).then(() =>
       {
-        console.log("APPLICATION RESET OK");
+        LogService.log("APPLICATION RESET OK");
         self.cleanCache();
       }).catch((e) =>
       {
         loader.dismiss().then(() =>
         {
-          console.log("Application reset error: " + e);
+          LogService.log("Application reset error: " + e);
           let toast = this.toastCtrl.create({
             message: 'Errore configurazione app! ' + e,
             duration: 15000,

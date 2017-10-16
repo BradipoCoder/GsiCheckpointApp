@@ -11,6 +11,7 @@ import {ConfigurationPage} from '../configuration/configuration';
 import _ from "lodash";
 import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
+import {LogService} from "../../services/log.service";
 
 
 @Component({
@@ -79,7 +80,7 @@ export class HomePage implements OnInit, OnDestroy
       checkin = newCheckin;
       return loader.dismiss();
     }).then(() => {
-      console.log("CHECKIN REGISTERED", checkin);
+      LogService.log("CHECKIN REGISTERED: " +  JSON.stringify(checkin));
 
       let toastMessage = "Sei entrato in: " + checkin.name + "(" + barcodeData.text + ")";
       if (checkin.type == Checkpoint.TYPE_OUT)
@@ -105,13 +106,13 @@ export class HomePage implements OnInit, OnDestroy
       if (this.presentLogoutScreen)
       {
         setTimeout((self) => {
-          console.log("time is up!");
+          LogService.log("time is up!");
           self.presentLogoutScreen = false;
         }, 15000, this);
       }
 
     }).catch((e) => {
-      console.error("Errore scansione: " + e);
+      LogService.log("Errore scansione: " + e, LogService.LEVEL_ERROR);
       if (!_.isUndefined(loader))
       {
         loader.dismiss();
@@ -131,9 +132,9 @@ export class HomePage implements OnInit, OnDestroy
   activatePause(): void
   {
     this.remoteDataService.storeNewCheckin("PAUSA").then((checkin: Checkin) => {
-      console.log("CHECKIN REGISTERED", checkin);
+      LogService.log("CHECKIN REGISTERED: " + JSON.stringify(checkin));
     }).catch((e) => {
-      console.error("Errore pausa: " + e);
+      LogService.log("Errore pausa: " + e, LogService.LEVEL_ERROR);
       let toast = this.toastCtrl.create({
         message: e,
         duration: 3000,
@@ -248,7 +249,7 @@ export class HomePage implements OnInit, OnDestroy
       let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
       let minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
       //let seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
-      //console.log("H: " + hours + "M: " + minutes + "S: " + seconds);
+      //LogService.log("H: " + hours + "M: " + minutes + "S: " + seconds);
       if (hours)
       {
         durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
@@ -257,7 +258,7 @@ export class HomePage implements OnInit, OnDestroy
       //durationStr += " " + seconds + "s";
     } else
     {
-      console.log("NSC");
+      LogService.log("NSC");
     }
 
     self.shiftTotalDuration = durationStr;
@@ -280,7 +281,7 @@ export class HomePage implements OnInit, OnDestroy
       }
     } else
     {
-      console.log("NSC");
+      LogService.log("NSC");
     }
   }
 
@@ -331,7 +332,7 @@ export class HomePage implements OnInit, OnDestroy
       self.is_refreshing = true;
 
       self.remoteDataService.updateCurrentSessionCheckins().then(() => {
-        //console.warn("HOMEDATA refresh - done");
+        //LogService.warn("HOMEDATA refresh - done");
         self.lastRefresh = moment();
         self.is_refreshing = false;
         resolve();
@@ -349,7 +350,7 @@ export class HomePage implements OnInit, OnDestroy
     this.networkStateSubscription = this.offlineCapableRestService.networkConnectedObservable.subscribe
     (
       (is_network_connected) => {
-        console.log('Connection state: ' + is_network_connected);
+        LogService.log('Connection state: ' + is_network_connected);
         self.is_network_connected = is_network_connected;
       }
     );
@@ -358,7 +359,7 @@ export class HomePage implements OnInit, OnDestroy
     ((data: any) => {
       if (_.includes(['checkpoint', 'checkin'], data.db))
       {
-        console.log('HOME - DB CHANGE!');
+        LogService.log('HOME - DB CHANGE!');
         self.refreshHomeData().then(() => {
           self.autoUpdateIntevalExecution(self);
         });

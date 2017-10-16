@@ -12,6 +12,7 @@ import {Network} from '@ionic-native/network';
 
 /* Services */
 import {ConfigurationService} from '../services/configuration.service';
+import {LogService} from "../services/log.service";
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
@@ -65,6 +66,7 @@ import {CheckinsPage} from "../pages/checkins/checkins";
     , SplashScreen
     , BarcodeScanner
     , ConfigurationService
+    , LogService
     , OfflineCapableRestService
     , UserService
     , RemoteDataService

@@ -12,6 +12,7 @@ import {Checkin} from '../models/Checkin';
 import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
 import * as moment from 'moment';
+import {LogService} from "../services/log.service";
 
 @Injectable()
 export class CheckinProvider extends LocalDocumentProvider
@@ -100,7 +101,7 @@ export class CheckinProvider extends LocalDocumentProvider
         }
         resolve(answer);
       }).catch((e) => {
-        console.error(e);
+        LogService.log(e, LogService.LEVEL_ERROR);
         reject(e);
       });
     });
@@ -137,7 +138,7 @@ export class CheckinProvider extends LocalDocumentProvider
 
     return new Promise(function (resolve, reject)
     {
-      //console.log("syncWithRemote_PUSH - START ---------------");
+      //LogService.log("syncWithRemote_PUSH - START ---------------");
 
       self.findDocuments({
         selector: {
@@ -164,14 +165,14 @@ export class CheckinProvider extends LocalDocumentProvider
               {
                 _.unset(parameters, 'id');
               }
-              console.log("PUSHING TO REMOTE WITH PARAMS: ", parameters);
+              LogService.log("PUSHING TO REMOTE WITH PARAMS: ", parameters);
               self.offlineCapableRestService.setEntry(self.remote_table_name, (isNewOnRemote ? false : checkin.id), parameters).then((res) =>
               {
                 if (!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
                 {
                   throw new Error("failed to save on remote!");
                 }
-                console.log("Saved on remote: ", res);
+                LogService.log("Saved on remote: ", res);
                 let currentLocalStorageId = checkin.id;
                 checkin.id = res.id;
                 checkin.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
@@ -181,7 +182,7 @@ export class CheckinProvider extends LocalDocumentProvider
                 resolve();
               }).catch((e) =>
               {
-                console.warn("Remote save error! ", e);
+                LogService.log("Remote save error! " + e, LogService.LEVEL_WARN);
                 //reject(e);
                 resolve();
               });
@@ -191,17 +192,17 @@ export class CheckinProvider extends LocalDocumentProvider
             resolve();
           }).catch((e) =>
           {
-            console.warn("syncWithRemote_PUSH[reduce] error!", e);
+            LogService.log("syncWithRemote_PUSH[reduce] error! " + e, LogService.LEVEL_WARN);
             resolve();
           });
         } else
         {
-          console.log("NOTHING TO SYNC");
+          LogService.log("NOTHING TO SYNC");
           resolve();
         }
       }).catch((e) =>
       {
-        console.warn("syncWithRemote_PUSH[find doc] error!", e);
+        LogService.log("syncWithRemote_PUSH[find doc] error! " + e, LogService.LEVEL_WARN);
         resolve();
       });
     });

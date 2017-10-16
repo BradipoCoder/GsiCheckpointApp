@@ -18,6 +18,7 @@ import {Promise} from '../../node_modules/bluebird'
 import Rx from "rxjs/Rx";
 import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
+import {LogService} from "../services/log.service";
 
 
 PouchDB.plugin(PouchDBFind);
@@ -78,13 +79,13 @@ export class LocalDocumentProvider
       self.syncWithRemoteGetItems(remoteDbTableName, processRecordsAtOnce, remoteQuery)
         .then((records: any) => {
             remoteItems = records;
-            //console.log("REMOTE-ITEMS: ", remoteItems);
+            //LogService.log("REMOTE-ITEMS: ", remoteItems);
 
             Promise.reduce(syncFunctions, function (accu, syncFunction, index) {
               return new Promise(function (resolve, reject) {
                 if (!_.isFunction(self[syncFunction]))
                 {
-                  console.warn("NO FN(" + syncFunction + ")!!!");
+                  LogService.log("NO FN(" + syncFunction + ")!!!", LogService.LEVEL_ERROR);
                   resolve();
                   return;
                 }
@@ -92,17 +93,17 @@ export class LocalDocumentProvider
                 let syncPromise = self[syncFunction].call(self, remoteItems);
 
                 syncPromise.then(() => {
-                  //console.log("FN(" + syncFunction + ") done.");
+                  //LogService.log("FN(" + syncFunction + ") done.");
                   resolve();
                 }, (e) => {
-                  console.warn("FN(" + syncFunction + ") fail: " + e);
+                  LogService.log("FN(" + syncFunction + ") fail: " + e, LogService.LEVEL_ERROR);
                   return reject(e);
                 })
 
               });
             }, null)
               .then(() => {
-                  //console.log("Promise Reduce done.");
+                  //LogService.log("Promise Reduce done.");
                   resolve();
                 }, (e) => {
                   return reject(new Error("syncWithRemote error: " + e));
@@ -135,11 +136,11 @@ export class LocalDocumentProvider
 
     //keep only items that are not deleted
     itemsToCheck = _.filter(itemsToCheck, {deleted: '0'});
-    //console.log("FILTERED ITEMS: " + _.size(itemsToCheck));
+    //LogService.log("FILTERED ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve, reject) {
       remoteIdArray = _.map(itemsToCheck, 'id');
-      //console.log("REMOTE ID ARRAY: ", remoteIdArray);
+      //LogService.log("REMOTE ID ARRAY: ", remoteIdArray);
 
       self.findDocuments({
         selector: {id: {'$in': remoteIdArray}},
@@ -147,21 +148,21 @@ export class LocalDocumentProvider
       }).then((docs) => {
 
         docs = !_.isUndefined(docs.docs) ? docs.docs : [];
-        //console.log("Local documents: ", docs);
+        //LogService.log("Local documents: ", docs);
 
         localIdArray = _.map(docs, 'id');
-        //console.log("LOCAL ID ARRAY: ", localIdArray);
+        //LogService.log("LOCAL ID ARRAY: ", localIdArray);
 
         missingIdArray = _.difference(remoteIdArray, localIdArray);
 
         if (!_.size(missingIdArray))
         {
-          //console.log("No new records.");
+          //LogService.log("No new records.");
           resolve();
           return;
         }
 
-        //console.log("MISSING ID ARRAY: ", missingIdArray);
+        //LogService.log("MISSING ID ARRAY: ", missingIdArray);
         self.offlineCapableRestService.getEntries(dbTableName, {
           select_fields: fixedModuleFields,
           ids: missingIdArray
@@ -177,13 +178,11 @@ export class LocalDocumentProvider
 
             if (!_.size(documents))
             {
-              //console.log("No new documents to register.");
+              //LogService.log("No new documents to register.");
               resolve();
               return;
             }
-
-            console.log("NEW DOCS : #", _.size(documents));
-            //console.log("NEW DOCS TO REGISTER: ", documents);
+            LogService.log("NEW DOCS : #"+ _.size(documents));
 
             self.storeDocuments(documents)
               .then(() => {
@@ -221,12 +220,12 @@ export class LocalDocumentProvider
 
     //keep only items that are not deleted
     itemsToCheck = _.filter(itemsToCheck, {deleted: '0'});
-    //console.log("FILTERED ITEMS: " + _.size(itemsToCheck));
+    //LogService.log("FILTERED ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve, reject) {
       remoteIdArray = _.map(itemsToCheck, 'id');
-      //console.log("REMOTE ID ARRAY: ", remoteIdArray);
-      //console.log("Remote documents: ", itemsToCheck);
+      //LogService.log("REMOTE ID ARRAY: ", remoteIdArray);
+      //LogService.log("Remote documents: ", itemsToCheck);
 
       self.findDocuments({
         selector: {id: {'$in': remoteIdArray}},
@@ -239,7 +238,7 @@ export class LocalDocumentProvider
         _.each(localDocs, (localDoc) => {
           localDoc.date_modified = moment(localDoc.date_modified);
         });
-        //console.log("Local documents: ", localDocs);
+        //LogService.log("Local documents: ", localDocs);
 
         let remoteDoc;
         _.each(localDocs, (localDoc) => {
@@ -255,12 +254,12 @@ export class LocalDocumentProvider
 
         if (!_.size(updateIdArray))
         {
-          //console.log("No records to update.");
+          //LogService.log("No records to update.");
           resolve();
           return;
         }
 
-        //console.log("Records to update: ", updateIdArray);
+        //LogService.log("Records to update: ", updateIdArray);
 
         self.offlineCapableRestService.getEntries(dbTableName, {
           select_fields: fixedModuleFields,
@@ -277,12 +276,12 @@ export class LocalDocumentProvider
 
           if (!_.size(documents))
           {
-            //console.log("No changed documents to update.");
+            //LogService.log("No changed documents to update.");
             resolve();
             return;
           }
-          console.log("CHANGED DOCS : #", _.size(documents));
-          //console.log("CHANGED DOCS TO UPDATE: ", documents);
+          LogService.log("CHANGED DOCS : #" + _.size(documents));
+          //LogService.log("CHANGED DOCS TO UPDATE: ", documents);
 
           self.storeDocuments(documents)
             .then(() => {
@@ -313,10 +312,10 @@ export class LocalDocumentProvider
 
     //keep only items that are deleted
     itemsToCheck = _.filter(itemsToCheck, {deleted: '1'});
-    //console.log("FILTERED (DELETED)ITEMS: " + _.size(itemsToCheck));
+    //LogService.log("FILTERED (DELETED)ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve, reject) {
-      //console.log("syncDownDeleted");
+      //LogService.log("syncDownDeleted");
       resolve();
     });
   }
@@ -343,9 +342,9 @@ export class LocalDocumentProvider
         .then((cfg) => {
             config = cfg;
             syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
-            //console.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
+            //LogService.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
 
-            //console.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
+            //LogService.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
 
             self.offlineCapableRestService.getEntryList(dbTableName, {
               select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
@@ -363,11 +362,11 @@ export class LocalDocumentProvider
                   record.date_modified = moment(record.date_modified);
                 });
 
-                //console.log("RECORDS: ", records);
+                //LogService.log("RECORDS: ", records);
                 let newSyncOffset = _.size(records) == itemLimit ? syncOffset + itemLimit : 0;
                 self.configurationService.setConfig(configCheckKey, newSyncOffset, false, true)
                   .then(() => {
-                    //console.log("CFGKEY written");
+                    //LogService.log("CFGKEY written");
                   }, (e) => {
                     return reject(new Error("Set Config item error: " + e));
                   });
@@ -400,32 +399,32 @@ export class LocalDocumentProvider
     return new Promise(function (resolve, reject) {
       let registeredDocument: any;
       self.getDocumentById(key).then((registeredDocument: any) => {
-        //console.log("Docs found:", key, registeredDocument);
+        //LogService.log("Docs found:", key, registeredDocument);
         doUpdate = document.isNewer(moment(registeredDocument.date_modified).toDate());
         if (doUpdate || forceUpdate)
         {
           document._id = registeredDocument._id;
           document._rev = registeredDocument._rev;
           self.db.put(document).then((res) => {
-            //console.log("Doc updated:", key, document);
+            //LogService.log("Doc updated:", key, document);
             resolve(key);
           });
         } else
         {
-          //console.log("Skipping doc update:", key, document);
+          //LogService.log("Skipping doc update:", key, document);
           resolve(key);
         }
 
       }).catch((e) => {
         document._id = key;
         self.db.put(document).then((res) => {
-          //console.log("Doc registered:", key, document);
+          //LogService.log("Doc registered:", key, document);
           resolve(key);
         }).catch((e) => {
-          console.error("Store Document Error - document", document);
-          console.error("Store Document Error - forceUpdate", forceUpdate);
-          console.error("Store Document Error - findById", findById);
-          console.error(e);
+          LogService.log("Store Document Error - document: " + document, LogService.LEVEL_ERROR);
+          LogService.log("Store Document Error - forceUpdate: " + forceUpdate, LogService.LEVEL_ERROR);
+          LogService.log("Store Document Error - findById: " + findById, LogService.LEVEL_ERROR);
+          LogService.log(e, LogService.LEVEL_ERROR);
           reject(e);
         });
       });
@@ -536,7 +535,7 @@ export class LocalDocumentProvider
     let self = this;
     return new Promise(function (resolve, reject) {
       self.db.destroy().then((res) => {
-        console.log("DB destroyed: " + self.database_name, res);
+        LogService.log("DB destroyed: " + self.database_name, res);
         resolve();
       }).catch((e) => {
         reject(e);
@@ -553,7 +552,7 @@ export class LocalDocumentProvider
     let self = this;
 
     return new Promise(function (resolve, reject) {
-      console.log("Creating DB: " + self.database_name);
+      LogService.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
 
@@ -562,7 +561,7 @@ export class LocalDocumentProvider
         live: true,
         include_docs: false
       }).on('change', function (change) {
-        //console.log('DB CHANGE: ', change);
+        //LogService.log('DB CHANGE: ', change);
         let data = {
           db: self.database_name,
           id: change.id
@@ -570,10 +569,10 @@ export class LocalDocumentProvider
         self.databaseChangeSubject.next(data);
         //put some observable here and trigger change
       }).on('complete', function (info) {
-        //console.log('DB COMPLETE: ', info);
+        //LogService.log('DB COMPLETE: ', info);
         self.databaseChangeSubject.complete();
       }).on('error', function (err) {
-        console.error('DB ERROR: ' + err);
+        LogService.log('DB ERROR: ' + err, LogService.LEVEL_ERROR);
         self.databaseChangeSubject.error(err);
       });
 
@@ -588,12 +587,12 @@ export class LocalDocumentProvider
 
       let indexCreationPromises = [];
       _.each(self.database_indices, function (indexObject) {
-        //console.log("Creating INDEX["+self.database_name+"]: ", indexObject);
+        //LogService.log("Creating INDEX["+self.database_name+"]: ", indexObject);
         indexCreationPromises.push(self.db.createIndex({index: indexObject}));
       });
 
       Promise.all(indexCreationPromises).then((res) => {
-        //console.log("INDEXES OK: ", res);
+        //LogService.log("INDEXES OK: ", res);
         resolve();
       });
     });

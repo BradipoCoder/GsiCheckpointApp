@@ -4,6 +4,7 @@
 import {CrmDataModel} from './crm.data.model';
 import _ from "lodash";
 import * as moment from 'moment';
+import {LogService} from "../services/log.service";
 
 export class Checkpoint extends CrmDataModel
 {
@@ -53,6 +54,6 @@ export class Checkpoint extends CrmDataModel
    * @todo: devel method - remove!
    */
   public dump(): void {
-    console.log("Checkpoint", this);
+    LogService.log("Checkpoint", JSON.stringify(this));
   }
 }

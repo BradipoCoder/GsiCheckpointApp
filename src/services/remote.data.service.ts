@@ -23,6 +23,7 @@ import {CheckinProvider} from "../providers/checkin.provider";
 import _ from "lodash";
 import * as moment from 'moment';
 import { Promise } from '../../node_modules/bluebird'
+import {LogService} from "./log.service";
 //import * as Bluebird from "bluebird";
 /*import md5 from '../../node_modules/blueimp-md5';*/
 
@@ -105,7 +106,7 @@ export class RemoteDataService
         }
 
         let fromDate = operation.checkin_date;
-        //console.log("Updating CURRENT_SESSION_CHECKINS (from date: "+fromDate+")...");
+        //LogService.log("Updating CURRENT_SESSION_CHECKINS (from date: "+fromDate+")...");
 
         let options = {
           selector: {
@@ -124,12 +125,12 @@ export class RemoteDataService
             });
           }
 
-          console.log("CURRENT_SESSION_CHECKINS: ", self.CURRENT_SESSION_CHECKINS);
+          LogService.log("CURRENT_SESSION_CHECKINS: "+ JSON.stringify(self.CURRENT_SESSION_CHECKINS));
 
           if (!_.isUndefined(self.CURRENT_SESSION_CHECKINS[0]))
           {
             self.last_checkin_operation = self.CURRENT_SESSION_CHECKINS[0];
-            //console.log("LAST IN OUT OP: ", self.last_checkin_operation);
+            //LogService.log("LAST IN OUT OP: ", self.last_checkin_operation);
           }
 
           resolve();
@@ -165,13 +166,13 @@ export class RemoteDataService
           if (_.size(res.docs))
           {
             let mostRecentCheckin = _.last(_.sortBy(res.docs, ['checkin_date']));
-            //console.log("MOST RECENT CHECKIN: ", mostRecentCheckin);
+            //LogService.log("MOST RECENT CHECKIN: ", mostRecentCheckin);
             lastInOutCheckin = new Checkin(mostRecentCheckin);
           }
           resolve(lastInOutCheckin);
         }).catch((e) =>
         {
-          console.error(e);
+          LogService.log(e, LogService.LEVEL_ERROR);
           resolve(lastInOutCheckin);
         });
       });
@@ -179,7 +180,7 @@ export class RemoteDataService
     {
       if (lastInOutCheckin)
       {
-        console.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastInOutCheckin.type + " @ " + lastInOutCheckin.checkin_date);
+        LogService.log("IDENTIFIED LAST IN/OUT OPERATION: " + lastInOutCheckin.type + " @ " + lastInOutCheckin.checkin_date);
       }
     });
   }
@@ -214,7 +215,7 @@ export class RemoteDataService
         return self.checkinProvider.store(checkin);
       }).then((checkinId) =>
       {
-        console.log("New Checkin stored with id: ", checkinId);
+        LogService.log("New Checkin stored with id: ", checkinId);
         return self.checkinProvider.getCheckinById(checkinId);
       }).then((checkin) =>
       {
@@ -248,7 +249,7 @@ export class RemoteDataService
 
     return new Promise(function (resolve, reject)
     {
-      //console.log("DURATION UPDATE - LAST: ", lastCheckin);
+      //LogService.log("DURATION UPDATE - LAST: ", lastCheckin);
 
       let options = {
         selector: {
@@ -261,7 +262,7 @@ export class RemoteDataService
       {
         if (_.isUndefined(res.docs[0]))
         {
-          console.log("DURATION-UPDATE: No previous document was found.");
+          LogService.log("DURATION-UPDATE: No previous document was found.");
           resolve();
           return;
         }
@@ -270,22 +271,22 @@ export class RemoteDataService
 
         if (previousCheckin.type == Checkpoint.TYPE_OUT)
         {
-          console.log("DURATION-UPDATE: Previous document is of type OUT - skipping.");
+          LogService.log("DURATION-UPDATE: Previous document is of type OUT - skipping.");
           resolve();
           return;
 
         }
-        //console.log("DURATION UPDATE - PREV: ", previousCheckin);
+        //LogService.log("DURATION UPDATE - PREV: ", previousCheckin);
         let checkin_date_last = lastCheckin.checkin_date;
         let checkin_date_prev = previousCheckin.checkin_date;
         let prevCheckinDuration = moment(checkin_date_last).diff(checkin_date_prev, "seconds");
 
-        // console.log("LAST: ", checkin_date_last);
-        // console.log("PREV: ", checkin_date_prev);
-        // console.log("DUR: ", prevCheckinDuration);
+        // LogService.log("LAST: ", checkin_date_last);
+        // LogService.log("PREV: ", checkin_date_prev);
+        // LogService.log("DUR: ", prevCheckinDuration);
         previousCheckin.duration = prevCheckinDuration.toString();
         previousCheckin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
-        console.log("Storing duration of previous checkin(" + previousCheckin.id + "): ", prevCheckinDuration);
+        LogService.log("Storing duration of previous checkin(" + previousCheckin.id + "): " + JSON.stringify(prevCheckinDuration));
         return self.checkinProvider.store(previousCheckin, true);
       }).then(() =>
       {
