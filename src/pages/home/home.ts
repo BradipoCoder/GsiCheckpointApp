@@ -256,9 +256,6 @@ export class HomePage implements OnInit, OnDestroy
       }
       durationStr += minutes + " min";
       //durationStr += " " + seconds + "s";
-    } else
-    {
-      LogService.log("NSC");
     }
 
     self.shiftTotalDuration = durationStr;
@@ -279,9 +276,6 @@ export class HomePage implements OnInit, OnDestroy
 
         this.currentOperationDuration = lastCheckin.getFormattedDuration();
       }
-    } else
-    {
-      LogService.log("NSC");
     }
   }
 
@@ -362,12 +356,16 @@ export class HomePage implements OnInit, OnDestroy
         LogService.log('HOME - DB CHANGE!');
         self.refreshHomeData().then(() => {
           self.autoUpdateIntevalExecution(self);
+        }, () => {
+          //
         });
       }
     });
 
     this.refreshHomeData().then(() => {
       this.autoUpdateIntevalExecution(this);
+    }, () => {
+      //
     });
   }
 

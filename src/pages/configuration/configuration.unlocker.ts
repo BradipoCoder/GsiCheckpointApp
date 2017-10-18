@@ -10,7 +10,7 @@ import {ViewController} from 'ionic-angular';
 })
 export class ConfigurationUnlockerPage
 {
-  unlock_code:string = "";
+  unlock_code:string = "MKT";
 
   constructor(public viewCtrl: ViewController)
   {}

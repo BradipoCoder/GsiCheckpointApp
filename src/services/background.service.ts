@@ -192,7 +192,7 @@ export class BackgroundService
   {
     let self = this;
 
-    setTimeout(self.intervalExecution, self.startup_delay_ms, self);
+    //setTimeout(self.intervalExecution, self.startup_delay_ms, self);
 
     return new Promise(function (resolve, reject) {
       resolve();

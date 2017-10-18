@@ -156,6 +156,7 @@ export class UserService
         self.authenticated = false;
         self.db.destroy().then(() => {
           LogService.log("User database has been destroyed.");
+          self.createDatabase();
           resolve();
         });
       }).catch((e) => {
@@ -265,10 +266,10 @@ export class UserService
   {
     let self = this;
     this.is_initialized = false;
-    this.unsetOfflineUserData();
 
     return new Promise(function (resolve) {
-      self.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+      self.unsetOfflineUserData();
+      self.createDatabase();
       self.configurationService.getConfigObject()
         .then((cfg) => {
           self.is_initialized = true;
@@ -310,6 +311,16 @@ export class UserService
 
     });
   }
+
+  /**
+   *
+   */
+  private createDatabase(): void
+  {
+    this.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+    LogService.log("new user database was created");
+  }
+
 }
 
 
