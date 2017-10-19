@@ -1,6 +1,6 @@
 /* CORE */
 import {Component, OnInit} from '@angular/core';
-import {NavController, ViewController, ModalController, ToastController, LoadingController} from 'ionic-angular';
+import {NavController, ModalController, ToastController, LoadingController} from 'ionic-angular';
 /* SERVICES */
 import {ConfigurationService} from '../../services/configuration.service';
 import {UserService} from '../../services/user.service';
@@ -23,8 +23,9 @@ import _ from "lodash";
 })
 export class ConfigurationSettingsPage implements OnInit
 {
-  cfg: any;
-  viewIsReady: boolean;
+  private cfg: any;
+
+  private viewIsReady: boolean;
 
   constructor(private navCtrl: NavController
     , private toastCtrl: ToastController
@@ -43,6 +44,10 @@ export class ConfigurationSettingsPage implements OnInit
   /**
    * !!! NETWORK CONNECTION REQUIRED !!!
    * destroy and recreate databases and load remote data
+   *
+   *
+   *
+   * @todo:------------------------------------------LoGService must be reset with new LOG LEVEL SETTING!!!
    *
    * @returns {Promise<any>}
    */
@@ -74,16 +79,14 @@ export class ConfigurationSettingsPage implements OnInit
       });
 
       loader.onDidDismiss((data, role) => {
-        LogService.log("CACHE CLEAR - LOADER DISMISSED");
-        self.backgroundService.unlockSyncPage();
-        self.navCtrl.push(ConfigurationPage);
+        self.navCtrl.push(ConfigurationPage).then(() => {
+          LogService.log("CACHE CLEAR - LOADER DISMISSED");
+        });
       });
-
 
       loader.present().then(() => {
 
-        //@todo: enable this
-        //self.backgroundService.lockSyncPage();
+        self.backgroundService.lockSyncPage();
 
         msg = "Stopping background service...";
         LogService.log(msg);
@@ -134,9 +137,8 @@ export class ConfigurationSettingsPage implements OnInit
         return self.backgroundService.start();
       }).then(() =>
       {
-        msg = "Cache cleared.";
-        LogService.log("Cache cleared.");
         loader.dismiss().then(() => {
+          LogService.log("CACHE CLEAR OK", LogService.LEVEL_WARN);
           resolve();
         });
       }).catch((e) => {
@@ -158,19 +160,73 @@ export class ConfigurationSettingsPage implements OnInit
 
   /**
    * Save configuration values and reset application
+   *
+   * @returns {Promise<any>}
    */
-  saveAndResetApplication(): void
+  saveAndResetApplication():  Promise<any>
   {
-    if(!this.offlineCapableRestService.isNetworkConnected())
-    {
-      let toast = this.toastCtrl.create({
-        message: "Nessuna connessione! Connettiti alla rete e riprova.",
-        duration: 5000,
-        position: 'top'
+    let self = this;
+
+    return new Promise(function (resolve, reject) {
+      if (!self.offlineCapableRestService.isNetworkConnected())
+      {
+        let toast = self.toastCtrl.create({
+          message: "Nessuna connessione! Connettiti alla rete e riprova.",
+          duration: 5000,
+          position: 'top'
+        });
+        toast.present().then(() => {
+          resolve();
+        });
+        return;
+      }
+
+      let loaderContent = "<strong>Salvataggio configurazione</strong><br />";
+      let msg;
+
+      let loader = self.loadingCtrl.create({
+        content: loaderContent,
+        duration: (5 * 60 * 1000)
       });
-      toast.present();
-      return;
-    }
+
+      loader.onDidDismiss((data, role) => {
+        LogService.log("APPLICATION RESET- LOADER DISMISSED");
+      });
+
+      loader.present().then(() =>
+      {
+        LogService.log("Stopping background service...");
+        return self.backgroundService.stop().then(() => {
+
+          //save all config values
+          let setPromises = [];
+          _.each(self.cfg, function (val, key)
+          {
+            setPromises.push(self.configurationService.setConfig(key, val));
+          });
+
+          Promise.all(setPromises).then(() =>
+          {
+            self.configurationService.unlockWithCode("");//lock it
+            LogService.log("Configuration values were saved.");
+            return self.cleanCache();
+          }).then(() => {
+            loader.dismiss().then(() => {
+              LogService.log("APPLICATION RESET OK", LogService.LEVEL_WARN);
+            });
+          });
+        });
+      });
+    });
+  }
+
+
+  /**
+   * Save configuration values and reset application
+   */
+  saveAndResetApplicationOld(): void
+  {
+
 
     let self = this;
     let loader = this.loadingCtrl.create({

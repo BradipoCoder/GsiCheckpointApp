@@ -340,7 +340,7 @@ export class LocalDocumentProvider
         .then((cfg) => {
             config = cfg;
             syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
-            LogService.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
+            //LogService.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
 
             //LogService.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
 

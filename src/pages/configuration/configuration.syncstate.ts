@@ -5,6 +5,7 @@ import {ViewController} from 'ionic-angular';
 import {CheckpointProvider} from '../../providers/checkpoint.provider';
 import {CheckinProvider} from '../../providers/checkin.provider';
 /* SERVICES */
+import {BackgroundService} from "../../services/background.service";
 import {LogService} from "../../services/log.service";
 /* OTHER */
 import _ from "lodash";
@@ -28,8 +29,9 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
 
   constructor(protected viewCtrl: ViewController
-    , protected checkpointProvider:CheckpointProvider
-    , protected checkinProvider:CheckinProvider)
+    , private checkpointProvider:CheckpointProvider
+    , private checkinProvider:CheckinProvider
+    , private backgroundService: BackgroundService)
   {
     this.counts = {
       checkpoints: {
@@ -86,11 +88,34 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
         self.counts.checkins.unsynced_up = data[6];
         self.counts.checkins.unsynced_down = data[7];
 
+        self.completeFullCacheCleanAction();
+
         resolve();
       }, (e) => {
         reject(e);
       });
     });
+  }
+
+  /**
+   * Unlock Sync page and do other after full cache clear actions
+   */
+  protected completeFullCacheCleanAction():void
+  {
+    if (this.backgroundService.isSyncPageLocked())
+    {
+      let unlockCount = this.counts.checkpoints.unsynced_up
+        + this.counts.checkpoints.unsynced_down
+        + this.counts.checkins.unsynced_up
+        + this.counts.checkins.unsynced_down;
+
+      if(unlockCount == 0)
+      {
+        LogService.log("FULL CACHE CLEAN COMPLETED.", LogService.LEVEL_WARN);
+        this.backgroundService.setSyncIntervalSlow();
+        this.backgroundService.unlockSyncPage();
+      }
+    }
   }
 
   /**
