@@ -30,7 +30,10 @@ import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
 import {LogoutPage} from "../pages/logout/logout";
 import {ConfigurationPage} from "../pages/configuration/configuration";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
+import {ConfigurationSettingsPage} from "../pages/configuration/configuration.settings";
+import {ConfigurationSyncstatePage} from "../pages/configuration/configuration.syncstate";
 import {CheckinsPage} from "../pages/checkins/checkins";
+
 
 /* Other/Utils/Tools */
 
@@ -43,6 +46,8 @@ import {CheckinsPage} from "../pages/checkins/checkins";
     , CheckinsPage
     , LogoutPage
     , ConfigurationPage
+    , ConfigurationSettingsPage
+    , ConfigurationSyncstatePage
     , ConfigurationUnlockerPage
   ],
   imports: [
@@ -59,6 +64,8 @@ import {CheckinsPage} from "../pages/checkins/checkins";
     , CheckinsPage
     , LogoutPage
     , ConfigurationPage
+    , ConfigurationSettingsPage
+    , ConfigurationSyncstatePage
     , ConfigurationUnlockerPage
   ],
   providers: [

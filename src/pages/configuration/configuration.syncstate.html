@@ -1,0 +1,51 @@
+
+<ion-content>
+  <ion-list>
+
+    <ion-list-header>Locali</ion-list-header>
+
+    <ion-item>
+      <ion-icon item-start name="cloud"></ion-icon>
+      Elementi sul server
+      <ion-badge item-end>{{counts.checkpoints.server}}</ion-badge>
+    </ion-item>
+
+    <ion-item>
+      <ion-icon item-start name="phone-portrait"></ion-icon>
+      Elementi sul device
+      <ion-badge item-end>{{counts.checkpoints.device}}</ion-badge>
+    </ion-item>
+
+    <ion-item>
+      <ion-icon item-start name="flash"></ion-icon>
+      Da sincronizzare[su/giù]
+      <ion-badge item-end color="yellow-light">{{counts.checkpoints.unsynced_up}}</ion-badge>
+      <ion-badge item-end color="violet-light">{{counts.checkpoints.unsynced_down}}</ion-badge>
+    </ion-item>
+
+
+    <ion-list-header>Tracce</ion-list-header>
+
+    <ion-item>
+      <ion-icon item-start name="cloud"></ion-icon>
+      Elementi sul server
+      <ion-badge item-end>{{counts.checkins.server}}</ion-badge>
+    </ion-item>
+
+    <ion-item>
+      <ion-icon item-start name="phone-portrait"></ion-icon>
+      Elementi sul device
+      <ion-badge item-end>{{counts.checkins.device}}</ion-badge>
+    </ion-item>
+
+    <ion-item>
+      <ion-icon item-start name="flash"></ion-icon>
+      Da sincronizzare[su/giù]
+      <ion-badge item-end color="yellow-light">{{counts.checkins.unsynced_up}}</ion-badge>
+      <ion-badge item-end color="violet-light">{{counts.checkins.unsynced_down}}</ion-badge>
+    </ion-item>
+
+  </ion-list>
+
+</ion-content>
+

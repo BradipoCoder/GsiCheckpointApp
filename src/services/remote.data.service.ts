@@ -352,11 +352,9 @@ export class RemoteDataService
 
   /**
    *
-   * @param {boolean} [waitForProviderData]
-   * @param {boolean} [skipDataSync]
    * @returns {Promise<any>}
    */
-  public initialize(waitForProviderData: boolean = false, skipDataSync: boolean = false): Promise<any>
+  public initialize(): Promise<any>
   {
     let self = this;
 

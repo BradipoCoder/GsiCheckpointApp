@@ -22,7 +22,7 @@ export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
   /* The page to start with */
-  startupPage: any = HomePage;
+  startupPage: any = ConfigurationPage;
   rootPage: any;
   pages: Array<{ title: string, icon: string, component: any }>;
 
@@ -62,7 +62,7 @@ export class MekitTracerApp
       return this.userService.initialize();
     }).then(() => {
       LogService.log("User service initialized.");
-      return this.remoteDataService.initialize(false, true);//do NOT load data
+      return this.remoteDataService.initialize();//do NOT load data
     }).then(() => {
       LogService.log("RemoteData service initialized.");
       return this.backgroundService.initialize();

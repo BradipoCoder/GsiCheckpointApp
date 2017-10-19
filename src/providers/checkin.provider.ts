@@ -20,24 +20,6 @@ export class CheckinProvider extends LocalDocumentProvider
   protected underlying_model:any = Checkin;
 
   database_name = "checkin";
-  database_indices = [
-    {
-      name: 'idx_date',
-      fields: ['checkin_date']
-    },
-    {
-      name: 'idx_checkpoint',
-      fields: ['mkt_checkpoint_id_c']
-    },
-    {
-      name: 'idx_date_checkpoint',
-      fields: ['checkin_date', 'mkt_checkpoint_id_c']
-    },
-    {
-      name: 'idx_sync_state',
-      fields: ['sync_state']
-    }
-  ];
 
   //@todo: remove this!!! MOVED TO MODEL!
   remote_table_name = "mkt_Checkin";
@@ -197,7 +179,7 @@ export class CheckinProvider extends LocalDocumentProvider
           });
         } else
         {
-          LogService.log("NOTHING TO SYNC");
+          LogService.log("CHECKIN PROVIDER - NOTHING TO SYNC UP");
           resolve();
         }
       }).catch((e) =>
@@ -206,6 +188,31 @@ export class CheckinProvider extends LocalDocumentProvider
         resolve();
       });
     });
+  }
+
+  /**
+   * @returns {any}
+   */
+  protected getDbIndexDefinition():any
+  {
+    return _.concat(super.getDbIndexDefinition(), [
+      {
+        name: 'idx_date',
+        fields: ['checkin_date']
+      },
+      {
+        name: 'idx_checkpoint',
+        fields: ['mkt_checkpoint_id_c']
+      },
+      {
+        name: 'idx_date_checkpoint',
+        fields: ['checkin_date', 'mkt_checkpoint_id_c']
+      },
+      {
+        name: 'idx_sync_state',
+        fields: ['sync_state']
+      }
+    ]);
   }
 
   /**

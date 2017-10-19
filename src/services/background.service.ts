@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 
 /* Services */
 import {UserService} from './user.service';
+import {LogService} from "./log.service";
 
 /* Data Providers */
 import {CheckpointProvider} from "../providers/checkpoint.provider";
@@ -9,7 +10,7 @@ import {CheckinProvider} from "../providers/checkin.provider";
 
 /* Other */
 import {Promise} from '../../node_modules/bluebird'
-import {LogService} from "./log.service";
+
 
 @Injectable()
 export class BackgroundService
@@ -21,11 +22,18 @@ export class BackgroundService
   private execution_count_max = 0;
 
   private startup_delay_ms = (15 * 1000);
-  private execution_interval_ms = (10 * 1000);
+
+
+  private execution_interval_slow_ms = (30 * 1000);
+  private execution_interval_fast_ms = (0.5 * 1000);
+  private execution_interval_ms = this.execution_interval_slow_ms;
 
   private auto_update_timeout: number;
 
   protected dataProviders: any = [];
+
+  /* using variable to lock user on sync page until initial sync has completed */
+  private syncPageLocked = false;
 
   constructor(private checkpointProvider: CheckpointProvider
               , private checkinProvider: CheckinProvider
@@ -37,7 +45,7 @@ export class BackgroundService
     ];
   }
 
-
+  //------------------------------------------------------------------------------------------------------------INTERNAL
   /**
    * Auto-self-calling function at regular intervals
    * @param {BackgroundService} self
@@ -120,23 +128,8 @@ export class BackgroundService
     });
   }
 
-  //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
 
-  /**
-   *
-   * @returns {Promise<any>}
-   */
-  public syncDataProviders(): Promise<any>
-  {
-    return Promise.reduce(this.dataProviders, function(accu, provider, index)
-    {
-      LogService.log("PROVIDER #" + index + " - " + provider.constructor.name);
-      return provider.syncWithRemote();
-    }, null);
-  }
-
-
-
+  //-----------------------------------------------------------------------------------------------------PUBLIC CONTROLS
   public stop(): Promise<any>
   {
     let self = this;
@@ -186,15 +179,78 @@ export class BackgroundService
 
 
   /**
+   * @returns {boolean}
+   */
+  public isSyncPageLocked():boolean
+  {
+    return this.syncPageLocked;
+  }
+
+  public lockSyncPage(): void
+  {
+    this.syncPageLocked = true;
+  }
+
+  public unlockSyncPage(): void
+  {
+    this.syncPageLocked = false;
+  }
+
+
+  /**
+   * Set interval to do fast execution riprogramming
+   */
+  public setSyncIntervalFast():void
+  {
+    this.execution_interval_ms = this.execution_interval_fast_ms;
+  }
+
+  /**
+   * Set interval to do fast execution riprogramming
+   */
+  public setSyncIntervalSlow():void
+  {
+    this.execution_interval_ms = this.execution_interval_slow_ms;
+  }
+
+  //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public syncDataProviders(): Promise<any>
+  {
+    return Promise.reduce(this.dataProviders, function(accu, provider, index)
+    {
+      LogService.log("[SYNC]PROVIDER#" + index + " - " + provider.constructor.name);
+      return provider.syncWithRemote();
+    }, null);
+  }
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public resetDataProvidersSyncOffset(): Promise<any>
+  {
+    return Promise.reduce(this.dataProviders, function(accu, provider, index)
+    {
+      LogService.log("[RST]PROVIDER#" + index + " - " + provider.constructor.name);
+      return provider.resetSyncOffsetToZero();
+    }, null);
+  }
+
+
+  //----------------------------------------------------------------------------------------------------------------INIT
+  /**
    * @returns {Promise<any>}
    */
   public initialize(): Promise<any>
   {
-    let self = this;
+    //@todo: re-enable me!
+    //setTimeout(this.intervalExecution, this.startup_delay_ms, this);
 
-    //setTimeout(self.intervalExecution, self.startup_delay_ms, self);
-
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       resolve();
     });
   }

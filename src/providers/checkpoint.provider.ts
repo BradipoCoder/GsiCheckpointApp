@@ -21,38 +21,8 @@ export class CheckpointProvider extends LocalDocumentProvider
 
   protected database_name = "checkpoint";
 
-  protected database_indices = [
-    {
-      name: 'idx_date_modified',
-      fields: ['date_modified']
-    }, {
-      name: 'idx_date_entered',
-      fields: ['date_entered']
-    }, {
-      name: 'idx_sync_last_check',
-      fields: ['sync_last_check']
-    },
-    {
-      name: 'idx_type',
-      fields: ['type']
-    },
-    {
-      name: 'idx_code',
-      fields: ['code']
-    },
-    {
-      name: 'idx_company',
-      fields: ['account_id_c']
-    },
-    {
-      name: 'idx_company_type',
-      fields: ['account_id_c', 'type']
-    }
-  ];
-
   //@todo: remove this!!! MOVED TO MODEL!
   protected remote_table_name = "mkt_Checkpoint";
-
 
   constructor(protected configurationService: ConfigurationService,
               protected offlineCapableRestService: OfflineCapableRestService)
@@ -203,6 +173,41 @@ export class CheckpointProvider extends LocalDocumentProvider
       });
     });
   }*/
+
+  /**
+   * @returns {any}
+   */
+  protected getDbIndexDefinition():any
+  {
+    return _.concat(super.getDbIndexDefinition(), [
+      {
+        name: 'idx_date_modified',
+        fields: ['date_modified']
+      }, {
+        name: 'idx_date_entered',
+        fields: ['date_entered']
+      }, {
+        name: 'idx_sync_last_check',
+        fields: ['sync_last_check']
+      },
+      {
+        name: 'idx_type',
+        fields: ['type']
+      },
+      {
+        name: 'idx_code',
+        fields: ['code']
+      },
+      {
+        name: 'idx_company',
+        fields: ['account_id_c']
+      },
+      {
+        name: 'idx_company_type',
+        fields: ['account_id_c', 'type']
+      }
+    ]);
+  }
 
   /**
    * @returns {Promise<any>}
