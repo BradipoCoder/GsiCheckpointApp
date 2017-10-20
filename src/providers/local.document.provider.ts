@@ -1,24 +1,22 @@
-/**
- * Rest Data Provider
- */
+/** CORE */
 import {Injectable} from '@angular/core';
-
+/** SERVICES */
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {ConfigurationService} from '../services/configuration.service';
 
+import {LogService} from "../services/log.service";
+/** MODELS */
 import {CrmDataModel} from '../models/crm.data.model';
-
+/** OTHER */
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
-
 import _ from "lodash";
 import * as moment from 'moment';
 import {Promise} from '../../node_modules/bluebird'
-
 import Rx from "rxjs/Rx";
-import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
-import {LogService} from "../services/log.service";
+import {Observable} from "rxjs/Observable";
+
 
 
 PouchDB.plugin(PouchDBFind);

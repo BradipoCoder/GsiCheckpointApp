@@ -6,9 +6,15 @@
  *  2) make get/set become synchronous methods on in-memory object
  *  3) on set trigger db.put (with optional wait-for-storage param/option)
  */
+
+/** CORE */
 import {Injectable} from '@angular/core';
+/** OTHER */
 import PouchDB from "pouchdb";
 import _ from "lodash";
+import Rx from "rxjs/Rx";
+import {Subject} from "rxjs/Subject";
+import {Observable} from "rxjs/Observable";
 
 @Injectable()
 export class ConfigurationService
@@ -26,6 +32,9 @@ export class ConfigurationService
     , crm_password: ''
     , log_level: 'NONE'
   };
+
+  private databaseChangeSubject: Subject<any> = new Rx.Subject();
+  public databaseChangeObservable: Observable<any> = Rx.Observable.create(e => this.databaseChangeSubject = e);
 
 
   public unlockWithCode(code: string): boolean
@@ -101,21 +110,51 @@ export class ConfigurationService
   };
 
   /**
-   * Set the value of a single configuration item
    *
-   * @param {string} key
-   * @param {any} value
-   * @param {boolean} skip_if_exists
-   * @param {boolean} override_code
+   * @param {any} configs
+   * @param {boolean} [skip_if_exists]
+   * @param {boolean} [override_lock]
    * @returns {Promise<any>}
    */
-  public setConfig(key, value, skip_if_exists = false, override_code = false): Promise<any>
+  public setMultipleConfigs(configs:any, skip_if_exists:boolean = false, override_lock:boolean = false): Promise<any>
   {
     let self = this;
 
     return new Promise(function (resolve, reject)
     {
-      if (!override_code && !self.isUnlocked())
+
+      let setPromises = [];
+      _.each(configs, function (v, k)
+      {
+        setPromises.push(self.setConfig(k, v, skip_if_exists, override_lock));
+      });
+
+      Promise.all(setPromises).then(() =>
+      {
+        resolve();
+      }, (e) =>
+      {
+        reject(e);
+      });
+    });
+  }
+
+  /**
+   * Set the value of a single configuration item
+   *
+   * @param {string} key
+   * @param {any} value
+   * @param {boolean} [skip_if_exists]
+   * @param {boolean} [override_lock]
+   * @returns {Promise<any>}
+   */
+  public setConfig(key:string, value:any, skip_if_exists:boolean = false, override_lock:boolean = false): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      if (!override_lock && !self.isUnlocked())
       {
         return reject(new Error("Configuration service is locked! Unlock first."));
       }
@@ -186,24 +225,25 @@ export class ConfigurationService
     {
       self.db = new PouchDB('configuration', {auto_compaction: true, revs_limit: 10});
 
-      self.is_unlocked = true;
-      let setPromises = [];
-      _.each(self.default_config, function (v, k)
-      {
-        setPromises.push(self.setConfig(k, v, true));
+      let changes = self.db.changes({
+        since: 'now',
+        live: true,
+        include_docs: false
+      }).on('change', function (change) {
+        self.databaseChangeSubject.next(change);
+      }).on('error', function (err) {
+        console.error('CONFIGURATION DB ERROR: ' + err);
+        self.databaseChangeSubject.error(err);
       });
 
-      Promise.all(setPromises).then(() =>
-      {
-        self.is_unlocked = false;
+
+      self.setMultipleConfigs(self.default_config, true, true).then(() => {
         resolve();
-      }).catch((e) =>
-      {
-        self.is_unlocked = false;
+      }, (e) => {
         reject(e);
       });
+
     });
   }
 }
-
 

@@ -45,10 +45,6 @@ export class ConfigurationSettingsPage implements OnInit
    * !!! NETWORK CONNECTION REQUIRED !!!
    * destroy and recreate databases and load remote data
    *
-   *
-   *
-   * @todo:------------------------------------------LoGService must be reset with new LOG LEVEL SETTING!!!
-   *
    * @returns {Promise<any>}
    */
   cleanCache(): Promise<any>
@@ -118,6 +114,12 @@ export class ConfigurationSettingsPage implements OnInit
         return self.userService.login(self.cfg.crm_username, self.cfg.crm_password);
       }).then(() =>
       {
+        msg = "Configuring user...";
+        LogService.log(msg);
+        loader.setContent(loaderContent + msg);
+        return self.userService.configureWithOfflineUserData();
+      }).then(() =>
+      {
         msg = "Destroying databases...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
@@ -161,6 +163,8 @@ export class ConfigurationSettingsPage implements OnInit
   /**
    * Save configuration values and reset application
    *
+   * @todo:------------------------------------------LoGService must be reset with new LOG LEVEL SETTING!!!
+   *
    * @returns {Promise<any>}
    */
   saveAndResetApplication():  Promise<any>
@@ -182,8 +186,6 @@ export class ConfigurationSettingsPage implements OnInit
       }
 
       let loaderContent = "<strong>Salvataggio configurazione</strong><br />";
-      let msg;
-
       let loader = self.loadingCtrl.create({
         content: loaderContent,
         duration: (5 * 60 * 1000)
@@ -196,16 +198,8 @@ export class ConfigurationSettingsPage implements OnInit
       loader.present().then(() =>
       {
         LogService.log("Stopping background service...");
-        return self.backgroundService.stop().then(() => {
-
-          //save all config values
-          let setPromises = [];
-          _.each(self.cfg, function (val, key)
-          {
-            setPromises.push(self.configurationService.setConfig(key, val));
-          });
-
-          Promise.all(setPromises).then(() =>
+        self.backgroundService.stop().then(() => {
+          self.configurationService.setMultipleConfigs(self.cfg).then(() =>
           {
             self.configurationService.unlockWithCode("");//lock it
             LogService.log("Configuration values were saved.");
@@ -215,74 +209,6 @@ export class ConfigurationSettingsPage implements OnInit
               LogService.log("APPLICATION RESET OK", LogService.LEVEL_WARN);
             });
           });
-        });
-      });
-    });
-  }
-
-
-  /**
-   * Save configuration values and reset application
-   */
-  saveAndResetApplicationOld(): void
-  {
-
-
-    let self = this;
-    let loader = this.loadingCtrl.create({
-      content: "Elaborazione in corso...",
-      duration: (5 * 60 * 1000)
-    });
-    loader.present().then(() =>
-    {
-      LogService.log("Stopping background service...");
-      return this.backgroundService.stop();
-    }).then(() =>
-    {
-      //save all config values
-      let setPromises = [];
-      _.each(this.cfg, function (val, key)
-      {
-        setPromises.push(self.configurationService.setConfig(key, val));
-      });
-
-      Promise.all(setPromises).then(() =>
-      {
-        this.configurationService.unlockWithCode("");//lock it
-        LogService.log("Configuration values were saved.");
-
-        return this.userService.logout();
-      }).then(() =>
-      {
-        LogService.log("User is now logged out.");
-
-        return this.userService.login(this.cfg.crm_username, this.cfg.crm_password);
-      }).then(() =>
-      {
-        LogService.log("User is now logged in.");
-        return this.userService.initialize();
-      }).then(() =>
-      {
-        LogService.log("Starting background service...");
-        return this.backgroundService.start();
-      }).then(() =>
-      {
-        return loader.dismiss();
-      }).then(() =>
-      {
-        LogService.log("APPLICATION RESET OK");
-        self.cleanCache();
-      }).catch((e) =>
-      {
-        loader.dismiss().then(() =>
-        {
-          LogService.log("Application reset error: " + e);
-          let toast = this.toastCtrl.create({
-            message: 'Errore configurazione app! ' + e,
-            duration: 15000,
-            position: 'top'
-          });
-          toast.present();
         });
       });
     });

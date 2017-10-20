@@ -1,6 +1,6 @@
+/** CORE */
 import {Injectable} from '@angular/core';
-
-/* Services */
+/** SERVICES */
 import {ConfigurationService} from './configuration.service';
 
 import _ from "lodash";
@@ -27,15 +27,35 @@ export class LogService
 
     return new Promise(function (resolve)
     {
-      self.configurationService.getConfig('log_level', LogService.LEVEL_NONE).then((value) =>
+      self.configurationService.databaseChangeObservable.subscribe((data) => {
+        if(!_.isUndefined(data["id"]) && data.id == "log_level")
+        {
+          self.resetLogLevelToConfigurationValue().then(() => {
+          });
+        }
+      });
+
+      self.resetLogLevelToConfigurationValue().then((value) =>
       {
-        LogService.log("Setting default log level to: " + value);
-        LogService.setLogLevel(value);
         resolve();
       });
     });
   }
 
+  private resetLogLevelToConfigurationValue(): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve)
+    {
+      self.configurationService.getConfig('log_level', LogService.LEVEL_NONE).then((value) =>
+      {
+        LogService.log("Setting log level to configured value: " + value);
+        LogService.setLogLevel(value);
+        resolve();
+      });
+    });
+  }
 
   /**
    *

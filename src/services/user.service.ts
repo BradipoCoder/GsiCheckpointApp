@@ -66,8 +66,11 @@ export class UserService
    *
    * @returns {Promise<any>}
    */
-  private configureWithOfflineUserData(): Promise<any>
+  public configureWithOfflineUserData(): Promise<any>
   {
+
+    LogService.log("configureWithOfflineUserData...", LogService.LEVEL_WARN);
+
     let self = this;
     this.unsetOfflineUserData();
 
