@@ -86,7 +86,6 @@ export class OfflineCapableRestService extends RestService
       this.setIsNetworkConnected(conn);
     });
 
-    //@todo: remove OFFLAJN
     super.initialize(rest_api_url, rest_api_version);
   }
 }

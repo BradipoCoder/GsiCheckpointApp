@@ -48,12 +48,4 @@ export class Checkpoint extends CrmDataModel
     this.checkPropertyDate('date_entered');
     this.checkPropertyDate('date_modified');
   }
-
-
-  /**
-   * @todo: devel method - remove!
-   */
-  public dump(): void {
-    LogService.log("Checkpoint", JSON.stringify(this));
-  }
 }

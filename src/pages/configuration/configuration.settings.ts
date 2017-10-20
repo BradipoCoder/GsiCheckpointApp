@@ -163,8 +163,6 @@ export class ConfigurationSettingsPage implements OnInit
   /**
    * Save configuration values and reset application
    *
-   * @todo:------------------------------------------LoGService must be reset with new LOG LEVEL SETTING!!!
-   *
    * @returns {Promise<any>}
    */
   saveAndResetApplication():  Promise<any>

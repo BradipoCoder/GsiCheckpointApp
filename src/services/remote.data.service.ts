@@ -150,8 +150,6 @@ export class RemoteDataService
   }
 
   /**
-   * @todo: should keep track of company id as well
-   *
    * @returns {Promise<any>}
    */
   private getLastInOutOperation(): Promise<Checkin>
@@ -248,7 +246,6 @@ export class RemoteDataService
   /**
    *
    * @todo: it would be easier to use current Session Checkins and pop off the last one
-   * @todo: do NOT set duration on "OUT" type checkins!
    *
    * @param {Checkin} lastCheckin
    * @returns {Promise<any>}
@@ -284,7 +281,6 @@ export class RemoteDataService
           LogService.log("DURATION-UPDATE: Previous document is of type OUT - skipping.");
           resolve();
           return;
-
         }
         //LogService.log("DURATION UPDATE - PREV: ", previousCheckin);
         let checkin_date_last = lastCheckin.checkin_date;

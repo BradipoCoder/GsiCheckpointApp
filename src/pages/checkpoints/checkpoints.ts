@@ -29,7 +29,6 @@ export class CheckpointsPage implements OnInit, OnDestroy
 
   /**
    * @todo: we should implement an id based refresh where we substitute documents singularly
-   * @todo: last triggered update could be skipped never updating to final list :....?
    */
   private refreshCheckpoints(): void
   {
