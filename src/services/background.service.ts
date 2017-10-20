@@ -21,7 +21,7 @@ export class BackgroundService
   private execution_count = 0;
   private execution_count_max = 0;
 
-  private startup_delay_ms = (15 * 1000);
+  private startup_delay_ms = (30 * 1000);
 
 
   private execution_interval_slow_ms = (30 * 1000);
@@ -135,7 +135,8 @@ export class BackgroundService
     let self = this;
     let waitInterval = null;
     let waitCount = 0;
-    let waitMaxCount = 60;
+    let intervalTimeout = 1000;
+    let waitMaxCount = 3 * (this.execution_interval_slow_ms / intervalTimeout);
     self.stop_requested = true;
 
 
@@ -157,7 +158,7 @@ export class BackgroundService
           self.stop_requested = false;
           reject(new Error("Background service would not stop!"));
         }
-      }, 500);
+      }, intervalTimeout);
     });
   }
 
@@ -247,8 +248,7 @@ export class BackgroundService
    */
   public initialize(): Promise<any>
   {
-    //@todo: re-enable me!
-    //setTimeout(this.intervalExecution, this.startup_delay_ms, this);
+    setTimeout(this.intervalExecution, this.startup_delay_ms, this);
 
     return new Promise(function (resolve) {
       resolve();

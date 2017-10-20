@@ -94,7 +94,6 @@ export class CheckpointsPage implements OnInit, OnDestroy
     this.dataChangeSubscription = this.checkpointProvider.databaseChangeObservable.subscribe(
       (data: any) => {
         if(data.db == 'checkpoint') {
-          //LogService.log('CHECKPOINT DB CHANGE Observed: ', data);
           this.refreshCheckpoints();
         }
       });

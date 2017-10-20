@@ -31,11 +31,11 @@ export class CheckinsPage implements OnInit, OnDestroy
 
   /**
    * @todo: we should implement an id based refresh where we substitute documents singularly
-   * @todo: last triggered update could be skipped never updating to final list :....?
    */
   private refreshCheckins(): void
   {
-    if(this.is_refreshing) {
+    if (this.is_refreshing)
+    {
       //console.warn("Refresh is already on the way...(skipping);)");
       return;
     }
@@ -68,11 +68,17 @@ export class CheckinsPage implements OnInit, OnDestroy
   public action1(): void
   {
     LogService.log("A1 - START");
+    this.backgroundService.start().then(() => {
+      LogService.log("A1 - START DONE.");
+    });
   }
 
   public action2(): void
   {
     LogService.log("A2 - STOP");
+    this.backgroundService.stop().then(() => {
+      LogService.log("A2 - STOP DONE.");
+    });
   }
 
   //------------------------------------------------------------------------------------------------------INIT & DESTROY
@@ -83,15 +89,15 @@ export class CheckinsPage implements OnInit, OnDestroy
   {
     this.refreshCheckins();
 
-    /*
-    this.dataChangeSubscription = this.checkpointProvider.databaseChangeObservable.subscribe(
+
+    this.dataChangeSubscription = this.checkinProvider.databaseChangeObservable.subscribe(
       (data: any) => {
-        if(data.db == 'checkpoint') {
+        if (data.db == 'checkin')
+        {
           //console.log('CHECKPOINT DB CHANGE Observed: ', data);
           this.refreshCheckins();
         }
       });
-     */
   }
 
 
@@ -100,6 +106,6 @@ export class CheckinsPage implements OnInit, OnDestroy
    */
   ngOnDestroy(): void
   {
-    //this.dataChangeSubscription.unsubscribe();
+    this.dataChangeSubscription.unsubscribe();
   }
 }

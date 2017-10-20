@@ -25,15 +25,23 @@
       <table class="table responsive checkins">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Sync</th>
+            <th></th>
+            <th>Data</th>
+            <th>Nome</th>
+            <th>Durata</th>
+            <th class="icon"><ion-icon name="cloud"></ion-icon></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let checkin of checkins">
-            <td>{{checkin.name}}</td>
-            <td>
-              <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{checkin.sync_state}}" item-right></ion-icon>
+            <td text-center>
+              <ion-icon [name]="checkin.icon" title="{{checkin.type}}"></ion-icon>
+            </td>
+            <td text-right>{{ checkin.checkin_date}}</td>
+            <td>{{ checkin.name}}</td>
+            <td text-right>{{ checkin.getFormattedDuration() }}</td>
+            <td text-center>
+              <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{checkin.sync_state}}"></ion-icon>
             </td>
           </tr>
         </tbody>

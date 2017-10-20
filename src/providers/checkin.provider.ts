@@ -147,14 +147,14 @@ export class CheckinProvider extends LocalDocumentProvider
               {
                 _.unset(parameters, 'id');
               }
-              LogService.log("PUSHING TO REMOTE WITH PARAMS: ", parameters);
+              LogService.log("PUSHING TO REMOTE WITH PARAMS: " + JSON.stringify(parameters));
               self.offlineCapableRestService.setEntry(self.remote_table_name, (isNewOnRemote ? false : checkin.id), parameters).then((res) =>
               {
                 if (!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
                 {
                   throw new Error("failed to save on remote!");
                 }
-                LogService.log("Saved on remote: ", res);
+                LogService.log("Saved on remote: " + JSON.stringify(res));
                 let currentLocalStorageId = checkin.id;
                 checkin.id = res.id;
                 checkin.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
