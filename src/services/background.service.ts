@@ -248,7 +248,8 @@ export class BackgroundService
    */
   public initialize(): Promise<any>
   {
-    setTimeout(this.intervalExecution, this.startup_delay_ms, this);
+    //@todo: re-enable me!
+    //setTimeout(this.intervalExecution, this.startup_delay_ms, this);
 
     return new Promise(function (resolve) {
       resolve();

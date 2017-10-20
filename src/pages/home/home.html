@@ -145,7 +145,7 @@
               <ion-row>
                 <ion-col>
                   <ion-label color="darkest">Hai segnalato la tua uscita.</ion-label>
-                  <ion-label>Oggi {{getTodaysDate("D MMMM")}} hai lavorato<br/>{{shiftTotalDuration}}</ion-label>
+                  <!--<ion-label>Oggi {{getTodaysDate("D MMMM")}} hai lavorato<br/>{{shiftTotalDuration}}</ion-label>-->
                 </ion-col>
               </ion-row>
             </ion-grid>
@@ -175,14 +175,14 @@
               Pausa
             </ion-label>
 
-            <button *ngIf="userService.isTrustedUser()" ion-button icon-left float-right (click)="fakeNetworkStateChange(true)" color="dark">
-              <ion-icon name="play"></ion-icon>
-              <ion-label>NET-ON</ion-label>
-            </button>
-            <button *ngIf="userService.isTrustedUser()" ion-button icon-left float-right (click)="fakeNetworkStateChange(false)" color="dark">
-              <ion-icon name="square"></ion-icon>
-              <ion-label>NET-OFF</ion-label>
-            </button>
+            <!--<button *ngIf="userService.isTrustedUser()" ion-button icon-left float-right (click)="fakeNetworkStateChange(true)" color="dark">-->
+              <!--<ion-icon name="play"></ion-icon>-->
+              <!--<ion-label>NET-ON</ion-label>-->
+            <!--</button>-->
+            <!--<button *ngIf="userService.isTrustedUser()" ion-button icon-left float-right (click)="fakeNetworkStateChange(false)" color="dark">-->
+              <!--<ion-icon name="square"></ion-icon>-->
+              <!--<ion-label>NET-OFF</ion-label>-->
+            <!--</button>-->
 
           </div>
         </ion-col>

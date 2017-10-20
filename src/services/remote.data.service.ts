@@ -32,6 +32,7 @@ export class RemoteDataService
 {
   private last_checkin_operation: Checkin;
 
+  private updating_session_checkins = false;
   private CURRENT_SESSION_CHECKINS: Checkin[];
 
   constructor(private offlineCapableRestService: OfflineCapableRestService
@@ -96,12 +97,20 @@ export class RemoteDataService
     let self = this;
     return new Promise(function (resolve, reject)
     {
+      if(self.updating_session_checkins == true)
+      {
+        //already working on it
+        return resolve();
+      }
+      self.updating_session_checkins = true;
+
       self.CURRENT_SESSION_CHECKINS = [];
 
       self.getLastInOutOperation().then((operation: Checkin) =>
       {
         if (_.isNull(operation) || _.isEmpty(operation))
         {
+          self.updating_session_checkins = false;
           return resolve();
         }
 
@@ -125,7 +134,7 @@ export class RemoteDataService
             });
           }
 
-          LogService.log("CURRENT_SESSION_CHECKINS: "+ JSON.stringify(self.CURRENT_SESSION_CHECKINS));
+          //LogService.log("CURRENT_SESSION_CHECKINS: "+ JSON.stringify(self.CURRENT_SESSION_CHECKINS));
 
           if (!_.isUndefined(self.CURRENT_SESSION_CHECKINS[0]))
           {
@@ -133,6 +142,7 @@ export class RemoteDataService
             //LogService.log("LAST IN OUT OP: ", self.last_checkin_operation);
           }
 
+          self.updating_session_checkins = false;
           resolve();
         });
       });
