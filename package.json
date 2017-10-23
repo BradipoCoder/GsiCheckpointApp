@@ -1,7 +1,7 @@
 {
     "name": "trace_with_mekit",
     "description": "Traccia con Mekit",
-    "version": "0.1.11",
+    "version": "0.1.12",
     "author": "Mekit",
     "homepage": "http://mekit.it",
     "private": true,

@@ -22,7 +22,7 @@ export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
   /* The page to start with */
-  startupPage: any = ConfigurationPage;
+  startupPage: any = HomePage;//ConfigurationPage
   rootPage: any;
   pages: Array<{ title: string, icon: string, component: any }>;
 
