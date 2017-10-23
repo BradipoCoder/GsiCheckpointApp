@@ -41,7 +41,7 @@ export class MekitTracerApp
       {title: 'Home', icon: 'home', component: HomePage}
       , {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage}
       , {title: 'Locali', icon: 'globe', component: CheckpointsPage}
-      , {title: 'Tracciature', icon: 'globe', component: CheckinsPage}
+      , {title: 'Tracciature', icon: 'flag', component: CheckinsPage}
       /*, {title: 'Esci', icon: 'power', component: LogoutPage}*/
     ];
 
