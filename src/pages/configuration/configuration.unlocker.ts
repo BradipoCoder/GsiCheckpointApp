@@ -10,7 +10,16 @@ import {ViewController} from 'ionic-angular';
 })
 export class ConfigurationUnlockerPage
 {
-  unlock_code:string = "MKT";
+  /**
+   * This is to auto-fill-in unlock code.
+   * Clear this in production releases
+   * The real unlock code is here:
+   * @see: src/services/configuration.service.ts:24
+   *
+   *
+   * @type {string}
+   */
+  unlock_code:string = "";
 
   constructor(public viewCtrl: ViewController)
   {}

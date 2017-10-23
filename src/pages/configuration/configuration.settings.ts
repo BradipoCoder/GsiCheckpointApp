@@ -1,6 +1,7 @@
 /* CORE */
 import {Component, OnInit} from '@angular/core';
 import {NavController, ModalController, ToastController, LoadingController} from 'ionic-angular';
+import { Insomnia } from '@ionic-native/insomnia';
 /* SERVICES */
 import {ConfigurationService} from '../../services/configuration.service';
 import {UserService} from '../../services/user.service';
@@ -17,6 +18,7 @@ import {HomePage} from "../home/home";
 import _ from "lodash";
 
 
+
 @Component({
   selector: 'page-configuration-settings',
   templateUrl: 'configuration.settings.html'
@@ -31,6 +33,7 @@ export class ConfigurationSettingsPage implements OnInit
     , private toastCtrl: ToastController
     , private modalCtrl: ModalController
     , private loadingCtrl: LoadingController
+    , private insomnia: Insomnia
     , private configurationService: ConfigurationService
     , private userService: UserService
     , private remoteDataService: RemoteDataService
@@ -65,6 +68,11 @@ export class ConfigurationSettingsPage implements OnInit
         });
         return;
       }
+
+      self.insomnia.keepAwake().then(() => {
+        LogService.log("KEEP AWAKE ON!");
+      });
+
 
       let loaderContent = "<strong>Eliminazione cache</strong><br />";
       let msg;

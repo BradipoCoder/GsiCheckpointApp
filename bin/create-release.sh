@@ -2,7 +2,7 @@
 
 APKDIR="platforms/android/build/outputs/apk"
 KEYSTORE="/home/jack/Documents/Keystore/mekit-release-key.keystore"
-ZIPALIGNBIN="/home/jack/Android/Sdk/build-tools/25.0.3/zipalign"
+ZIPALIGN_BIN="${ANDROID_HOME}/build-tools/current/zipalign"
 
 if [ ! -d "${APKDIR}" ]; then
   echo "NO APK DIR! Run this script from project root!"
@@ -35,5 +35,5 @@ jarsigner -sigalg SHA1withRSA -digestalg SHA1 -keystore ${KEYSTORE} -storepass m
 
 
 echo "Creating zipaligned signed version..."
-${ZIPALIGNBIN} -v 4 "${APKDIR}/android-release-unsigned.apk" "${APKDIR}/android-release-signed.apk"
+${ZIPALIGN_BIN} -v 4 "${APKDIR}/android-release-unsigned.apk" "${APKDIR}/android-release-signed.apk"
 

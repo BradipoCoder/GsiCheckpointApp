@@ -9,6 +9,7 @@ import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {Network} from '@ionic-native/network';
+import {Insomnia} from '@ionic-native/insomnia';
 
 /* Services */
 import {ConfigurationService} from '../services/configuration.service';
@@ -72,6 +73,7 @@ import {CheckinsPage} from "../pages/checkins/checkins";
     StatusBar
     , SplashScreen
     , BarcodeScanner
+    , Insomnia
     , ConfigurationService
     , LogService
     , OfflineCapableRestService

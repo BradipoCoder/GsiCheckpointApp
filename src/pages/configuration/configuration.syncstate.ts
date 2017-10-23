@@ -1,6 +1,7 @@
 /* CORE */
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ViewController} from 'ionic-angular';
+import { Insomnia } from '@ionic-native/insomnia';
 /* PROVIDERS */
 import {CheckpointProvider} from '../../providers/checkpoint.provider';
 import {CheckinProvider} from '../../providers/checkin.provider';
@@ -29,6 +30,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
 
   constructor(protected viewCtrl: ViewController
+    , private insomnia: Insomnia
     , private checkpointProvider:CheckpointProvider
     , private checkinProvider:CheckinProvider
     , private backgroundService: BackgroundService)
@@ -114,6 +116,9 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
         LogService.log("FULL CACHE CLEAN COMPLETED.", LogService.LEVEL_WARN);
         this.backgroundService.setSyncIntervalSlow();
         this.backgroundService.unlockSyncPage();
+        this.insomnia.allowSleepAgain().then(() => {
+          LogService.log("KEEP AWAKE OFF!");
+        });
       }
     }
   }
