@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-APKDIR="platforms/android/build/outputs/apk"
+ANDROID_PLATFORM_DIR="./platforms/android"
+APKDIR="${ANDROID_PLATFORM_DIR}/build/outputs/apk"
 KEYSTORE="/home/jack/Documents/Keystore/mekit-release-key.keystore"
 ZIPALIGN_BIN="${ANDROID_HOME}/build-tools/current/zipalign"
 
-if [ ! -d "${APKDIR}" ]; then
+if [ ! -d "${ANDROID_PLATFORM_DIR}" ]; then
   echo "NO APK DIR! Run this script from project root!"
   exit 1
 fi
