@@ -1,12 +1,13 @@
 /* CORE */
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {ViewController} from 'ionic-angular';
+import {ViewController, ToastController, Platform} from 'ionic-angular';
 import { Insomnia } from '@ionic-native/insomnia';
 /* PROVIDERS */
 import {CheckpointProvider} from '../../providers/checkpoint.provider';
 import {CheckinProvider} from '../../providers/checkin.provider';
 /* SERVICES */
 import {BackgroundService} from "../../services/background.service";
+import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
 import {LogService} from "../../services/log.service";
 /* OTHER */
 import _ from "lodash";
@@ -22,6 +23,10 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
   private counts: any;
 
+  private is_in_sync: boolean = false;
+
+  private viewIsReady: boolean;
+
   private hasInterfaceRefreshRequest = false;
   private isInterfaceRefreshRunning = false;
 
@@ -30,12 +35,18 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
 
   constructor(protected viewCtrl: ViewController
+    , private toastCtrl: ToastController
+    , private platform:Platform
     , private insomnia: Insomnia
     , private checkpointProvider:CheckpointProvider
     , private checkinProvider:CheckinProvider
+    , private offlineCapableRestService: OfflineCapableRestService
     , private backgroundService: BackgroundService)
   {
+    this.viewIsReady = false;
+
     this.counts = {
+      unsynced_count: 0, /* total unsynced count */
       checkpoints: {
         server: 0,
         device: 0,
@@ -49,6 +60,39 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
         unsynced_down: 0,
       }
     };
+  }
+
+  public quickSync():void
+  {
+    let self = this;
+
+    return new Promise(function (resolve) {
+      if (!self.offlineCapableRestService.isNetworkConnected())
+      {
+        let toast = self.toastCtrl.create({
+          message: "Nessuna connessione! Connettiti alla rete e riprova.",
+          duration: 5000,
+          position: 'top'
+        });
+        toast.present().then(() => {
+          resolve();
+        });
+        return;
+      }
+
+      if (self.platform.is("mobile"))
+      {
+        self.insomnia.keepAwake().then(() => {
+          LogService.log("KEEP AWAKE ON!");
+        });
+      }
+
+      self.backgroundService.lockSyncPage();
+      self.backgroundService.setSyncIntervalFast();
+      self.updateCounts().then(() => {
+        resolve();
+      });
+    });
   }
 
   /**
@@ -90,8 +134,18 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
         self.counts.checkins.unsynced_up = data[6];
         self.counts.checkins.unsynced_down = data[7];
 
+        //TOTAL UNSYNCED COUNT
+        self.counts.unsynced_count = self.counts.checkpoints.unsynced_up
+          + self.counts.checkpoints.unsynced_down
+          + self.counts.checkins.unsynced_up
+          + self.counts.checkins.unsynced_down;
+
+        // IS IN SYNC
+        self.is_in_sync = (self.counts.unsynced_count == 0);
+
         self.completeFullCacheCleanAction();
 
+        self.viewIsReady = true;
         resolve();
       }, (e) => {
         reject(e);
@@ -106,19 +160,18 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   {
     if (this.backgroundService.isSyncPageLocked())
     {
-      let unlockCount = this.counts.checkpoints.unsynced_up
-        + this.counts.checkpoints.unsynced_down
-        + this.counts.checkins.unsynced_up
-        + this.counts.checkins.unsynced_down;
-
-      if(unlockCount == 0)
+      if(this.counts.unsynced_count == 0)
       {
         LogService.log("FULL CACHE CLEAN COMPLETED.", LogService.LEVEL_WARN);
         this.backgroundService.setSyncIntervalSlow();
         this.backgroundService.unlockSyncPage();
-        this.insomnia.allowSleepAgain().then(() => {
-          LogService.log("KEEP AWAKE OFF!");
-        });
+
+        if (this.platform.is("mobile"))
+        {
+          this.insomnia.allowSleepAgain().then(() => {
+            LogService.log("KEEP AWAKE OFF!");
+          });
+        }
       }
     }
   }
@@ -175,9 +228,19 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
   /**
    * Actions on component init
+   * @todo: we also need calls on regular intervals
    */
   public ngOnInit(): void
   {
+    //@todo: TEMPORARY - REMOVE ME WITH NEXT RELEASE(1.1.11)
+    if (this.platform.is("mobile"))
+    {
+      this.insomnia.keepAwake().then(() => {
+        LogService.log("KEEP AWAKE ON!");
+      });
+    }
+
+
     this.dataChangeSubscriptionCheckin = this.checkinProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
     this.dataChangeSubscriptionCheckpoint = this.checkpointProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
     this.registerInterfaceRefreshRequest();

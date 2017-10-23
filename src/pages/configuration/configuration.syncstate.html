@@ -1,6 +1,16 @@
+<ion-content *ngIf="viewIsReady">
 
-<ion-content>
+  <h1 class="tab-title">
+    Stato sincronizzazione dati
+  </h1>
+
   <ion-list>
+
+    <ion-item class="sync-state" text-center align-items-center>
+      <ion-icon *ngIf="is_in_sync" name="happy" class="happy"></ion-icon>
+      <ion-icon *ngIf="!is_in_sync" name="sad" class="sad"></ion-icon>
+    </ion-item>
+
 
     <ion-list-header>Locali</ion-list-header>
 
@@ -47,5 +57,16 @@
 
   </ion-list>
 
+  <div class="buttons cache-clean-buttons" text-center align-items-center>
+    <hr />
+    <button ion-button icon-left (click)="quickSync()" color="dark">
+      <ion-icon name="refresh-circle"></ion-icon>
+      <ion-label>Forza sincronizzazione</ion-label>
+    </button>
+  </div>
+
 </ion-content>
 
+<ion-content *ngIf="!viewIsReady">
+  <ion-label class="loading">caricamento in corso...</ion-label>
+</ion-content>
