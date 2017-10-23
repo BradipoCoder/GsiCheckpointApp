@@ -17,8 +17,6 @@ import Rx from "rxjs/Rx";
 import {Subject} from "rxjs/Subject";
 import {Observable} from "rxjs/Observable";
 
-
-
 PouchDB.plugin(PouchDBFind);
 //PouchDB.debug.enable('pouchdb:find');
 PouchDB.debug.disable('pouchdb:find');
@@ -303,14 +301,14 @@ export class LocalDocumentProvider
    */
   public syncDownDeleted(itemsToCheck: any = []): Promise<any>
   {
-    let self = this;
-    let dbTableName = self.underlying_model.DB_TABLE_NAME;
+    //let self = this;
+    //let dbTableName = self.underlying_model.DB_TABLE_NAME;
 
     //keep only items that are deleted
-    itemsToCheck = _.filter(itemsToCheck, {deleted: '1'});
+    //itemsToCheck = _.filter(itemsToCheck, {deleted: '1'});
     //LogService.log("FILTERED (DELETED)ITEMS: " + _.size(itemsToCheck));
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       //LogService.log("syncDownDeleted");
       resolve();
     });
@@ -481,7 +479,6 @@ export class LocalDocumentProvider
     let doUpdate = false;
 
     return new Promise(function (resolve, reject) {
-      let registeredDocument: any;
       self.getDocumentById(key).then((registeredDocument: any) => {
         //LogService.log("Docs found:", key, registeredDocument);
         doUpdate = document.isNewer(moment(registeredDocument.date_modified).toDate());
@@ -663,7 +660,7 @@ export class LocalDocumentProvider
       LogService.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
-      let changes = self.db.changes({
+      self.db.changes({
         since: 'now',
         live: true,
         include_docs: false
