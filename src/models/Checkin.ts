@@ -19,8 +19,11 @@ export class Checkin extends CrmDataModel
   public check_point: string = null;
   public duration: string = null;//seconds
 
-  //additional properties
   public type: string = null;
+  public code: string = null;
+
+  //additional properties
+
   public icon: string = null;
   public css_class: string = "row";
 

@@ -35,10 +35,10 @@
         </thead>
         <tbody>
           <tr *ngFor="let checkpoint of checkpoints">
-            <td>{{checkpoint.code}}</td>
+            <td >{{checkpoint.code}}</td>
             <td>{{checkpoint.name}}</td>
             <td>{{checkpoint.type}}</td>
-            <td>{{checkpoint.checklist_c}}</td>
+            <td  class="canwrap">{{checkpoint.getChecklistValues().join(", ")}}</td>
             <td>{{checkpoint.sync_last_check}}</td>
             <td>
               <ion-icon [name]="checkpoint.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{checkpoint.sync_state}}" item-right></ion-icon>

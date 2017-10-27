@@ -3,6 +3,7 @@ import {Platform, NavController, ToastController, LoadingController} from 'ionic
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
+import {CheckpointProvider} from "../../providers/checkpoint.provider";
 import {CheckinProvider} from "../../providers/checkin.provider";
 import {CodeScanService} from '../../services/code.scan.service';
 import {Checkpoint} from '../../models/Checkpoint';
@@ -45,6 +46,7 @@ export class HomePage implements OnInit, OnDestroy
     , public codeScanService: CodeScanService
     , public remoteDataService: RemoteDataService
     , public offlineCapableRestService: OfflineCapableRestService
+    , public checkpointProvider: CheckpointProvider
     , public checkinProvider: CheckinProvider)
   {
   }
@@ -231,6 +233,8 @@ export class HomePage implements OnInit, OnDestroy
   {
     return !this.platform.is("core");
   }
+
+
 
   //-----------------------------------------------------------------------------------------------------------INTERVALS
   /**

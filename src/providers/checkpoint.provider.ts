@@ -108,6 +108,29 @@ export class CheckpointProvider extends LocalDocumentProvider
   }
 
   /**
+   *
+   * @param {string} id
+   * @param {string} key
+   * @param {string} def
+   * @returns {Promise<any>}
+   */
+  public getCheckpointData(id:string, key:string, def = null): Promise<Checkpoint>
+  {
+    let self = this;
+    LogService.log("getCheckpointData - Looking for CP: " + id);
+
+    return new Promise(function (resolve) {
+      self.getCheckpoint({selector: {id: id}}).then((checkpoint: Checkpoint) => {
+        LogService.log("getCheckpointData - FOUND CP: " + checkpoint.name);
+        let answer = !_.isUndefined(checkpoint[key]) ? checkpoint[key] : def;
+        resolve(answer);
+      }, () => {
+        resolve(def);
+      });
+    });
+  }
+
+  /**
    * Returns all IN and OUT type checkpoints
    *
    * @returns {Promise<any>}

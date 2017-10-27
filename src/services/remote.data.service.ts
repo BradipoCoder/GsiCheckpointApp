@@ -128,8 +128,11 @@ export class RemoteDataService
         {
           if (_.size(res.docs))
           {
+            let checkin: Checkin;
             _.each(res.docs, function (doc)
             {
+              checkin = new Checkin(doc);
+              checkin.check_point = "abc";
               self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
             });
           }
@@ -218,6 +221,7 @@ export class RemoteDataService
           checkin_user: self.userService.getUserData("full_name"),
           mkt_checkpoint_id_c: relativeCheckpoint.id,
           type: relativeCheckpoint.type,
+          code: relativeCheckpoint.code,
           sync_state: CrmDataModel.SYNC_STATE__NEW
         });
         return self.checkinProvider.store(checkin);
