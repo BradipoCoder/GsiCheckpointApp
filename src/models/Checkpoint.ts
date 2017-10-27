@@ -54,6 +54,15 @@ export class Checkpoint extends CrmDataModel
     this.createChecklistArray();
   }
 
+  public hasChecklistValues(): boolean
+  {
+    return _.size(this.checklist_items) > 0;
+  }
+
+  /**
+   *
+   * @returns {any}
+   */
   public getChecklistValues():any
   {
     return _.values(this.checklist_items);

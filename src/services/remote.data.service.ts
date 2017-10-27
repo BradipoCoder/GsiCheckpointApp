@@ -199,6 +199,57 @@ export class RemoteDataService
   /**
    * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
    *
+   * @param {Checkpoint} checkpoint
+   * @returns {Promise<string>}
+   */
+  public storeNewCheckinForCheckpoint(checkpoint: Checkpoint): Promise<Checkin>
+  {
+    let self = this;
+    let checkin: Checkin;
+
+    return new Promise(function (resolve, reject)
+    {
+      checkin = new Checkin({
+        name: checkpoint.name,
+        duration: 0,
+        description: '',
+        checkin_date: moment().format(CrmDataModel.CRM_DATE_FORMAT), /*@todo!!! SERVER TIME !!!*/
+        user_id_c: self.userService.getUserData("id"),
+        assigned_user_id: self.userService.getUserData("id"),
+        checkin_user: self.userService.getUserData("full_name"),
+        mkt_checkpoint_id_c: checkpoint.id,
+        type: checkpoint.type,
+        code: checkpoint.code,
+        sync_state: CrmDataModel.SYNC_STATE__NEW
+      });
+
+      self.checkinProvider.store(checkin).then((checkinId) =>
+      {
+        LogService.log("New Checkin stored with id: " + checkinId);
+        return self.checkinProvider.getCheckinById(checkinId);
+      }).then((newCheckin) =>
+      {
+        checkin = newCheckin;
+        return self.updateDurationOfPreviousCheckin(checkin);
+      }).then(() =>
+      {
+        return self.updateCurrentSessionCheckins();
+      }).then(() =>
+      {
+        resolve(checkin);
+      }).catch((e) =>
+      {
+        return reject(e);
+      });
+    });
+  }
+
+  /**
+   * OLD!!!
+   * @todo: PAUSA uses this - convert to storeNewCheckinForCheckpoint and remove this!!!
+   * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
+   * OLD!!!
+   *
    * @param {string} code
    * @returns {Promise<string>}
    */

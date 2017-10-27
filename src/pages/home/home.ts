@@ -1,5 +1,5 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {Platform, NavController, ToastController, LoadingController} from 'ionic-angular';
+import {Platform, NavController, ToastController, LoadingController, AlertController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
@@ -42,6 +42,7 @@ export class HomePage implements OnInit, OnDestroy
     , private platform: Platform
     , public toastCtrl: ToastController
     , private loadingCtrl: LoadingController
+    , private alertCtrl: AlertController
     , public userService: UserService
     , public codeScanService: CodeScanService
     , public remoteDataService: RemoteDataService
@@ -52,79 +53,179 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
-   *@todo: !!!missing important controls!!!
-   *  1) cannot scan anything if we are NOT checked in!
-   *  2) cannot check the same code twice in a row
-   *
+   * Scan QR code and find corresponding Checkpoint for it
+   * IF OK - call registration method
    * @param {[<string>]} allowedTypes
    */
-  scanQRCode(allowedTypes: any): void
+  public scanQRCode(allowedTypes: any): void
   {
     let loader;
-    let barcodeData: any;
-    let checkin: Checkin;
+    let barcodeText: any;
+    let checkpoint: Checkpoint;
 
     this.recalculateShiftTotalDuration(this);
     this.recalculateLastCheckinDuration(this);
 
-    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((data) => {
-      barcodeData = data;
-      //console.log("BARCODE", barcodeData);
+    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) => {
+      barcodeText = barcodeData.text;
+      LogService.log("BARCODE: " + barcodeText);
+
       loader = this.loadingCtrl.create({
-        content: "Ricerca locale(" + barcodeData.text + ") in corso...",
-        duration: (30 * 1000)
+        content: "Ricerca locale in corso: " + barcodeText,
+        duration: (15 * 1000)
       });
+
+      loader.onDidDismiss(() => {
+        if (_.isEmpty(checkpoint))
+        {
+          LogService.log("Unable to find checkpoint for barcode!", LogService.LEVEL_ERROR);
+        } else
+        {
+          this.registerNewCheckinForCheckpoint(checkpoint).then(() => {
+            LogService.log('registration OK');
+          }, (e) => {
+            LogService.log('registration FAIL: ' + e);
+          });
+        }
+      });
+
       return loader.present();
     }).then(() => {
-
-      return this.remoteDataService.storeNewCheckin(barcodeData.text);
-    }).then((newCheckin) => {
-      checkin = newCheckin;
-      return loader.dismiss();
-    }).then(() => {
-      LogService.log("CHECKIN REGISTERED: " +  JSON.stringify(checkin));
-
-      let toastMessage = "Sei entrato in: " + checkin.name + "(" + barcodeData.text + ")";
-      if (checkin.type == Checkpoint.TYPE_OUT)
-      {
-        // OUT
-        toastMessage = "Fine turno";
-        this.presentLogoutScreen = true;
-
-      } else if (checkin.type == Checkpoint.TYPE_OUT)
-      {
-        // IN
-        toastMessage = "Inizio turno";
-      }
-
-      let toast = this.toastCtrl.create({
-        message: toastMessage,
-        duration: 3000,
-        position: 'bottom'
-      });
-      toast.present();
-
-      //timeout to hide end of session screen
-      if (this.presentLogoutScreen)
-      {
-        setTimeout((self) => {
-          LogService.log("time is up!");
-          self.presentLogoutScreen = false;
-        }, 15000, this);
-      }
-
+      LogService.log("Looking for bardoce: " + barcodeText);
+      return this.checkpointProvider.getCheckpoint({selector: {code: barcodeText}});
+    }).then((relativeCheckpoint) => {
+      checkpoint = relativeCheckpoint;
+      loader.dismiss();
     }).catch((e) => {
       LogService.log("Errore scansione: " + e, LogService.LEVEL_ERROR);
+
       if (!_.isUndefined(loader))
       {
         loader.dismiss();
       }
-      let toast = this.toastCtrl.create({
-        message: e,
-        duration: 3000,
-        position: 'top'
+
+      let alert = this.alertCtrl.create({
+        title: 'ERRORE SCANSIONE',
+        subTitle: e,
+        buttons: [
+          {
+            text: 'OK',
+            handler: () => {
+              /*LogService.log('OK clicked');*/
+            }
+          }
+        ]
       });
-      toast.present();
+
+      alert.present();
+    });
+  }
+
+  /**
+   * @todo: !!!missing important controls!!!
+   *  1) cannot scan anything if we are NOT checked in!
+   *  2) cannot check the same code twice in a row
+   *
+   * @param {Checkpoint} checkpoint
+   * @returns {Promise<any>}
+   */
+  protected registerNewCheckinForCheckpoint(checkpoint:Checkpoint): Promise<any>
+  {
+    let self = this;
+    let loader;
+
+    return new Promise(function (resolve, reject) {
+      LogService.log("Registering CP["+checkpoint.code+"]: " + checkpoint.name);
+
+      self.presentCheckpointChecklistSelector(checkpoint).then((selectedValues) => {
+        loader = self.loadingCtrl.create({
+          content: "Salvataggio in corso...",
+          duration: (3 * 1000)
+        });
+        loader.present();
+
+
+        //@todo: pass selected values to store method
+        LogService.log('Checkbox selected data:' + JSON.stringify(selectedValues));
+
+
+        return self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint);
+      }).then((checkin: Checkin) => {
+        let msg = "Sei entrato in: [" + checkin.code + "] " + checkin.name;
+
+        if (checkin.type == Checkpoint.TYPE_OUT)
+        {
+          msg = "Fine turno";
+          self.presentLogoutScreen = true;
+        } else if (checkin.type == Checkpoint.TYPE_IN)
+        {
+          self.presentLogoutScreen = false;
+          msg = "Inizio turno";
+        }
+        loader.setContent(msg);
+        resolve(checkin);
+      }, (e) => {
+        if (!_.isUndefined(loader))
+        {
+          loader.dismiss();
+        }
+        reject(e);
+      }).catch((e) => {
+        if (!_.isUndefined(loader))
+        {
+          loader.dismiss();
+        }
+        reject(e);
+      });
+    });
+  }
+
+  /**
+   *
+   * @param {Checkpoint} checkpoint
+   * @returns {Promise<any>}
+   */
+  protected presentCheckpointChecklistSelector(checkpoint:Checkpoint):Promise<any>
+  {
+    let self = this;
+    let alert;
+
+    return new Promise(function (resolve, reject) {
+
+      if(!checkpoint.hasChecklistValues()) {
+        resolve();
+        return;
+      }
+
+      alert = self.alertCtrl.create({
+        title: 'RIFORNIMENTI',
+        subTitle: 'clicca sulle voci che hai rifornito',
+      });
+
+      _.each(checkpoint.checklist_items, (label, key) => {
+        alert.addInput({
+          type: 'checkbox',
+          label: label,
+          value: key,
+        });
+      });
+
+      alert.addButton({
+        text: 'Cancel',
+        handler: () => {
+          LogService.log("Cancel");
+          resolve([]);
+        }
+      });
+
+      alert.addButton({
+        text: 'Fatto',
+        handler: (data) => {
+          resolve(data);
+        }
+      });
+
+      alert.present();
     });
   }
 
@@ -233,7 +334,6 @@ export class HomePage implements OnInit, OnDestroy
   {
     return !this.platform.is("core");
   }
-
 
 
   //-----------------------------------------------------------------------------------------------------------INTERVALS
