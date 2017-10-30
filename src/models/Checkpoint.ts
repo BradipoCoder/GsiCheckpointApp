@@ -51,54 +51,7 @@ export class Checkpoint extends CrmDataModel
     this.checkPropertyDate('date_entered');
     this.checkPropertyDate('date_modified');
 
-    this.createChecklistArray();
-  }
-
-  public hasChecklistValues(): boolean
-  {
-    return _.size(this.checklist_items) > 0;
-  }
-
-  /**
-   *
-   * @returns {any}
-   */
-  public getChecklistValues():any
-  {
-    return _.values(this.checklist_items);
-  }
-
-  /**
-   * split original crm formatted ^xxx^,^yyy^,... to key/val object
-   */
-  private createChecklistArray(): void
-  {
-    if(!_.isEmpty(this.checklist_c))
-    {
-      let elements = this.checklist_c.split(",");
-      if(_.size(elements))
-      {
-        this.checklist_items = {};
-        let key, val, key_elements, key_name_stub, key_multiplier, new_name;
-        _.each(elements, (element) => {
-          key = element.replace(new RegExp("\\^", 'g'), "");
-
-          key_elements = _.split(key, "__");
-          key_name_stub = key_elements[0];
-          key_multiplier = !_.isUndefined(key_elements[1]) ? key_elements[1] : null;
-          new_name = _.startCase(key_name_stub);
-
-          val = new_name
-            + (!_.isEmpty(key_multiplier) ? "(x" + key_multiplier + ")" : "")
-            ;
-
-          _.set(this.checklist_items, key, val);
-        });
-
-        LogService.log("CLI: " + JSON.stringify(this.checklist_items));
-
-      }
-    }
+    this.setChecklistItemsFromString(this.checklist_c);
   }
 
   /**

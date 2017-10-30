@@ -1,6 +1,7 @@
 /**
  * Data Model for SugarCRM modules
  */
+import {LogService} from "../services/log.service";
 import _ from "lodash";
 import * as moment from 'moment';
 
@@ -45,6 +46,9 @@ export class CrmDataModel
   public sync_state: string = CrmDataModel.SYNC_STATE__IN_SYNC;
   public sync_last_check: string = null;
 
+  /* NON-MODULE FIELDS */
+  public checklist_items: any = null;
+
   /**
    *
    * @param {any} data
@@ -59,6 +63,104 @@ export class CrmDataModel
     this.deleted = "0";
 
     this.sync_last_check = moment().format(CrmDataModel.CRM_DATE_FORMAT);
+  }
+
+  /**
+   * split original crm formatted ^xxx^,^yyy^,... to key/val object
+   *
+   * @param {string} checklist
+   */
+  protected setChecklistItemsFromString(checklist:string): void
+  {
+    if(!_.isEmpty(checklist))
+    {
+      let elements = checklist.split(",");
+      if(_.size(elements))
+      {
+        this.checklist_items = {};
+        let key, val, key_elements, key_name_stub, key_multiplier, new_name;
+        _.each(elements, (element) => {
+          key = element.replace(new RegExp("\\^", 'g'), "");
+
+          key_elements = _.split(key, "__");
+          key_name_stub = key_elements[0];
+          key_multiplier = !_.isUndefined(key_elements[1]) ? key_elements[1] : null;
+          new_name = _.startCase(key_name_stub);
+
+          val = new_name
+            + (!_.isEmpty(key_multiplier) ? "(x" + key_multiplier + ")" : "")
+          ;
+
+          _.set(this.checklist_items, key, val);
+        });
+
+        //LogService.log("CLI-STR: " + JSON.stringify(this.checklist_items));
+
+      }
+    }
+  }
+
+  /**
+   * @param {any} elements
+   */
+  public setChecklistItemsFromArray(elements:any): void
+  {
+    if(_.size(elements))
+    {
+      this.checklist_items = {};
+      let key, val, key_elements, key_name_stub, key_multiplier, new_name;
+      _.each(elements, (key) => {
+
+        key_elements = _.split(key, "__");
+        key_name_stub = key_elements[0];
+        key_multiplier = !_.isUndefined(key_elements[1]) ? key_elements[1] : null;
+        new_name = _.startCase(key_name_stub);
+
+        val = new_name
+          + (!_.isEmpty(key_multiplier) ? "(x" + key_multiplier + ")" : "")
+        ;
+
+        _.set(this.checklist_items, key, val);
+      });
+
+      //LogService.log("CLI-ARR: " + JSON.stringify(this.checklist_items));
+
+    }
+  }
+
+  /**
+   * Returns a SugarCRM absurdly formatted string from an array of elements: ^AAA^, ^BBB^, ^CCC^
+   *
+   * @param {any} elements
+   * @returns {string}
+   */
+  public getChecklistStringFromArray(elements:any): string
+  {
+    let answer = '';
+    if(_.size(elements))
+    {
+      let list = [];
+      _.each(elements, (key) => {
+        list.push('^' + key + '^');
+      });
+      answer = _.join(list, ",");
+    }
+
+    return answer;
+  }
+
+  public hasChecklistValues(): boolean
+  {
+    return _.size(this.checklist_items) > 0;
+  }
+
+  /**
+   *
+   * @returns {any}
+   */
+  public getChecklistValues():any
+  {
+    return _.values(this.checklist_items);
   }
 
   /**
@@ -86,8 +188,6 @@ export class CrmDataModel
   {
     return (moment(this.date_modified).diff(date, "seconds")) > 0;
   }
-
-
 
   /**
    *

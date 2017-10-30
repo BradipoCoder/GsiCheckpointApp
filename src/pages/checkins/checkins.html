@@ -27,8 +27,8 @@
           <tr>
             <th></th>
             <th>Data</th>
-            <th>Nome</th>
             <th>Locale</th>
+            <th>Checklist</th>
             <th>Durata</th>
             <th class="icon"><ion-icon name="cloud"></ion-icon></th>
           </tr>
@@ -39,8 +39,8 @@
               <ion-icon [name]="checkin.icon" title="{{checkin.type}}"></ion-icon>
             </td>
             <td text-right>{{ checkin.checkin_date}}</td>
-            <td>{{ checkin.name}}</td>
-            <td>{{ checkin.code}}</td>
+            <td>[{{ checkin.code}}] - {{ checkin.name}}</td>
+            <td  class="canwrap">{{checkin.getChecklistValues().join(", ")}}</td>
             <td text-right>{{ checkin.getFormattedDuration() }}</td>
             <td text-center>
               <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{checkin.sync_state}}"></ion-icon>

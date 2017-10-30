@@ -149,7 +149,7 @@ export class HomePage implements OnInit, OnDestroy
         LogService.log('Checkbox selected data:' + JSON.stringify(selectedValues));
 
 
-        return self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint);
+        return self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint, selectedValues);
       }).then((checkin: Checkin) => {
         let msg = "Sei entrato in: [" + checkin.code + "] " + checkin.name;
 

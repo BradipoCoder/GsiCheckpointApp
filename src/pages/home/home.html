@@ -236,6 +236,7 @@
             <ion-icon [name]="checkin.icon" item-left></ion-icon>
             <!--[{{checkin.sync_state}}] -&#45;&#45; {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>[{{checkin._id}}]-[{{checkin.id}}]</small>-->
             [{{checkin.code}}] - {{checkin.name}} ({{checkin.getFormattedDuration()}})
+            <!--{{checkin.getChecklistValues().join(", ")}}-->
           </div>
         </ion-col>
         <ion-col col-3 text-right="">

@@ -132,7 +132,7 @@ export class RemoteDataService
             _.each(res.docs, function (doc)
             {
               checkin = new Checkin(doc);
-              checkin.check_point = "abc";
+              //checkin.check_point = "abc";
               self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
             });
           }
@@ -200,9 +200,10 @@ export class RemoteDataService
    * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
    *
    * @param {Checkpoint} checkpoint
+   * @param {any} [checklistItems]
    * @returns {Promise<string>}
    */
-  public storeNewCheckinForCheckpoint(checkpoint: Checkpoint): Promise<Checkin>
+  public storeNewCheckinForCheckpoint(checkpoint: Checkpoint, checklistItems: any = []): Promise<Checkin>
   {
     let self = this;
     let checkin: Checkin;
@@ -222,6 +223,8 @@ export class RemoteDataService
         code: checkpoint.code,
         sync_state: CrmDataModel.SYNC_STATE__NEW
       });
+
+      checkin.setChecklistItemsFromArray(checklistItems);
 
       self.checkinProvider.store(checkin).then((checkinId) =>
       {

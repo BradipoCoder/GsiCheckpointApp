@@ -16,16 +16,18 @@ export class Checkin extends CrmDataModel
   public checkin_user: string = null;
   public checkin_date: string = null;
   public mkt_checkpoint_id_c: string = null;
-  public check_point: string = null;
   public duration: string = null;//seconds
-
   public type: string = null;
   public code: string = null;
+  public checked_c: string = null;
+  public checklist_c: string = null;
 
   //additional properties
-
-  public icon: string = null;
+  public check_point: string = null;
   public css_class: string = "row";
+  public icon: string = null;
+  public checklist_items: any = null;
+
 
   /**
    * Create an instance by mapping supplied data to existent properties
@@ -55,6 +57,7 @@ export class Checkin extends CrmDataModel
     //type & icon
     this.setType(this.type);
 
+    this.setChecklistItemsFromString(this.checklist_c);
   }
 
   /**
@@ -74,7 +77,16 @@ export class Checkin extends CrmDataModel
     iconsByType[Checkpoint.TYPE_PAUSE] = 'pause';
 
     this.icon = _.has(iconsByType, this.type) ? _.get(iconsByType, this.type).toString() : 'pin';
+  }
 
+  /**
+   *
+   * @param {any} elements
+   */
+  public setChecklistItemsFromArray(elements:any): void
+  {
+    super.setChecklistItemsFromArray(elements);
+    this.checklist_c = this.getChecklistStringFromArray(elements);
   }
 
 
@@ -147,7 +159,7 @@ export class Checkin extends CrmDataModel
    */
   public getDefinedProperties(additionalExcludeFields:any = []): any
   {
-    let nonModuleFields = ['css_class', 'icon'];
+    let nonModuleFields = ['check_point', 'css_class', 'icon', 'checklist_items'];
     let properties = super.getDefinedProperties();
     return _.difference(_.difference(properties, nonModuleFields), additionalExcludeFields);
   }
