@@ -186,7 +186,7 @@ export class HomePage implements OnInit, OnDestroy
    * @param {Checkpoint} checkpoint
    * @returns {Promise<any>}
    */
-  protected presentCheckpointChecklistSelector(checkpoint:Checkpoint):Promise<any>
+  protected presentCheckpointChecklistSelector___PAGE(checkpoint:Checkpoint):Promise<any>
   {
     let self = this;
 
@@ -198,15 +198,16 @@ export class HomePage implements OnInit, OnDestroy
       }
 
       self.remoteDataService.HomeCheckinViewPageData = {
+        promise_resolve: resolve,
+        promise_reject: reject,
         checkpoint: checkpoint
       };
 
       self.navCtrl.push(HomeCheckinViewPage).then(() => {
         self.navCtrl.setRoot(HomeCheckinViewPage).then(() => {
-          //
+          //HomeCheckinViewPage will pick up the promise and resolve it from there
         });
       });
-
     });
   }
 
@@ -215,7 +216,7 @@ export class HomePage implements OnInit, OnDestroy
    * @param {Checkpoint} checkpoint
    * @returns {Promise<any>}
    */
-  protected presentCheckpointChecklistSelector_ALERT(checkpoint:Checkpoint):Promise<any>
+  protected presentCheckpointChecklistSelector(checkpoint:Checkpoint):Promise<any>
   {
     let self = this;
     let alert;

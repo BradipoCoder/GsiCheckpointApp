@@ -15,6 +15,7 @@ import _ from "lodash";
 import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
 import {LogService} from "../../services/log.service";
+import {Thenable} from "bluebird";
 
 
 @Component({
@@ -28,19 +29,18 @@ export class HomeCheckinViewPage implements OnInit, OnDestroy
   private checklist:any;
 
   constructor(private remoteDataService:RemoteDataService)
-  {
+  {}
 
-  }
-
-  checklistChange():void
-  {
-    LogService.log("HCV - change: " + JSON.stringify(this.checklist));
-  }
 
   protected confirmChecklist():void
   {
+    LogService.log("HCV - confirm checklist: " + JSON.stringify(this.checklist));
 
+    let selectedData = ['aaa','bbb'];
+    let selectorPromiseResolve = this.remoteDataService.HomeCheckinViewPageData.promise_resolve;
+    selectorPromiseResolve.call(this, selectedData);
   }
+
 
 
   ngOnInit(): void
@@ -60,8 +60,9 @@ export class HomeCheckinViewPage implements OnInit, OnDestroy
     });
   }
 
+
   ngOnDestroy(): void
   {
-    LogService.log("HCV - destroy");
+    this.remoteDataService.HomeCheckinViewPageData = null;
   }
 }

@@ -16,13 +16,13 @@
 
     <ion-row>
       <ion-col>
-
-        <ion-item *ngFor="let item of checklist" >
-          <!--<ion-icon name="leaf" darkgreen item-left></ion-icon>-->
-          <ion-label>{{item.value}}</ion-label>
-          <ion-checkbox item-left [(ngModel)]="item.checked" (ionChange)="checklistChange(item);"></ion-checkbox>
-        </ion-item>
-
+        <div class="checklist">
+          <ion-item *ngFor="let item of checklist" >
+            <!--<ion-icon name="leaf" darkgreen item-left></ion-icon>-->
+            <ion-label>{{item.value}}</ion-label>
+            <ion-checkbox item-left [(ngModel)]="item.checked"></ion-checkbox>
+          </ion-item>
+        </div>
       </ion-col>
     </ion-row>
 
@@ -30,9 +30,10 @@
 </ion-content>
 
 
-<ion-footer text-center align-items-center>
-  <button large ion-button icon-left (click)="confirmChecklist()" color="danger">
+<ion-footer text-right="" align-items-end="">
+  <button large ion-button icon-left (click)="confirmChecklist()" color="red">
     <ion-icon name="checkmark-circle"></ion-icon>
     <ion-label>Conferma</ion-label>
   </button>
 </ion-footer>
+

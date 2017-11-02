@@ -1,0 +1,16 @@
+page-home-checkin-view {
+  ion-header
+  {
+  }
+  ion-content
+  {
+    .checklist{
+      ion-item{
+        background:none;
+      }
+    }
+  }
+  ion-footer{
+    background: color($app-colors, app-bg);
+  }
+}
