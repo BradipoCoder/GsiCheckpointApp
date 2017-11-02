@@ -35,6 +35,9 @@ export class RemoteDataService
   private updating_session_checkins = false;
   private CURRENT_SESSION_CHECKINS: Checkin[];
 
+  /* for Home - HomeCheckinViewPage*/
+  public HomeCheckinViewPageData:any;
+
   constructor(private offlineCapableRestService: OfflineCapableRestService
     , private userService: UserService
     , private network: Network

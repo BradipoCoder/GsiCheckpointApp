@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title float-left>[{{checkpoint.code}}] - {{checkpoint.name}}</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+
+
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <span>Clicca sulle voci che hai rifornito</span>
+      </ion-col>
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+
+        <ion-item *ngFor="let item of checklist" >
+          <!--<ion-icon name="leaf" darkgreen item-left></ion-icon>-->
+          <ion-label>{{item.value}}</ion-label>
+          <ion-checkbox item-left [(ngModel)]="item.checked" (ionChange)="checklistChange(item);"></ion-checkbox>
+        </ion-item>
+
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+</ion-content>
+
+
+<ion-footer text-center align-items-center>
+  <button large ion-button icon-left (click)="confirmChecklist()" color="danger">
+    <ion-icon name="checkmark-circle"></ion-icon>
+    <ion-label>Conferma</ion-label>
+  </button>
+</ion-footer>

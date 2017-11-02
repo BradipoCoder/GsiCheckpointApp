@@ -8,6 +8,7 @@ import {CheckinProvider} from "../../providers/checkin.provider";
 import {CodeScanService} from '../../services/code.scan.service';
 import {Checkpoint} from '../../models/Checkpoint';
 import {Checkin} from "../../models/Checkin";
+import {HomeCheckinViewPage} from './home.checkin.view';
 import {ConfigurationPage} from '../configuration/configuration';
 import _ from "lodash";
 import * as moment from 'moment';
@@ -188,6 +189,35 @@ export class HomePage implements OnInit, OnDestroy
   protected presentCheckpointChecklistSelector(checkpoint:Checkpoint):Promise<any>
   {
     let self = this;
+
+    return new Promise(function (resolve, reject) {
+
+      if(!checkpoint.hasChecklistValues()) {
+        resolve();
+        return;
+      }
+
+      self.remoteDataService.HomeCheckinViewPageData = {
+        checkpoint: checkpoint
+      };
+
+      self.navCtrl.push(HomeCheckinViewPage).then(() => {
+        self.navCtrl.setRoot(HomeCheckinViewPage).then(() => {
+          //
+        });
+      });
+
+    });
+  }
+
+  /**
+   *
+   * @param {Checkpoint} checkpoint
+   * @returns {Promise<any>}
+   */
+  protected presentCheckpointChecklistSelector_ALERT(checkpoint:Checkpoint):Promise<any>
+  {
+    let self = this;
     let alert;
 
     return new Promise(function (resolve, reject) {
@@ -263,9 +293,23 @@ export class HomePage implements OnInit, OnDestroy
 
   goToConfigurationPage(): void
   {
-    this.navCtrl.push(ConfigurationPage);
-    this.navCtrl.setRoot(ConfigurationPage);
+    this.navCtrl.push(ConfigurationPage).then(() => {
+      this.navCtrl.setRoot(ConfigurationPage);
+    });
   }
+
+  /**
+   * Checkin details page with checklis selection
+
+  goToCheckinViewPage(): void
+  {
+    this.navCtrl.push(HomeCheckinViewPage).then(() => {
+      this.navCtrl.setRoot(HomeCheckinViewPage).then(() => {
+
+      });
+    });
+  }
+*/
 
   /**
    *

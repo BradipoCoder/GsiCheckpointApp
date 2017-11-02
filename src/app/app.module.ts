@@ -26,6 +26,7 @@ import {CheckinProvider} from '../providers/checkin.provider';
 
 /* Pages */
 import {HomePage} from "../pages/home/home";
+import {HomeCheckinViewPage} from "../pages/home/home.checkin.view";
 import {InfoPage} from "../pages/info/info";
 import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
 import {LogoutPage} from "../pages/logout/logout";
@@ -42,6 +43,7 @@ import {CheckinsPage} from "../pages/checkins/checkins";
   declarations: [
     MekitTracerApp
     , HomePage
+    , HomeCheckinViewPage
     , InfoPage
     , CheckpointsPage
     , CheckinsPage
@@ -60,6 +62,7 @@ import {CheckinsPage} from "../pages/checkins/checkins";
   entryComponents: [
     MekitTracerApp
     , HomePage
+    ,HomeCheckinViewPage
     , InfoPage
     , CheckpointsPage
     , CheckinsPage
