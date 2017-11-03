@@ -232,11 +232,14 @@
 
       <ion-row *ngFor="let checkin of remoteDataService.getCurrentSessionCheckins()" ngClass="{{checkin.css_class}}">
         <ion-col col-9>
-          <div>
+          <div (click)="modifyCheckin(checkin)">
             <ion-icon [name]="checkin.icon" item-left></ion-icon>
             <!--[{{checkin.sync_state}}] -&#45;&#45; {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>[{{checkin._id}}]-[{{checkin.id}}]</small>-->
             [{{checkin.code}}] - {{checkin.name}} ({{checkin.getFormattedDuration()}})
-            <!--{{checkin.getChecklistValues().join(", ")}}-->
+            <span *ngIf="checkin.hasChecklistValues()">
+              <ion-icon name="checkmark-circle" *ngIf="checkin.hasChecklistValues()"></ion-icon>
+              {{checkin.getChecklistValueCount()}}
+            </span>
           </div>
         </ion-col>
         <ion-col col-3 text-right="">

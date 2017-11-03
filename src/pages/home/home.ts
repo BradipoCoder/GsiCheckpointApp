@@ -6,6 +6,7 @@ import {OfflineCapableRestService} from '../../services/offline.capable.rest.ser
 import {CheckpointProvider} from "../../providers/checkpoint.provider";
 import {CheckinProvider} from "../../providers/checkin.provider";
 import {CodeScanService} from '../../services/code.scan.service';
+import {CrmDataModel} from '../../models/crm.data.model';
 import {Checkpoint} from '../../models/Checkpoint';
 import {Checkin} from "../../models/Checkin";
 import {HomeCheckinViewPage} from './home.checkin.view';
@@ -128,30 +129,28 @@ export class HomePage implements OnInit, OnDestroy
    *  2) cannot check the same code twice in a row
    *
    * @param {Checkpoint} checkpoint
-   * @returns {Promise<any>}
+   * @returns {Promise<Checkin>}
    */
-  protected registerNewCheckinForCheckpoint(checkpoint:Checkpoint): Promise<any>
+  protected registerNewCheckinForCheckpoint(checkpoint:Checkpoint): Promise<Checkin>
   {
     let self = this;
     let loader;
+    let checkin:Checkin;
 
     return new Promise(function (resolve, reject) {
-      LogService.log("Registering CP["+checkpoint.code+"]: " + checkpoint.name);
+      LogService.log("Registering checkin for CP["+checkpoint.code+"]: " + checkpoint.name);
 
-      self.presentCheckpointChecklistSelector(checkpoint).then((selectedValues) => {
-        loader = self.loadingCtrl.create({
-          content: "Salvataggio in corso...",
-          duration: (3 * 1000)
-        });
-        loader.present();
+      loader = self.loadingCtrl.create({
+        content: "Salvataggio in corso...",
+        duration: (3 * 1000)
+      });
 
+      loader.present().then(() => {
+        return self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint);
+      }).then((registeredCheckin: Checkin) => {
+        checkin = registeredCheckin;
+        loader.dismiss();
 
-        //@todo: pass selected values to store method
-        LogService.log('Checkbox selected data:' + JSON.stringify(selectedValues));
-
-
-        return self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint, selectedValues);
-      }).then((checkin: Checkin) => {
         let msg = "Sei entrato in: [" + checkin.code + "] " + checkin.name;
 
         if (checkin.type == Checkpoint.TYPE_OUT)
@@ -164,7 +163,22 @@ export class HomePage implements OnInit, OnDestroy
           msg = "Inizio turno";
         }
         loader.setContent(msg);
+
+        return self.presentCheckpointChecklistSelector(checkin, checkpoint);
+      }).then((selectedValues) => {
+        //LogService.log('Checkbox selected data:' + JSON.stringify(selectedValues));
+        if (_.isEmpty(selectedValues))
+        {
+          resolve(checkin);
+          return;
+        }
+
+        LogService.log('Re-saving checkin with checkbox selected data:' + JSON.stringify(selectedValues));
+        checkin.setChecklistItemsFromArray(selectedValues);
+        return self.checkinProvider.store(checkin, true);
+      }).then(() => {
         resolve(checkin);
+        //DONE
       }, (e) => {
         if (!_.isUndefined(loader))
         {
@@ -179,6 +193,33 @@ export class HomePage implements OnInit, OnDestroy
         reject(e);
       });
     });
+  }
+
+  /**
+   *
+   * @param {Checkin} checkin
+   */
+  protected modifyCheckin(checkin:Checkin)
+  {
+    LogService.log('Modify Checkin:' + checkin.code + " - " + checkin.mkt_checkpoint_id_c);
+    this.checkpointProvider.getCheckpoint({selector: {id: checkin.mkt_checkpoint_id_c}})
+      .then((relativeCheckpoint: Checkpoint) => {
+        LogService.log('Checkpoint: ' + relativeCheckpoint.id);
+        this.presentCheckpointChecklistSelector(checkin, relativeCheckpoint).then((selectedValues) => {
+          LogService.log('Re-saving checkin with checkbox selected data:' + JSON.stringify(selectedValues));
+          checkin.setChecklistItemsFromArray(selectedValues);
+          checkin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
+          this.checkinProvider.store(checkin, true).then(() => {
+            LogService.log('Modified, stored and queued for save');
+          }, (e) => {
+            LogService.log(e, LogService.LEVEL_ERROR);
+          });
+        }, (e) => {
+          LogService.log(e, LogService.LEVEL_ERROR);
+        });
+      }, (e) => {
+        LogService.log(e, LogService.LEVEL_ERROR);
+      });
   }
 
   /**
@@ -213,10 +254,11 @@ export class HomePage implements OnInit, OnDestroy
 
   /**
    *
+   * @param {Checkin} checkin
    * @param {Checkpoint} checkpoint
    * @returns {Promise<any>}
    */
-  protected presentCheckpointChecklistSelector(checkpoint:Checkpoint):Promise<any>
+  protected presentCheckpointChecklistSelector(checkin:Checkin, checkpoint:Checkpoint):Promise<any>
   {
     let self = this;
     let alert;
@@ -231,13 +273,17 @@ export class HomePage implements OnInit, OnDestroy
       alert = self.alertCtrl.create({
         title: 'RIFORNIMENTI',
         subTitle: 'clicca sulle voci che hai rifornito',
+        enableBackdropDismiss: false
       });
 
+      let checked:boolean;
       _.each(checkpoint.checklist_items, (label, key) => {
+        checked = checkin.hasChecklistValue(key);
         alert.addInput({
           type: 'checkbox',
           label: label,
           value: key,
+          checked: checked,
         });
       });
 

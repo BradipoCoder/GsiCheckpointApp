@@ -105,9 +105,10 @@ export class CrmDataModel
    */
   public setChecklistItemsFromArray(elements:any): void
   {
+    this.checklist_items = {};
     if(_.size(elements))
     {
-      this.checklist_items = {};
+
       let key, val, key_elements, key_name_stub, key_multiplier, new_name;
       _.each(elements, (key) => {
 
@@ -124,7 +125,6 @@ export class CrmDataModel
       });
 
       //LogService.log("CLI-ARR: " + JSON.stringify(this.checklist_items));
-
     }
   }
 
@@ -149,9 +149,31 @@ export class CrmDataModel
     return answer;
   }
 
+  /**
+   *
+   * @returns {boolean}
+   */
   public hasChecklistValues(): boolean
   {
     return _.size(this.checklist_items) > 0;
+  }
+
+  /**
+   * @param {string} key
+   * @returns {boolean}
+   */
+  public hasChecklistValue(key:string): boolean
+  {
+    return _.includes(_.keys(this.checklist_items), key);
+  }
+
+  /**
+   *
+   * @returns {number}
+   */
+  public getChecklistValueCount():any
+  {
+    return _.size(this.checklist_items);
   }
 
   /**
