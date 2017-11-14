@@ -1,0 +1,33 @@
+<ion-content>
+  <button ion-button icon-left (click)="openNewTaskPage()" color="yellow-light">
+    <ion-icon name="star"></ion-icon>
+    <ion-label>Crea segnalazione</ion-label>
+  </button>
+
+  <pre>
+    {{tasks|json}}
+  </pre>
+
+  <table class="table responsive tasks">
+    <thead>
+    <tr>
+      <th>Id</th>
+      <th>Nome</th>
+      <th>Descrizione</th>
+      <th>Sync</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let task of tasks">
+      <td >{{task.id}}</td>
+      <td>{{task.name}}</td>
+      <td  class="canwrap">{{task.description}}</td>
+      <td>
+        <ion-icon [name]="task.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{task.sync_state}}" item-right></ion-icon>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+
+</ion-content>

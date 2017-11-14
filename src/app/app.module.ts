@@ -23,18 +23,24 @@ import {CodeScanService} from '../services/code.scan.service';
 /* Providers */
 import {CheckpointProvider} from '../providers/checkpoint.provider';
 import {CheckinProvider} from '../providers/checkin.provider';
+import {TaskProvider} from "../providers/task.provider";
 
 /* Pages */
-import {HomePage} from "../pages/home/home";
-import {HomeCheckinViewPage} from "../pages/home/home.checkin.view";
-import {InfoPage} from "../pages/info/info";
+import {CheckinsPage} from "../pages/checkins/checkins";
 import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
-import {LogoutPage} from "../pages/logout/logout";
 import {ConfigurationPage} from "../pages/configuration/configuration";
-import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
 import {ConfigurationSettingsPage} from "../pages/configuration/configuration.settings";
 import {ConfigurationSyncstatePage} from "../pages/configuration/configuration.syncstate";
-import {CheckinsPage} from "../pages/checkins/checkins";
+import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
+import {HomeCheckinViewPage} from "../pages/home/home.checkin.view";
+import {HomePage} from "../pages/home/home";
+import {InfoPage} from "../pages/info/info";
+import {LogoutPage} from "../pages/logout/logout";
+import {TasksPage} from "../pages/tasks/tasks";
+import {TaskNewPage} from "../pages/tasks/task.new";
+import {TasksInPage} from "../pages/tasks/tasks.in";
+import {TasksOutPage} from "../pages/tasks/tasks.out";
+
 
 
 /* Other/Utils/Tools */
@@ -42,16 +48,55 @@ import {CheckinsPage} from "../pages/checkins/checkins";
 @NgModule({
   declarations: [
     MekitTracerApp
-    , HomePage
-    , HomeCheckinViewPage
-    , InfoPage
-    , CheckpointsPage
     , CheckinsPage
-    , LogoutPage
+    , CheckpointsPage
     , ConfigurationPage
     , ConfigurationSettingsPage
     , ConfigurationSyncstatePage
     , ConfigurationUnlockerPage
+    , HomeCheckinViewPage
+    , HomePage
+    , InfoPage
+    , LogoutPage
+    , TasksPage
+    , TaskNewPage
+    , TasksInPage
+    , TasksOutPage
+  ],
+  entryComponents: [
+    MekitTracerApp
+    , CheckinsPage
+    , CheckpointsPage
+    , ConfigurationPage
+    , ConfigurationSettingsPage
+    , ConfigurationSyncstatePage
+    , ConfigurationUnlockerPage
+    , HomeCheckinViewPage
+    , HomePage
+    , InfoPage
+    , LogoutPage
+    , TasksPage
+    , TaskNewPage
+    , TasksInPage
+    , TasksOutPage
+  ],
+  providers: [
+    StatusBar
+    , BackgroundService
+    , BarcodeScanner
+    , CheckinProvider
+    , CheckpointProvider
+    , TaskProvider
+    , CodeScanService
+    , ConfigurationService
+    , Insomnia
+    , LogService
+    , Network
+    , OfflineCapableRestService
+    , RemoteDataService
+    , SplashScreen
+    , UserService
+    , {provide: ErrorHandler, useClass: IonicErrorHandler}
   ],
   imports: [
     BrowserModule
@@ -59,36 +104,6 @@ import {CheckinsPage} from "../pages/checkins/checkins";
     , IonicModule.forRoot(MekitTracerApp)
   ],
   bootstrap: [IonicApp],
-  entryComponents: [
-    MekitTracerApp
-    , HomePage
-    ,HomeCheckinViewPage
-    , InfoPage
-    , CheckpointsPage
-    , CheckinsPage
-    , LogoutPage
-    , ConfigurationPage
-    , ConfigurationSettingsPage
-    , ConfigurationSyncstatePage
-    , ConfigurationUnlockerPage
-  ],
-  providers: [
-    StatusBar
-    , SplashScreen
-    , BarcodeScanner
-    , Insomnia
-    , ConfigurationService
-    , LogService
-    , OfflineCapableRestService
-    , UserService
-    , RemoteDataService
-    , BackgroundService
-    , CodeScanService
-    , Network
-    , CheckpointProvider
-    , CheckinProvider
-    , {provide: ErrorHandler, useClass: IonicErrorHandler}
-  ]
 })
 export class AppModule
 {

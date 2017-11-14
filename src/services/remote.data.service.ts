@@ -18,6 +18,7 @@ import {Checkin} from '../models/Checkin';
 /* Data Providers */
 import {CheckpointProvider} from "../providers/checkpoint.provider";
 import {CheckinProvider} from "../providers/checkin.provider";
+import {TaskProvider} from "../providers/task.provider";
 
 /* Utils */
 import _ from "lodash";
@@ -43,7 +44,8 @@ export class RemoteDataService
     , private network: Network
     , private platform: Platform
     , private checkpointProvider: CheckpointProvider
-    , private checkinProvider: CheckinProvider)
+    , private checkinProvider: CheckinProvider
+    , private taskProvider: TaskProvider)
   {
   }
 
@@ -433,6 +435,8 @@ export class RemoteDataService
       self.checkpointProvider.initialize().then(() =>
       {
         return self.checkinProvider.initialize();
+      }).then(() => {
+        return self.taskProvider.initialize();
       }).then(() =>
       {
         resolve();

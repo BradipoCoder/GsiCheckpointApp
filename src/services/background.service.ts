@@ -7,6 +7,7 @@ import {LogService} from "./log.service";
 /* Data Providers */
 import {CheckpointProvider} from "../providers/checkpoint.provider";
 import {CheckinProvider} from "../providers/checkin.provider";
+import {TaskProvider} from "../providers/task.provider";
 
 /* Other */
 import {Promise} from '../../node_modules/bluebird'
@@ -21,7 +22,7 @@ export class BackgroundService
   private execution_count = 0;
   private execution_count_max = 0;
 
-  private startup_delay_ms = (30 * 1000);
+  private startup_delay_ms = (5 * 1000);//@todo: put me back to 30
 
 
   private execution_interval_slow_ms = (30 * 1000);
@@ -37,11 +38,13 @@ export class BackgroundService
 
   constructor(private checkpointProvider: CheckpointProvider
               , private checkinProvider: CheckinProvider
+              , private taskProvider: TaskProvider
               ,private userService: UserService)
   {
     this.dataProviders = [
       this.checkpointProvider,
-      this.checkinProvider
+      this.checkinProvider,
+      this.taskProvider
     ];
   }
 

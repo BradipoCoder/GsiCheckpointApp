@@ -1,0 +1,21 @@
+@import "../../theme/variables";
+
+page-task-new {
+  ion-content.content {
+    background: color($colors, lightest);
+    color: map-get($colors, darkest);
+
+    ion-list{
+      margin:0;
+    }
+
+  }
+
+  ion-footer{
+    .explanation{
+      font-size: 1.4rem;
+      padding: 1% 20%;
+    }
+  }
+
+}

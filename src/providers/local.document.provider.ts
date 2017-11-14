@@ -104,6 +104,7 @@ export class LocalDocumentProvider
                 }
               );
           }, (e) => {
+            LogService.log("syncWithRemoteGetItems failed: " + e, LogService.LEVEL_ERROR);
             return reject(new Error("Get Remote Items error: " + e));
           }
         );
@@ -356,7 +357,7 @@ export class LocalDocumentProvider
                   record.date_modified = moment(record.date_modified);
                 });
 
-                //LogService.log("RECORDS: ", records);
+                //LogService.log("RECORDS: " + JSON.stringify(records));
                 let newSyncOffset = _.size(records) == itemLimit ? syncOffset + itemLimit : 0;
                 self.configurationService.setConfig(configCheckKey, newSyncOffset, false, true)
                   .then(() => {
