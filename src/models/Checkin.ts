@@ -129,7 +129,7 @@ export class Checkin extends CrmDataModel
   }
 
   /**
-   *
+   * Data to be used to push to CRM (REST API)
    * @returns {{}}
    */
   public getRestData(): any

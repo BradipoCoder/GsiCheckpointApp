@@ -4,16 +4,15 @@
     <ion-label>Crea segnalazione</ion-label>
   </button>
 
-  <pre>
-    {{tasks|json}}
-  </pre>
-
   <table class="table responsive tasks">
     <thead>
     <tr>
       <th>Id</th>
       <th>Nome</th>
       <th>Descrizione</th>
+      <th>Data inizio</th>
+      <th>Stato</th>
+      <th>Priorità</th>
       <th>Sync</th>
     </tr>
     </thead>
@@ -22,6 +21,9 @@
       <td >{{task.id}}</td>
       <td>{{task.name}}</td>
       <td  class="canwrap">{{task.description}}</td>
+      <td >{{task.date_start}}</td>
+      <td >{{task.status}}</td>
+      <td >{{task.priority}}</td>
       <td>
         <ion-icon [name]="task.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{task.sync_state}}" item-right></ion-icon>
       </td>

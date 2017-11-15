@@ -39,28 +39,7 @@ export class Task extends CrmDataModel
   constructor(data: any = {})
   {
     super(data);
-
-    //console.log("Undefined keys", _.difference(_.keys(data), _.keys(this)));
-    // let self = this;
-    // _.each(_.keys(this), function (key)
-    // {
-    //   if (_.has(data, key))
-    //   {
-    //     _.set(self, key, _.get(data, key, null));
-    //   }
-    // });
     this.setData(data);
-
-    //
-    this.setPriority(this.priority);
-    this.setStatus(this.status);
-
-    //date checks
-    this.checkPropertyDate('date_start');
-    this.checkPropertyDate('date_due');
-
-    //type & icon
-    this.icon = 'pin';
   }
 
   /**
@@ -77,6 +56,25 @@ export class Task extends CrmDataModel
         _.set(self, key, _.get(data, key, null));
       }
     });
+
+    this.setPriority(this.priority);
+    this.setStatus(this.status);
+
+    if(_.isEmpty(this.date_start))
+    {
+      this.date_start = moment().format(CrmDataModel.CRM_DATE_FORMAT);
+    }
+
+    if(_.isEmpty(this.date_due))
+    {
+      this.date_due = this.date_start;
+    }
+
+    //type & icon
+    this.icon = 'pin';
+
+    this.checkPropertyDate('date_start');
+    this.checkPropertyDate('date_due');
   }
 
   /**
@@ -99,6 +97,37 @@ export class Task extends CrmDataModel
     this.priority = _.includes(
       [Task.PRIORITY_HIGH, Task.PRIORITY_MEDIUM, Task.PRIORITY_LOW]
       , priority) ? priority : Task.PRIORITY_MEDIUM;
+  }
+
+  /**
+   * Data to be used to push to CRM (REST API)
+   * @returns {{}}
+   */
+  public getRestData(): any
+  {
+    let self = this;
+    let answer:any = {};
+    let keys = this.getDefinedProperties(['']);
+    _.each(keys, function (key)
+    {
+      if(!_.isNull(_.get(self, key, null))) {
+        _.set(answer, key, _.get(self, key, null));
+      }
+    });
+
+    //@todo: DATE TIME - UTC OFFSET FIX
+    if(!_.isUndefined(answer.date_start))
+    {
+      answer.date_start = moment(answer.date_start).subtract(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
+    }
+
+    //@todo: DATE TIME - UTC OFFSET FIX
+    if(!_.isUndefined(answer.date_due))
+    {
+      answer.date_due = moment(answer.date_due).subtract(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
+    }
+
+    return answer;
   }
 
   /**

@@ -37,7 +37,8 @@ export class LocalDocumentProvider
     syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
     remoteDbTableName: 'some_table',
     remoteQuery: '',
-    processRecordsAtOnce: 25
+    processRecordsAtOnce: 25,
+    maxRecords: 0
   };
 
   protected db: any;
@@ -65,12 +66,13 @@ export class LocalDocumentProvider
     let syncFunctions = self.sync_configuration.syncFunctions;
     let remoteDbTableName = self.sync_configuration.remoteDbTableName;
     let remoteQuery = self.sync_configuration.remoteQuery;
+    let maxRecords = self.sync_configuration.maxRecords;
     let processRecordsAtOnce = self.sync_configuration.processRecordsAtOnce;
 
     let remoteItems = [];
 
     return new Promise(function (resolve, reject) {
-      self.syncWithRemoteGetItems(remoteDbTableName, processRecordsAtOnce, remoteQuery)
+      self.syncWithRemoteGetItems(remoteDbTableName, maxRecords, processRecordsAtOnce, remoteQuery)
         .then((records: any) => {
             remoteItems = records;
             //LogService.log("REMOTE-ITEMS: ", remoteItems);
@@ -320,11 +322,12 @@ export class LocalDocumentProvider
    * [ called by localDocumentProvider.syncWithRemote ]
    *
    * @param {string} dbTableName
-   * @param {number} [itemLimit]
+   * @param {number} [maxRecords]
+   * @param {number} [itemsAtOnce]
    * @param {string} [query]
    * @returns {Promise<any>}
    */
-  public syncWithRemoteGetItems(dbTableName: string, itemLimit: number = 0, query: string = ""): Promise<any>
+  public syncWithRemoteGetItems(dbTableName: string, maxRecords: number = 0, itemsAtOnce: number = 0, query: string = ""): Promise<any>
   {
     let self = this;
     let config: any;
@@ -338,8 +341,15 @@ export class LocalDocumentProvider
             config = cfg;
             syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
             //LogService.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
-
             //LogService.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
+
+            //@todo: needs to be implemented
+            /*
+            if(maxRecords && syncOffset + itemsAtOnce > maxRecords)
+            {
+              itemsAtOnce = maxRecords - syncOffset;
+            }
+            */
 
             self.offlineCapableRestService.getEntryList(dbTableName, {
               select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
@@ -347,7 +357,7 @@ export class LocalDocumentProvider
               deleted: '1',
               query: query,
               offset: syncOffset,
-              max_results: itemLimit
+              max_results: itemsAtOnce
             }).then((res) => {
                 let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
 
@@ -358,7 +368,7 @@ export class LocalDocumentProvider
                 });
 
                 //LogService.log("RECORDS: " + JSON.stringify(records));
-                let newSyncOffset = _.size(records) == itemLimit ? syncOffset + itemLimit : 0;
+                let newSyncOffset = _.size(records) == itemsAtOnce ? syncOffset + itemsAtOnce : 0;
                 self.configurationService.setConfig(configCheckKey, newSyncOffset, false, true)
                   .then(() => {
                     //LogService.log("CFGKEY written");
@@ -470,7 +480,7 @@ export class LocalDocumentProvider
    *
    * @param {CrmDataModel} document
    * @param {Boolean} [forceUpdate]
-   * @param {String} [findById] - when document contains the new id - you need to use this param to find the document
+   * @param {String} [findById] - when document contains the new id - you need to use this param to find the document - @todo: never used and now document contains temporary id so this param can be removed
    * @returns {Promise<string>}
    */
   protected storeDocument(document: CrmDataModel, forceUpdate: boolean = false, findById: any = false): Promise<string>

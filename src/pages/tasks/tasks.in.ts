@@ -46,19 +46,27 @@ export class TasksInPage implements OnInit, OnDestroy
 
   /**
    *
-   * @param string id
+   * @param {string} id
    */
   private refreshTask(id): void
   {
-    LogService.log("TASK Data Change: " + id);
-
     this.taskProvider.getDocumentById(id).then((doc) => {
-      //LogService.log("DOC: " + JSON.stringify(doc));
-
-      let el:Task = _.find(this.tasks, { 'id': id});
-      el.setData(doc);
-
-
+      let task:Task = _.find(this.tasks, { 'id': id});
+      if(task)
+      {
+        task.setData(doc);
+        this.tasks = _.reverse(_.sortBy(this.tasks, ["date_start"]));
+        LogService.log("Task["+id+"] has been updated.");
+      } else
+      {
+        this.taskProvider.getTaskById(id).then((task:Task) => {
+          this.tasks.push(task);
+          this.tasks = _.reverse(_.sortBy(this.tasks, ["date_start"]));
+          LogService.log("Task["+id+"] has been added.");
+        }, (e) => {
+          LogService.log("Error finding Task["+id+"]! " + e, LogService.LEVEL_ERROR);
+        });
+      }
     }, (e) => {
       LogService.log("Error refreshing Task: " + e, LogService.LEVEL_ERROR);
     });
@@ -71,7 +79,6 @@ export class TasksInPage implements OnInit, OnDestroy
       {
         selector: {date_start: {"$gt": null}},
         sort: [{'date_start': 'desc'}],
-        /*limit: 25*/
       };
 
     this.taskProvider.find(findOptions).then(

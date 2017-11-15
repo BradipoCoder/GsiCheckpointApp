@@ -37,10 +37,11 @@ export class TaskProvider extends LocalDocumentProvider
     * remoteQuery - CRM is role based - no need to filter by user id (it will NOT work)
     */
     this.sync_configuration = {
-      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],//, 'syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY'
+      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted', 'syncUpStore'],//, 'syncUpStore'
       remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
       remoteQuery: "",
-      processRecordsAtOnce: 25
+      processRecordsAtOnce: 25,
+      maxRecords: 3
     };
   }
 
@@ -84,7 +85,7 @@ export class TaskProvider extends LocalDocumentProvider
   }
 
   /**
-   * @todo: use getDocumentById !!! to find doc
+   *
    * @param {string} id
    * @returns {Promise<Task>}
    */
@@ -104,19 +105,18 @@ export class TaskProvider extends LocalDocumentProvider
     });
   }
 
+
   /**
+   * @todo: this should not work this way but we should be listening to db changes and react to that (immediately)
    *
    * @returns {Promise<any>}
    */
-  /*
-  private syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY(): Promise<any>
+  public syncUpStore():Promise<any>
   {
     let self = this;
+    let dbTableName = self.underlying_model.DB_TABLE_NAME;
 
-    return new Promise(function (resolve, reject)
-    {
-      //LogService.log("syncWithRemote_PUSH - START ---------------");
-
+    return new Promise((resolve) => {
       self.findDocuments({
         selector: {
           $or: [
@@ -124,67 +124,72 @@ export class TaskProvider extends LocalDocumentProvider
             {sync_state: CrmDataModel.SYNC_STATE__CHANGED},
           ]
         },
-        /*fields: ['checkin_date', 'mkt_checkpoint_id_c'],* /
-      }).then((res) =>
-      {
-        if (_.size(res.docs))
+      }).then((res) => {
+        if(_.isUndefined(res.docs) || !_.size(res.docs))
         {
-          let docs = _.concat([""], res.docs);//for Promise.reduce
+          LogService.log("syncUpStore[Task] - NOTHING TO SYNC UP");
+          resolve();
+          return;
+        }
 
-          Promise.reduce(docs, function (accu, doc, index, length)
-          {
-            return new Promise(function (resolve, reject)
+        LogService.log("syncUpStore[Task] - DOCS TO SYNC UP: " + _.size(res.docs));
+
+        Promise.reduce(res.docs, (accu, doc, index, length) => {
+          return new Promise((resolve, reject) => {
+            let task = new Task(doc);
+            let isNewOnRemote = _.startsWith(task.id, CrmDataModel.TEMPORARY_ID_PREFIX);
+            let parameters = task.getRestData();
+
+            if (isNewOnRemote)
             {
-              let checkin = new Checkin(doc);
-              let isNewOnRemote = _.startsWith(checkin.id, CrmDataModel.TEMPORARY_ID_PREFIX);
-              let parameters = checkin.getRestData();
+              _.unset(parameters, 'id');
+            }
+
+            LogService.log("syncUpStore[Task] - syncing: " + task.id + " - DATA: " + JSON.stringify(parameters));
+            self.offlineCapableRestService.setEntry(
+              dbTableName,
+              isNewOnRemote ? false : task.id,
+              parameters
+            ).then((res) => {
+              if (!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
+              {
+                throw new Error("failed to save on remote!");
+              }
+              LogService.log("syncUpStore[Task] saved on remote: " + JSON.stringify(res));
+
+              let temporaryLocalStorageId = null;
+              let forceUpdate = true;
               if (isNewOnRemote)
               {
-                _.unset(parameters, 'id');
+                temporaryLocalStorageId = task.id;
+                task.id = res.id;
               }
-              LogService.log("PUSHING TO REMOTE WITH PARAMS: " + JSON.stringify(parameters));
-              self.offlineCapableRestService.setEntry(self.remote_table_name, (isNewOnRemote ? false : checkin.id), parameters).then((res) =>
-              {
-                if (!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
-                {
-                  throw new Error("failed to save on remote!");
-                }
-                LogService.log("Saved on remote: " + JSON.stringify(res));
-                let currentLocalStorageId = checkin.id;
-                checkin.id = res.id;
-                checkin.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
-                return self.storeDocument(checkin, true, currentLocalStorageId);
-              }).then((res) =>
-              {
-                resolve();
-              }).catch((e) =>
-              {
-                LogService.log("Remote save error! " + e, LogService.LEVEL_WARN);
-                //reject(e);
-                resolve();
-              });
+              task.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
+              return self.storeDocument(task, forceUpdate, temporaryLocalStorageId);
+            }, (e) => {
+              LogService.log("syncUpStore[Task] remote setEntry error! " + e, LogService.LEVEL_ERROR);
+              resolve();
+            }).then(() => {
+              LogService.log("syncUpStore[Task] updated on local.");
+              resolve();
+            }, (e) => {
+              LogService.log("syncUpStore[Task] local store error! " + e, LogService.LEVEL_ERROR);
+              resolve();
             });
-          }).then(() =>
-          {
-            resolve();
-          }).catch((e) =>
-          {
-            LogService.log("syncWithRemote_PUSH[reduce] error! " + e, LogService.LEVEL_WARN);
-            resolve();
           });
-        } else
-        {
-          LogService.log("CHECKIN PROVIDER - NOTHING TO SYNC UP");
+        }, null).then(() => {
+          LogService.log("syncUpStore[Task] - sync done.");
           resolve();
-        }
-      }).catch((e) =>
-      {
-        LogService.log("syncWithRemote_PUSH[find doc] error! " + e, LogService.LEVEL_WARN);
+        }, (e) => {
+          LogService.log("syncUpStore[Task] sync error! " + e, LogService.LEVEL_ERROR);
+          resolve();
+        });
+      }, (e) => {
+        LogService.log("syncUpStore[Task] document find error! " + e, LogService.LEVEL_ERROR);
         resolve();
       });
     });
   }
-  */
 
   /**
    * @returns {any}

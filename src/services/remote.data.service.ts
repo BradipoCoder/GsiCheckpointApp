@@ -409,6 +409,7 @@ export class RemoteDataService
       let promises = [];
       promises.push(self.checkpointProvider.destroyDatabase());
       promises.push(self.checkinProvider.destroyDatabase());
+      promises.push(self.taskProvider.destroyDatabase());
       Promise.all(promises).then(() =>
       {
         resolve();
