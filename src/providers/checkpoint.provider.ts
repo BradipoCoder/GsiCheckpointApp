@@ -94,11 +94,11 @@ export class CheckpointProvider extends LocalDocumentProvider
       self.findDocuments(options).then((res) => {
         if (_.size(res.docs) < 1)
         {
-          throw new Error("Codice locale sconosciuto!");
+          return reject(new Error("Codice locale sconosciuto!"));
         }
         if (_.size(res.docs) > 1)
         {
-          throw new Error("Locali multipli per il codice!");
+          return reject(new Error("Locali multipli per il codice!"));
         }
         let checkpoint = new Checkpoint(res.docs[0]);
         resolve(checkpoint);

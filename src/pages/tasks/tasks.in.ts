@@ -1,12 +1,12 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {App, NavController} from 'ionic-angular';
+import {App} from 'ionic-angular';
 import {TaskNewPage} from "./task.new";
 import {TaskProvider} from "../../providers/task.provider";
 import {Task} from "../../models/Task";
-import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
 import {LogService} from "../../services/log.service";
 import _ from "lodash";
+import {UserService} from "../../services/user.service";
 
 @Component({
   selector: 'page-tasks-in',
@@ -20,19 +20,14 @@ export class TasksInPage implements OnInit, OnDestroy
 
   private dataChangeSubscription: Subscription;
 
-  /**
-   *
-   */
   constructor(
-    private taskProvider:TaskProvider
+    private userService:UserService
+    , private taskProvider:TaskProvider
     , public appCtrl: App
-    , public navCtrl: NavController
   )
   {
     let navs = this.appCtrl.getRootNavs();
     this.rootNav = navs.pop();
-
-
   }
 
   /**
@@ -60,9 +55,16 @@ export class TasksInPage implements OnInit, OnDestroy
       } else
       {
         this.taskProvider.getTaskById(id).then((task:Task) => {
-          this.tasks.push(task);
-          this.tasks = _.reverse(_.sortBy(this.tasks, ["date_start"]));
-          LogService.log("Task["+id+"] has been added.");
+          //@note: this does not work currently because CRM permissions do not allow record assigned to a different user to be loaded
+          //IS this an IN task?
+          let user_id = this.userService.getUserData("id");
+          if(task.assigned_user_id == user_id) {
+            this.tasks.push(task);
+            this.tasks = _.reverse(_.sortBy(this.tasks, ["date_start"]));
+            LogService.log("Task["+id+"] has been added.");
+          } else {
+            LogService.log("Task["+id+"] has been skipped because it is not assigned to user["+user_id+"].");
+          }
         }, (e) => {
           LogService.log("Error finding Task["+id+"]! " + e, LogService.LEVEL_ERROR);
         });
@@ -75,9 +77,10 @@ export class TasksInPage implements OnInit, OnDestroy
 
   private refreshAllTasks(): void
   {
+    let user_id = this.userService.getUserData("id");
     let findOptions =
       {
-        selector: {date_start: {"$gt": null}},
+        selector: {assigned_user_id: user_id, date_start: {"$gt": null}},
         sort: [{'date_start': 'desc'}],
       };
 

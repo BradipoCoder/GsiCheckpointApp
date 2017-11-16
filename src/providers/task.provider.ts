@@ -13,6 +13,8 @@ import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
 import * as moment from 'moment';
 import {LogService} from "../services/log.service";
+import {CheckpointProvider} from "./checkpoint.provider";
+import {Checkpoint} from "../models/Checkpoint";
 
 
 @Injectable()
@@ -26,11 +28,12 @@ export class TaskProvider extends LocalDocumentProvider
     protected configurationService: ConfigurationService
     , protected userService: UserService
     , protected offlineCapableRestService: OfflineCapableRestService
+    , protected checkpointProvider:CheckpointProvider
   )
   {
     super(configurationService, offlineCapableRestService);
 
-    let model = new Task();
+    let model = this.getNewModelInstance();
     this.module_fields = model.getDefinedProperties();
 
     /*
@@ -45,6 +48,35 @@ export class TaskProvider extends LocalDocumentProvider
     };
   }
 
+  /**
+   *
+   * @param {{}} [data]
+   * @returns {Task}
+   */
+  public getNewModelInstance(data:any = {}): Task
+  {
+    let model:Task = super.getNewModelInstance(data);
+    this.setRelatedCheckpointOnTask(model);
+    //do something with all tasks
+    LogService.log("New Task Instance..." + model.id);
+    //
+    return model;
+  }
+
+  /**
+   *
+   * @param {Task} task
+   */
+  protected setRelatedCheckpointOnTask(task:Task):void
+  {
+    if(task.parent_type == "mkt_Checkpoint" && !_.isEmpty(task.parent_id))
+    {
+      this.checkpointProvider.getCheckpoint({selector: {id: task.parent_id}}).then((checkpoint:Checkpoint) => {
+        task.check_point = checkpoint;
+        LogService.log("setRelatedCheckpointOnTask DONE:" + checkpoint.id);
+      });
+    }
+  }
   /**
    *
    * @param {Task} task
@@ -73,7 +105,7 @@ export class TaskProvider extends LocalDocumentProvider
         {
           let docs = _.concat([], res.docs);
           _.each(docs, function (doc) {
-            answer.push(new Task(doc));
+            answer.push(self.getNewModelInstance(doc));
           });
         }
         resolve(answer);
@@ -96,7 +128,7 @@ export class TaskProvider extends LocalDocumentProvider
     {
       self.getDocumentById(id).then((doc) =>
       {
-        let task = new Task(doc);
+        let task = self.getNewModelInstance(doc);
         resolve(task);
       }).catch((e) =>
       {
@@ -136,7 +168,7 @@ export class TaskProvider extends LocalDocumentProvider
 
         Promise.reduce(res.docs, (accu, doc, index, length) => {
           return new Promise((resolve, reject) => {
-            let task = new Task(doc);
+            let task = self.getNewModelInstance(doc);
             let isNewOnRemote = _.startsWith(task.id, CrmDataModel.TEMPORARY_ID_PREFIX);
             let parameters = task.getRestData();
 

@@ -23,7 +23,6 @@ export class Checkin extends CrmDataModel
   public checklist_c: string = null;
 
   //additional properties
-  public check_point: string = null;
   public css_class: string = "row";
   public icon: string = null;
   public checklist_items: any = null;
@@ -159,7 +158,7 @@ export class Checkin extends CrmDataModel
    */
   public getDefinedProperties(additionalExcludeFields:any = []): any
   {
-    let nonModuleFields = ['check_point', 'css_class', 'icon', 'checklist_items'];
+    let nonModuleFields = ['css_class', 'icon', 'checklist_items'];
     let properties = super.getDefinedProperties();
     return _.difference(_.difference(properties, nonModuleFields), additionalExcludeFields);
   }

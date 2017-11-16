@@ -4,6 +4,7 @@
 import {CrmDataModel} from './crm.data.model';
 import _ from "lodash";
 import * as moment from 'moment';
+import {Checkpoint} from "./Checkpoint";
 
 export class Task extends CrmDataModel
 {
@@ -28,8 +29,13 @@ export class Task extends CrmDataModel
   public priority: string = null;
   public status: string = null;
 
+  public parent_type: string = null;
+  public parent_id: string = null;
+
   //additional properties (non-db)
+  public check_point: Checkpoint = null;
   public icon: string = null;
+  public icon_color: string = null;
 
   /**
    * Create an instance by mapping supplied data to existent properties
@@ -70,9 +76,6 @@ export class Task extends CrmDataModel
       this.date_due = this.date_start;
     }
 
-    //type & icon
-    this.icon = 'pin';
-
     this.checkPropertyDate('date_start');
     this.checkPropertyDate('date_due');
   }
@@ -97,6 +100,27 @@ export class Task extends CrmDataModel
     this.priority = _.includes(
       [Task.PRIORITY_HIGH, Task.PRIORITY_MEDIUM, Task.PRIORITY_LOW]
       , priority) ? priority : Task.PRIORITY_MEDIUM;
+
+    //icon & color
+    switch(this.priority)
+    {
+      case Task.PRIORITY_HIGH:
+        this.icon = 'alert';
+        this.icon_color = "danger";
+        break;
+      case Task.PRIORITY_MEDIUM:
+        this.icon = 'alert';
+        this.icon_color = "not-so-danger";
+        break;
+      case Task.PRIORITY_LOW:
+        this.icon = 'alert';
+        this.icon_color = "yellow-light";
+        break;
+      default:
+        this.icon = 'alert';
+        this.icon_color = "dark";
+        break;
+    }
   }
 
   /**
@@ -136,7 +160,7 @@ export class Task extends CrmDataModel
    */
   public getDefinedProperties(additionalExcludeFields:any = []): any
   {
-    let nonModuleFields = ['icon'];
+    let nonModuleFields = ['icon', 'icon_color', 'check_point'];
     let properties = super.getDefinedProperties();
     return _.difference(_.difference(properties, nonModuleFields), additionalExcludeFields);
   }

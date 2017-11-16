@@ -55,6 +55,16 @@ export class LocalDocumentProvider
 
   /**
    *
+   * @param {{}} data
+   * @returns {any}
+   */
+  public getNewModelInstance(data:any): any
+  {
+    return new this.underlying_model(data);
+  }
+
+  /**
+   *
    * @todo: all this sync business is to be moved to background sync service
    *
    * @returns {Promise<any>}
@@ -130,6 +140,8 @@ export class LocalDocumentProvider
     let fixedModuleFields = self.module_fields;
     fixedModuleFields.push('date_entered');
     fixedModuleFields.push('date_modified');
+    fixedModuleFields.push('created_by');
+    fixedModuleFields.push('created_by_name');
 
     //keep only items that are not deleted
     itemsToCheck = _.filter(itemsToCheck, {deleted: '0'});
@@ -169,7 +181,8 @@ export class LocalDocumentProvider
             let documents = [];
             let model;
             _.each(records, function (record) {
-              model = new self.underlying_model(record);
+              //model = new self.underlying_model(record);
+              model = self.getNewModelInstance(record);
               documents.push(model);
             });
 
@@ -214,6 +227,9 @@ export class LocalDocumentProvider
     let fixedModuleFields = self.module_fields;
     fixedModuleFields.push('date_entered');
     fixedModuleFields.push('date_modified');
+    fixedModuleFields.push('created_by');
+    fixedModuleFields.push('created_by_name');
+    // 'created_by', 'created_by_name'
 
     //keep only items that are not deleted
     itemsToCheck = _.filter(itemsToCheck, {deleted: '0'});
@@ -267,7 +283,8 @@ export class LocalDocumentProvider
           let documents = [];
           let model;
           _.each(records, function (record) {
-            model = new self.underlying_model(record);
+            //model = new self.underlying_model(record);
+            model = self.getNewModelInstance(record);
             documents.push(model);
           });
 
@@ -624,7 +641,7 @@ export class LocalDocumentProvider
 
 
   /**
-   * @todo: this should be moved out from here to some utility class
+   * @todo: Is this not used anymore?
    *
    * @param {any} data
    * @param {function} condition

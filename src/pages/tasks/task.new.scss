@@ -7,6 +7,12 @@ page-task-new {
 
     ion-list{
       margin:0;
+      ion-textarea{
+        height:20rem;
+        textarea{
+          height:80%;
+        }
+      }
     }
 
   }

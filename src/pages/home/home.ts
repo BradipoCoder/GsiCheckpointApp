@@ -1,5 +1,5 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {Platform, NavController, ToastController, LoadingController, AlertController} from 'ionic-angular';
+import {App, Platform, NavController, ToastController, LoadingController, AlertController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
@@ -10,6 +10,7 @@ import {CrmDataModel} from '../../models/crm.data.model';
 import {Checkpoint} from '../../models/Checkpoint';
 import {Checkin} from "../../models/Checkin";
 import {HomeCheckinViewPage} from './home.checkin.view';
+import {TaskNewPage} from "../tasks/task.new";
 import {ConfigurationPage} from '../configuration/configuration';
 import _ from "lodash";
 import * as moment from 'moment';
@@ -40,7 +41,8 @@ export class HomePage implements OnInit, OnDestroy
   private dataChangeSubscription: Subscription;
 
 
-  constructor(public navCtrl: NavController
+  constructor(public appCtrl: App
+    , public navCtrl: NavController
     , private platform: Platform
     , public toastCtrl: ToastController
     , private loadingCtrl: LoadingController
@@ -329,15 +331,24 @@ export class HomePage implements OnInit, OnDestroy
    */
   registerNewTask(): void
   {
+    let navs = this.appCtrl.getRootNavs();
+    let rootNav = navs.pop();
+    rootNav.push(TaskNewPage);
+
+    /*
     let toast = this.toastCtrl.create({
       message: "Questa funzionalità non è ancora implementata.",
       duration: 3000,
       position: 'top'
     });
     toast.present();
+    */
   }
 
 
+  /**
+   *
+   */
   goToConfigurationPage(): void
   {
     this.navCtrl.push(ConfigurationPage).then(() => {
