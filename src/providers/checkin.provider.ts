@@ -91,7 +91,6 @@ export class CheckinProvider extends LocalDocumentProvider
   }
 
   /**
-   * @todo: use getDocumentById !!! to find doc
    * @param {string} id
    * @returns {Promise<Checkin>}
    */
@@ -105,6 +104,45 @@ export class CheckinProvider extends LocalDocumentProvider
         let checkin = new Checkin(doc);
         resolve(checkin);
       }).catch((e) =>
+      {
+        reject(e);
+      });
+    });
+  }
+
+  /**
+   * @param {string} [type]
+   * @returns {Promise<Checkin>}
+   */
+  public getlastCheckinOperationByType(type: string = null): Promise<Checkin>
+  {
+    let self = this;
+    return new Promise(function (resolve, reject)
+    {
+      let options = {
+        selector: {
+          checkin_date: {$gt: null},
+        },
+        sort: [{checkin_date: 'desc'}],
+        limit: 1
+      };
+
+      if(!_.isEmpty(type))
+      {
+        options.selector["type"] = type;
+      }
+
+      self.findDocuments(options).then((res) =>
+      {
+        if (_.size(res.docs) == 1)
+        {
+          let doc = res.docs[0];
+          let checkin = new Checkin(doc);
+          resolve(checkin);
+        } else {
+          reject(new Error("Could not identify last checkin operation[type="+type+"]!"));
+        }
+      }, (e) =>
       {
         reject(e);
       });
@@ -210,6 +248,10 @@ export class CheckinProvider extends LocalDocumentProvider
         fields: ['checkin_date', 'mkt_checkpoint_id_c']
       },
       {
+        name: 'idx_date_type',
+        fields: ['checkin_date', 'type']
+      },
+      {
         name: 'idx_sync_state',
         fields: ['sync_state']
       }
@@ -226,10 +268,6 @@ export class CheckinProvider extends LocalDocumentProvider
     {
       self.setupDatabase().then(() =>
       {
-
-        // MY checkins - this cannot be done in constructor because userService is not yet inited
-        /*self.sync_configuration.remoteQuery = "user_id_c = '" + self.userService.getUserData("user_id") + "'";*/
-
         resolve();
       }).catch((e) =>
       {

@@ -18,6 +18,12 @@ import {Subscription} from "rxjs/Subscription";
 import {LogService} from "../../services/log.service";
 
 
+/**
+ * @todo: 1) implementare popup auto per segnalazioni in arrivo
+ *
+ *
+ */
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'

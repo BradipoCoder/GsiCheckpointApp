@@ -67,7 +67,7 @@ export class TaskProvider extends LocalDocumentProvider
    *
    * @param {Task} task
    */
-  protected setRelatedCheckpointOnTask(task:Task):void
+  public setRelatedCheckpointOnTask(task:Task):void
   {
     if(task.parent_type == "mkt_Checkpoint" && !_.isEmpty(task.parent_id))
     {
@@ -77,6 +77,7 @@ export class TaskProvider extends LocalDocumentProvider
       });
     }
   }
+
   /**
    *
    * @param {Task} task

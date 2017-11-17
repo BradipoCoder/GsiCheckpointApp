@@ -6,35 +6,42 @@
 
 <ion-content>
 
-  <!--<pre>-->
-    <!--{{task|json}}-->
-  <!--</pre>-->
-
   <ion-list>
-
-    <ion-list-header>Generale</ion-list-header>
+    <!--<ion-list-header>Generale</ion-list-header>-->
     <ion-item>
-      <ion-input placeholder="Titolo segnalazione" clearInput [(ngModel)]="task.name"></ion-input>
+      <ion-input placeholder="Oggetto segnalazione" clearInput [(ngModel)]="task.name"></ion-input>
     </ion-item>
-
     <ion-item>
       <ion-textarea placeholder="Descrizione estesa" [(ngModel)]="task.description"></ion-textarea>
     </ion-item>
 
+    <ion-item>
+      <div class="where" *ngIf="task.check_point;">
+        <ion-icon name="pin" title="Locale" item-left></ion-icon>
+        <div class="code-name">
+          [{{task.check_point.code}}]&nbsp;{{task.check_point.name}}
+        </div>
+      </div>
+
+    </ion-item>
   </ion-list>
+
+
 
 </ion-content>
 
 <ion-footer>
-  <button ion-button icon-left float-left (click)="actionCancel()" color="yellow-light">
-    <ion-icon name="arrow-back"></ion-icon>
-    <ion-label>Indietro</ion-label>
-  </button>
+  <div class="buttons">
+    <button ion-button icon-left float-left (click)="actionCancel()" color="yellow-light">
+      <ion-icon name="arrow-back"></ion-icon>
+      <ion-label>Indietro</ion-label>
+    </button>
 
-  <button ion-button icon-left float-right (click)="actionSave()" color="green-light">
-    <ion-icon name="send"></ion-icon>
-    <ion-label>Invia</ion-label>
-  </button>
+    <button ion-button icon-left float-right (click)="actionSave()" color="green-light">
+      <ion-icon name="send"></ion-icon>
+      <ion-label>Invia</ion-label>
+    </button>
+  </div>
 
   <div text-center class="explanation">
     Compila i campi e premi il tasto invia per registrare una segnalazione.

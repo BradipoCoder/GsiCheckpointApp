@@ -7,12 +7,31 @@ page-task-new {
 
     ion-list{
       margin:0;
+
       ion-textarea{
         height:20rem;
         textarea{
           height:80%;
         }
       }
+
+      .where
+      {
+        font-size: 1.3rem;
+        color: map_get($colors, green-dark);
+        .icon{
+          line-height:20px;
+          margin: 0;
+        }
+        .code-name{
+          margin: 0;
+          line-height:20px;
+          display:inline-block;
+          vertical-align: bottom;
+        }
+      }
+
+
     }
 
   }
