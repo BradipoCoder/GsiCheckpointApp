@@ -134,15 +134,17 @@ export class CodeScanService
     let allowFakes = codes[expected_type];
 
     /*
-    //@todo: to be able to remove previous checkin 'code' from 'allowFakes' - we need code on checkins
-    // now we only have reference to checkpoint by id
+     * unallow the same codes to be returned twice in a row
+     */
     let lastCheckinOperation = this.remoteDataService.getLastOperation();
-    if(!_.isUndefined(lastCheckinOperation.type) && lastCheckinOperation.type == Checkpoint.TYPE_CHK)
+    if(lastCheckinOperation.type == Checkpoint.TYPE_CHK && !_.isEmpty(lastCheckinOperation.code))
     {
-
+      allowFakes = _.pull(allowFakes, lastCheckinOperation.code);
+      if(!_.size(allowFakes))
+      {
+        allowFakes = codes[expected_type];
+      }
     }
-    */
-
 
     let code = _.sample(allowFakes);
     //console.log("Not mobile - faking("+expected_type+"): "+JSON.stringify(allowFakes)+"...: " + code);
