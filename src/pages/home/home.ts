@@ -1,5 +1,5 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {App, Platform, NavController, ToastController, LoadingController, AlertController} from 'ionic-angular';
+import {App, Platform, NavController, ToastController, LoadingController, AlertController, Alert, ModalController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
@@ -11,11 +11,14 @@ import {Checkpoint} from '../../models/Checkpoint';
 import {Checkin} from "../../models/Checkin";
 import {HomeCheckinViewPage} from './home.checkin.view';
 import {TaskNewPage} from "../tasks/task.new";
+import {HomeTaskViewPage} from "./home.task.view";
 import {ConfigurationPage} from '../configuration/configuration';
 import _ from "lodash";
 import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
 import {LogService} from "../../services/log.service";
+import {TaskProvider} from "../../providers/task.provider";
+import {Task} from "../../models/Task";
 
 
 /**
@@ -44,21 +47,25 @@ export class HomePage implements OnInit, OnDestroy
   private lastRefresh;
 
   private networkStateSubscription: Subscription;
-  private dataChangeSubscription: Subscription;
+  private dataChangeSubscription_CHK: Subscription;
+  private dataChangeSubscription_TASK: Subscription;
 
 
-  constructor(public appCtrl: App
-    , public navCtrl: NavController
-    , private platform: Platform
-    , public toastCtrl: ToastController
-    , private loadingCtrl: LoadingController
-    , private alertCtrl: AlertController
-    , public userService: UserService
-    , public codeScanService: CodeScanService
-    , public remoteDataService: RemoteDataService
-    , public offlineCapableRestService: OfflineCapableRestService
-    , public checkpointProvider: CheckpointProvider
-    , public checkinProvider: CheckinProvider)
+  constructor(protected appCtrl: App
+    , protected alertCtrl: AlertController
+    , protected checkinProvider: CheckinProvider
+    , protected checkpointProvider: CheckpointProvider
+    , protected codeScanService: CodeScanService
+    , protected loadingCtrl: LoadingController
+    , protected modalCtrl: ModalController
+    , protected navCtrl: NavController
+    , protected offlineCapableRestService: OfflineCapableRestService
+    , protected platform: Platform
+    , protected remoteDataService: RemoteDataService
+    , protected toastCtrl: ToastController
+    , protected taskProvider:TaskProvider
+    , protected userService: UserService
+  )
   {
   }
 
@@ -443,6 +450,38 @@ export class HomePage implements OnInit, OnDestroy
     return !this.platform.is("core");
   }
 
+  //----------------------------------------------------------------------------------------------------------------TASK
+  /**
+   *
+   * @param {string} id
+   */
+  protected handleNewIncomingTask(id): void
+  {
+    let self = this;
+
+    this.taskProvider.getDocumentById(id).then((doc) => {
+      LogService.log("TASK CHANGE ON: " + JSON.stringify(doc));
+      let task = this.taskProvider.getNewModelInstance(doc);
+      if(task.status == Task.STATUS_NOT_STARTED)
+      {
+
+        let taskModal = this.modalCtrl.create(HomeTaskViewPage, {task: task}, {enableBackdropDismiss:false});
+        taskModal.onDidDismiss(data =>
+        {
+          LogService.log("modal closed with return data: " + JSON.stringify(data));
+
+          task.status = Task.STATUS_IN_PROGRESS;
+          task.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
+          self.taskProvider.store(task, true).then(() => {
+            LogService.log("task saved");
+          });
+        });
+        taskModal.present();
+      }
+    }, (e) => {
+      LogService.log("Unable to find task["+id+"]!", LogService.LEVEL_ERROR);
+    });
+  }
 
   //-----------------------------------------------------------------------------------------------------------INTERVALS
   /**
@@ -560,18 +599,29 @@ export class HomePage implements OnInit, OnDestroy
       }
     );
 
-    this.dataChangeSubscription = this.checkinProvider.databaseChangeObservable.subscribe
+    this.dataChangeSubscription_CHK = this.checkinProvider.databaseChangeObservable.subscribe
     ((data: any) => {
       if (_.includes(['checkpoint', 'checkin'], data.db))
       {
-        LogService.log('HOME - DB CHANGE!');
+        LogService.log('HOME - DB['+data.db+'] CHANGE!');
         self.refreshHomeData().then(() => {
           self.autoUpdateIntevalExecution(self);
         }, () => {
           //
         });
       }
+      if(data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id)) {
+        this.handleNewIncomingTask(data.id);
+      }
     });
+
+    this.dataChangeSubscription_TASK = this.taskProvider.databaseChangeObservable.subscribe
+    ((data: any) => {
+      if(data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id)) {
+        this.handleNewIncomingTask(data.id);
+      }
+    });
+
 
     this.refreshHomeData().then(() => {
       this.autoUpdateIntevalExecution(this);
@@ -587,7 +637,8 @@ export class HomePage implements OnInit, OnDestroy
   ngOnDestroy(): void
   {
     this.networkStateSubscription.unsubscribe();
-    this.dataChangeSubscription.unsubscribe();
+    this.dataChangeSubscription_CHK.unsubscribe();
+    this.dataChangeSubscription_TASK.unsubscribe();
 
     if (this.auto_update_timeout)
     {

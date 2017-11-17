@@ -594,11 +594,11 @@ export class LocalDocumentProvider
         self.findDocuments(options).then((res) => {
           if (_.size(res.docs) < 1)
           {
-            throw new Error("Checkin was not found!");
+            return reject(new Error("Checkin was not found!"));
           }
           if (_.size(res.docs) > 1)
           {
-            throw new Error("Multiple checkins were found!");
+            return reject(new Error("Multiple checkins were found!"));
           }
           let doc = _.first(res.docs);
           resolve(doc);

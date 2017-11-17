@@ -33,6 +33,7 @@ import {ConfigurationSettingsPage} from "../pages/configuration/configuration.se
 import {ConfigurationSyncstatePage} from "../pages/configuration/configuration.syncstate";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
 import {HomeCheckinViewPage} from "../pages/home/home.checkin.view";
+import {HomeTaskViewPage} from "../pages/home/home.task.view";
 import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
 import {LogoutPage} from "../pages/logout/logout";
@@ -55,6 +56,7 @@ import {TasksOutPage} from "../pages/tasks/tasks.out";
     , ConfigurationSyncstatePage
     , ConfigurationUnlockerPage
     , HomeCheckinViewPage
+    , HomeTaskViewPage
     , HomePage
     , InfoPage
     , LogoutPage
@@ -72,6 +74,7 @@ import {TasksOutPage} from "../pages/tasks/tasks.out";
     , ConfigurationSyncstatePage
     , ConfigurationUnlockerPage
     , HomeCheckinViewPage
+    , HomeTaskViewPage
     , HomePage
     , InfoPage
     , LogoutPage
