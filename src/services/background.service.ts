@@ -25,7 +25,7 @@ export class BackgroundService
   private startup_delay_ms = (5 * 1000);//@todo: put me back to 30
 
 
-  private execution_interval_slow_ms = (30 * 1000);
+  private execution_interval_slow_ms = (5 * 1000);//@todo: put me back to 30
   private execution_interval_fast_ms = (0.5 * 1000);
   private execution_interval_ms = this.execution_interval_slow_ms;
 
