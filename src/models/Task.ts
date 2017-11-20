@@ -124,6 +124,30 @@ export class Task extends CrmDataModel
   }
 
   /**
+   *
+   * @param {string} [format]
+   * @returns {String}
+   */
+  getFormattedDateStart(format = null): String
+  {
+    let m = moment(this.date_start);
+    m.locale("it");
+    return m.format(format ? format : CrmDataModel.IT_DATE_FORMAT_FULL);
+  }
+
+  /**
+   *
+   * @param {string} [format]
+   * @returns {String}
+   */
+  getFormattedDateDue(format = null): String
+  {
+    let m = moment(this.date_due);
+    m.locale("it");
+    return m.format(format ? format : CrmDataModel.IT_DATE_FORMAT_FULL);
+  }
+
+  /**
    * Data to be used to push to CRM (REST API)
    * @returns {{}}
    */

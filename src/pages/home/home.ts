@@ -1,5 +1,13 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {App, Platform, NavController, ToastController, LoadingController, AlertController, ModalController} from 'ionic-angular';
+import {
+  App,
+  Platform,
+  NavController,
+  ToastController,
+  LoadingController,
+  AlertController,
+  ModalController
+} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
@@ -56,9 +64,8 @@ export class HomePage implements OnInit, OnDestroy
     , protected platform: Platform
     , protected remoteDataService: RemoteDataService
     , protected toastCtrl: ToastController
-    , protected taskProvider:TaskProvider
-    , protected userService: UserService
-  )
+    , protected taskProvider: TaskProvider
+    , protected userService: UserService)
   {
   }
 
@@ -135,14 +142,14 @@ export class HomePage implements OnInit, OnDestroy
    * @param {Checkpoint} checkpoint
    * @returns {Promise<Checkin>}
    */
-  protected registerNewCheckinForCheckpoint(checkpoint:Checkpoint): Promise<Checkin>
+  protected registerNewCheckinForCheckpoint(checkpoint: Checkpoint): Promise<Checkin>
   {
     let self = this;
     let loader;
-    let checkin:Checkin;
+    let checkin: Checkin;
 
     return new Promise(function (resolve, reject) {
-      LogService.log("Registering checkin for CP["+checkpoint.code+"]: " + checkpoint.name);
+      LogService.log("Registering checkin for CP[" + checkpoint.code + "]: " + checkpoint.name);
 
       loader = self.loadingCtrl.create({
         content: "Salvataggio in corso...",
@@ -203,7 +210,7 @@ export class HomePage implements OnInit, OnDestroy
    *
    * @param {Checkin} checkin
    */
-  protected modifyCheckin(checkin:Checkin)
+  protected modifyCheckin(checkin: Checkin)
   {
     LogService.log('Modify Checkin:' + checkin.code + " - " + checkin.mkt_checkpoint_id_c);
     this.checkpointProvider.getCheckpoint({selector: {id: checkin.mkt_checkpoint_id_c}})
@@ -231,13 +238,14 @@ export class HomePage implements OnInit, OnDestroy
    * @param {Checkpoint} checkpoint
    * @returns {Promise<any>}
    */
-  protected presentCheckpointChecklistSelector___PAGE(checkpoint:Checkpoint):Promise<any>
+  protected presentCheckpointChecklistSelector___PAGE(checkpoint: Checkpoint): Promise<any>
   {
     let self = this;
 
     return new Promise(function (resolve, reject) {
 
-      if(!checkpoint.hasChecklistValues()) {
+      if (!checkpoint.hasChecklistValues())
+      {
         resolve();
         return;
       }
@@ -262,14 +270,15 @@ export class HomePage implements OnInit, OnDestroy
    * @param {Checkpoint} checkpoint
    * @returns {Promise<any>}
    */
-  protected presentCheckpointChecklistSelector(checkin:Checkin, checkpoint:Checkpoint):Promise<any>
+  protected presentCheckpointChecklistSelector(checkin: Checkin, checkpoint: Checkpoint): Promise<any>
   {
     let self = this;
     let alert;
 
     return new Promise(function (resolve) {
 
-      if(!checkpoint.hasChecklistValues()) {
+      if (!checkpoint.hasChecklistValues())
+      {
         resolve();
         return;
       }
@@ -280,7 +289,7 @@ export class HomePage implements OnInit, OnDestroy
         enableBackdropDismiss: false
       });
 
-      let checked:boolean;
+      let checked: boolean;
       _.each(checkpoint.checklist_items, (label, key) => {
         checked = checkin.hasChecklistValue(key);
         alert.addInput({
@@ -336,17 +345,7 @@ export class HomePage implements OnInit, OnDestroy
     let navs = this.appCtrl.getRootNavs();
     let rootNav = navs.pop();
     rootNav.push(TaskNewPage);
-
-    /*
-    let toast = this.toastCtrl.create({
-      message: "Questa funzionalità non è ancora implementata.",
-      duration: 3000,
-      position: 'top'
-    });
-    toast.present();
-    */
   }
-
 
   /**
    *
@@ -356,31 +355,6 @@ export class HomePage implements OnInit, OnDestroy
     this.navCtrl.push(ConfigurationPage).then(() => {
       this.navCtrl.setRoot(ConfigurationPage);
     });
-  }
-
-  /**
-   * Checkin details page with checklis selection
-
-  goToCheckinViewPage(): void
-  {
-    this.navCtrl.push(HomeCheckinViewPage).then(() => {
-      this.navCtrl.setRoot(HomeCheckinViewPage).then(() => {
-
-      });
-    });
-  }
-*/
-
-  /**
-   * @todo: use this in models for locale formatted date
-   * @param {string} [format]
-   * @returns {string}
-   */
-  getTodaysDate(format = null): String
-  {
-    let m = moment();
-    m.locale("it");
-    return m.format(format);
   }
 
   /**
@@ -442,12 +416,11 @@ export class HomePage implements OnInit, OnDestroy
     this.taskProvider.getDocumentById(id).then((doc) => {
       LogService.log("TASK CHANGE ON: " + JSON.stringify(doc));
       let task = this.taskProvider.getNewModelInstance(doc);
-      if(task.status == Task.STATUS_NOT_STARTED)
+      if (task.status == Task.STATUS_NOT_STARTED)
       {
 
-        let taskModal = this.modalCtrl.create(HomeTaskViewPage, {task: task}, {enableBackdropDismiss:false});
-        taskModal.onDidDismiss(data =>
-        {
+        let taskModal = this.modalCtrl.create(HomeTaskViewPage, {task: task}, {enableBackdropDismiss: false});
+        taskModal.onDidDismiss(data => {
           LogService.log("modal closed with return data: " + JSON.stringify(data));
 
           task.status = Task.STATUS_IN_PROGRESS;
@@ -459,7 +432,7 @@ export class HomePage implements OnInit, OnDestroy
         taskModal.present();
       }
     }, (e) => {
-      LogService.log("Unable to find task["+id+"]!" + e, LogService.LEVEL_ERROR);
+      LogService.log("Unable to find task[" + id + "]!" + e, LogService.LEVEL_ERROR);
     });
   }
 
@@ -583,21 +556,23 @@ export class HomePage implements OnInit, OnDestroy
     ((data: any) => {
       if (_.includes(['checkpoint', 'checkin'], data.db))
       {
-        LogService.log('HOME - DB['+data.db+'] CHANGE!');
+        LogService.log('HOME - DB[' + data.db + '] CHANGE!');
         self.refreshHomeData().then(() => {
           self.autoUpdateIntevalExecution(self);
         }, () => {
           //
         });
       }
-      if(data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id)) {
+      if (data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id))
+      {
         this.handleNewIncomingTask(data.id);
       }
     });
 
     this.dataChangeSubscription_TASK = this.taskProvider.databaseChangeObservable.subscribe
     ((data: any) => {
-      if(data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id)) {
+      if (data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id))
+      {
         this.handleNewIncomingTask(data.id);
       }
     });

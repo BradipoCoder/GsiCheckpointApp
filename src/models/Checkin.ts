@@ -98,6 +98,19 @@ export class Checkin extends CrmDataModel
     this.duration = checkinDuration.toString();
   }
 
+
+  /**
+   *
+   * @param {string} [format]
+   * @returns {String}
+   */
+  getFormattedCheckinDate(format = null): String
+  {
+    let m = moment(this.checkin_date);
+    m.locale("it");
+    return m.format(format ? format : CrmDataModel.IT_DATE_FORMAT_FULL);
+  }
+
   /**
    * duration is stored in seconds
    * @returns {string}

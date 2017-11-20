@@ -38,7 +38,7 @@
             <td text-center>
               <ion-icon [name]="checkin.icon" title="{{checkin.type}}"></ion-icon>
             </td>
-            <td text-right>{{ checkin.checkin_date}}</td>
+            <td text-right>{{ checkin.getFormattedCheckinDate("DD/MM/YYYY HH:mm")}}</td>
             <td>[{{ checkin.code}}] - {{ checkin.name}}</td>
             <td  class="canwrap">{{checkin.getChecklistValues().join(", ")}}</td>
             <td text-right>{{ checkin.getFormattedDuration() }}</td>

@@ -10,6 +10,10 @@ export class CrmDataModel
 
   public static readonly CRM_DATE_FORMAT: string = "YYYY-MM-DD HH:mm:ss";
 
+  public static readonly IT_DATE_FORMAT_FULL: string = "DD/MM/YYYY HH:mm:ss";
+  public static readonly IT_DATE_FORMAT_DATE_ONLY: string = "DD/MM/YYYY";
+  public static readonly IT_DATE_FORMAT_TIME_ONLY: string = "HH:mm:ss";
+
   public static readonly SYNC_STATE__IN_SYNC: string = "in-sync";
   public static readonly SYNC_STATE__NEW: string = "new";
   public static readonly SYNC_STATE__CHANGED: string = "changed";

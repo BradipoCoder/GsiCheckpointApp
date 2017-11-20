@@ -32,7 +32,7 @@
           </div>
         </div>
         <div class="when">
-          {{task.date_start}}
+          {{task.getFormattedDateStart("DD/MM/YYYY HH:mm")}}
         </div>
         <ion-icon [name]="task.icon" [color]="task.icon_color" title="{{task.priority}}" class="alert" item-left></ion-icon>
       </div>
