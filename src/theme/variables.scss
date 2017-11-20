@@ -2,7 +2,7 @@
 // http://ionicframework.com/docs/v2/theming/
 $font-path: "../assets/fonts";
 
-@import "ionic.globals";
+@import "../../node_modules/ionic-angular/themes/ionic.globals";
 
 // Shared Variables
 // --------------------------------------------------
@@ -51,23 +51,6 @@ $app-colors: (
 $font-size-base: 1.8rem;
 $toolbar-background: color($app-colors, header-bg);
 $button-md-border-radius: 0px;
-//$toolbar-md-title-font-size: 1.4rem;
-//$toolbar-md-height: 32px;
-//
-//$list-background-color: color($colors, green-light);
-//
-//$item-md-divider-background: #ff00ff;
-//$item-md-divider-color: #ff00ff;
-//
-//$text-input-highlight-color-valid: color($colors, green-dark);
-//$text-input-highlight-color-invalid: color($colors, danger);
-//
-//
-//$label-md-text-color: color($colors, lightest);
-//$label-md-text-color-focused: color($colors, lightest);
-
-
-
 
 // App Theme
 // --------------------------------------------------
@@ -75,18 +58,15 @@ $button-md-border-radius: 0px;
 // then be future customized. This import comes last
 // so that the above variables are used and Ionic's
 // default are overridden.
-
-@import "ionic.theme.default";
+@import "../../node_modules/ionic-angular/themes/ionic.theme.default";
 
 // Ionicons
 // --------------------------------------------------
 // The premium icon font for Ionic. For more info, please see:
 // http://ionicframework.com/docs/v2/ionicons/
-
-@import "ionic.ionicons";
+@import "../../node_modules/ionic-angular/themes/ionic.ionicons";
 
 // Fonts
 // --------------------------------------------------
-
-@import "roboto";
-@import "noto-sans";
+@import "../../node_modules/ionic-angular/fonts/roboto";
+@import "../../node_modules/ionic-angular/fonts/noto-sans";
