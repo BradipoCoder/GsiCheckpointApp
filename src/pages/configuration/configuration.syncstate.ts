@@ -231,15 +231,6 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    */
   public ngOnInit(): void
   {
-    //@todo: TEMPORARY - REMOVE ME WITH NEXT RELEASE(1.1.11)
-    if (this.platform.is("mobile"))
-    {
-      this.insomnia.keepAwake().then(() => {
-        LogService.log("KEEP AWAKE ON!");
-      });
-    }
-
-
     this.dataChangeSubscriptionCheckin = this.checkinProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
     this.dataChangeSubscriptionCheckpoint = this.checkpointProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
     this.registerInterfaceRefreshRequest();

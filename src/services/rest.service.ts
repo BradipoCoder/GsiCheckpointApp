@@ -195,7 +195,6 @@ export class RestService
   }
 
   /**
-   * @todo: allow to define other consumers
    *
    * @param {string} rest_api_url
    * @param {string} rest_api_version

@@ -1,7 +1,7 @@
 /**
  * Configuration Service
  *
- *  @todo: configure to:
+ *  @todo: refactor like this (for ease of use):
  *  1) on init load config object into memory
  *  2) make get/set become synchronous methods on in-memory object
  *  3) on set trigger db.put (with optional wait-for-storage param/option)

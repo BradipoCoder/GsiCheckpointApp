@@ -136,7 +136,6 @@ export class CheckpointProvider extends LocalDocumentProvider
     let self = this;
     return new Promise(function (resolve, reject) {
       let findPromises = [];
-      //@todo: for some reason index on 'type' does not work - when using combined selector
       findPromises.push(self.findDocuments({selector: {type: Checkpoint.TYPE_IN}}));
       findPromises.push(self.findDocuments({selector: {type: Checkpoint.TYPE_OUT}}));
       Promise.all(findPromises).then((res) => {

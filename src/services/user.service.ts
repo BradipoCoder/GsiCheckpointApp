@@ -98,7 +98,8 @@ export class UserService
 
     return new Promise(function (resolve) {
 
-      //@todo: this only works if you are logged in on CRM
+      //todo: this only works if you are logged in on CRM
+      //fixme: create a custom entry point on CRM for public image
       if (!_.isUndefined(data.id))
       {
         data.avatar_uri = 'http://gsi.crm.mekit.it/index.php?entryPoint=download'
@@ -122,7 +123,6 @@ export class UserService
       });
     });
   };
-
 
   /**
    *

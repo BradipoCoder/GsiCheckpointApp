@@ -20,13 +20,6 @@ import {LogService} from "../../services/log.service";
 import {TaskProvider} from "../../providers/task.provider";
 import {Task} from "../../models/Task";
 
-
-/**
- * @todo: 1) implementare popup auto per segnalazioni in arrivo
- *
- *
- */
-
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -139,10 +132,6 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
-   * @todo: !!!missing important controls!!!
-   *  1) cannot scan anything if we are NOT checked in!
-   *  2) cannot check the same code twice in a row
-   *
    * @param {Checkpoint} checkpoint
    * @returns {Promise<Checkin>}
    */

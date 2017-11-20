@@ -121,8 +121,6 @@ export class LocalDocumentProvider
   }
 
   /**
-   * @todo: use self.sync_configuration
-   * [ called by localDocumentProvider.syncWithRemote ]
    *
    * @param {any} itemsToCheck
    * @returns {Promise<any>}
@@ -311,7 +309,6 @@ export class LocalDocumentProvider
 
   /**
    * @todo: this is not yet implemented
-   * @todo: use self.sync_configuration
    * [ called by localDocumentProvider.syncWithRemote ]
    *
    * @param {any} itemsToCheck
@@ -495,7 +492,7 @@ export class LocalDocumentProvider
    *
    * @param {CrmDataModel} document
    * @param {Boolean} [forceUpdate]
-   * @param {String} [findById] - when document contains the new id - you need to use this param to find the document - @todo: never used and now document contains temporary id so this param can be removed
+   * @param {String} [findById] - when document contains the new id - you need to use this param to find the document
    * @returns {Promise<string>}
    */
   protected storeDocument(document: CrmDataModel, forceUpdate: boolean = false, findById: any = false): Promise<string>
