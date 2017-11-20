@@ -4,17 +4,6 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title float-left>Elenco locali({{checkpoints.length}})</ion-title>
-
-    <!--<button ion-button icon-left float-right (click)="action1()" color="dark">-->
-      <!--<ion-icon name="play"></ion-icon>-->
-      <!--<ion-label>START</ion-label>-->
-    <!--</button>-->
-
-    <!--<button ion-button icon-left float-right (click)="action2()" color="dark">-->
-      <!--<ion-icon name="square"></ion-icon>-->
-      <!--<ion-label>STOP</ion-label>-->
-    <!--</button>-->
-
   </ion-navbar>
 </ion-header>
 
@@ -37,7 +26,9 @@
             <td >{{checkpoint.code}}</td>
             <td>{{checkpoint.name}}</td>
             <td>{{checkpoint.type}}</td>
-            <td  class="canwrap">{{checkpoint.getChecklistValues().join(", ")}}</td>
+            <td>
+              <ion-icon *ngIf="checkpoint.hasChecklistValues()" name="checkmark-circle" title="{{checkpoint.getChecklistValues().join(', ')}}" item-right></ion-icon>
+            </td>
             <td>
               <ion-icon [name]="checkpoint.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" title="{{checkpoint.sync_state}}" item-right></ion-icon>
             </td>
