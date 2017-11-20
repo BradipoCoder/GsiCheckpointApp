@@ -1,12 +1,8 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
-//import {CheckpointProvider} from '../../providers/checkpoint.provider';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CheckinProvider} from '../../providers/checkin.provider';
-import {BackgroundService} from "../../services/background.service";
-//import {Checkpoint} from "../../models/Checkpoint";
 import {Checkin} from "../../models/Checkin";
 import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
-import {LogService} from "../../services/log.service";
 
 @Component({
   selector: 'page-checkins',
@@ -25,7 +21,7 @@ export class CheckinsPage implements OnInit, OnDestroy
 
   private dataChangeSubscription: Subscription;
 
-  constructor(private checkinProvider: CheckinProvider, private backgroundService: BackgroundService)
+  constructor(private checkinProvider: CheckinProvider)
   {
   }
 
@@ -63,22 +59,6 @@ export class CheckinsPage implements OnInit, OnDestroy
         this.is_refreshing = false;
       });
 
-  }
-
-  public action1(): void
-  {
-    LogService.log("A1 - START");
-    this.backgroundService.start().then(() => {
-      LogService.log("A1 - START DONE.");
-    });
-  }
-
-  public action2(): void
-  {
-    LogService.log("A2 - STOP");
-    this.backgroundService.stop().then(() => {
-      LogService.log("A2 - STOP DONE.");
-    });
   }
 
   //------------------------------------------------------------------------------------------------------INIT & DESTROY

@@ -1,5 +1,5 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {App, Platform, NavController, ToastController, LoadingController, AlertController, Alert, ModalController} from 'ionic-angular';
+import {App, Platform, NavController, ToastController, LoadingController, AlertController, ModalController} from 'ionic-angular';
 import {UserService} from '../../services/user.service';
 import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
@@ -278,7 +278,7 @@ export class HomePage implements OnInit, OnDestroy
     let self = this;
     let alert;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
 
       if(!checkpoint.hasChecklistValues()) {
         resolve();
@@ -383,7 +383,7 @@ export class HomePage implements OnInit, OnDestroy
 */
 
   /**
-   *
+   * @todo: use this in models for locale formatted date
    * @param {string} [format]
    * @returns {string}
    */
@@ -400,15 +400,6 @@ export class HomePage implements OnInit, OnDestroy
   isUserConfigured(): boolean
   {
     return this.userService.is_user_configured;
-  }
-
-  /**
-   *
-   * @returns {boolean}
-   */
-  isUserAuthenticated(): boolean
-  {
-    return this.userService.isAuthenticated();
   }
 
   /**
@@ -479,7 +470,7 @@ export class HomePage implements OnInit, OnDestroy
         taskModal.present();
       }
     }, (e) => {
-      LogService.log("Unable to find task["+id+"]!", LogService.LEVEL_ERROR);
+      LogService.log("Unable to find task["+id+"]!" + e, LogService.LEVEL_ERROR);
     });
   }
 

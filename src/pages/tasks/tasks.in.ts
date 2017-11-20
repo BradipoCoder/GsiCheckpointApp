@@ -1,6 +1,5 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {App} from 'ionic-angular';
-import {TaskNewPage} from "./task.new";
 import {TaskProvider} from "../../providers/task.provider";
 import {Task} from "../../models/Task";
 import {Subscription} from "rxjs/Subscription";
@@ -28,15 +27,6 @@ export class TasksInPage implements OnInit, OnDestroy
   {
     let navs = this.appCtrl.getRootNavs();
     this.rootNav = navs.pop();
-  }
-
-  /**
-   *
-   * @returns {Promise<any>}
-   */
-  public openNewTaskPage(): Promise<any>
-  {
-    return this.rootNav.push(TaskNewPage);
   }
 
   /**

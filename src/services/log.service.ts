@@ -35,7 +35,7 @@ export class LogService
         }
       });
 
-      self.resetLogLevelToConfigurationValue().then((value) =>
+      self.resetLogLevelToConfigurationValue().then(() =>
       {
         resolve();
       });

@@ -94,7 +94,7 @@ export class BackgroundService
     self.executionRun(self)
       .then(() => {
         //LogService.log("executionRun: DONE!");
-      }, (e) => {
+      }, () => {
         //LogService.warn("executionRun: ERROR! - " + e);
       }).then(() => {
       LogService.log("BSE RUN[" + self.execution_count + "]: DONE.");

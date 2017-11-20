@@ -1,6 +1,6 @@
 /* CORE */
 import {Component, OnInit, OnDestroy} from '@angular/core';
-import {ViewController, ToastController, Platform} from 'ionic-angular';
+import {ToastController, Platform} from 'ionic-angular';
 import { Insomnia } from '@ionic-native/insomnia';
 /* PROVIDERS */
 import {CheckpointProvider} from '../../providers/checkpoint.provider';
@@ -34,8 +34,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   private dataChangeSubscriptionCheckin: Subscription;
 
 
-  constructor(protected viewCtrl: ViewController
-    , private toastCtrl: ToastController
+  constructor(private toastCtrl: ToastController
     , private platform:Platform
     , private insomnia: Insomnia
     , private checkpointProvider:CheckpointProvider

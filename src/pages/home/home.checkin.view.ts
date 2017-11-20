@@ -1,21 +1,10 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
-import {Platform, NavController, ToastController, LoadingController, AlertController} from 'ionic-angular';
-
-import {UserService} from '../../services/user.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {RemoteDataService} from '../../services/remote.data.service';
-import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
-
-import {CheckpointProvider} from "../../providers/checkpoint.provider";
-import {CheckinProvider} from "../../providers/checkin.provider";
 
 import {Checkpoint} from '../../models/Checkpoint';
-import {Checkin} from "../../models/Checkin";
 
 import _ from "lodash";
-import * as moment from 'moment';
-import {Subscription} from "rxjs/Subscription";
 import {LogService} from "../../services/log.service";
-import {Thenable} from "bluebird";
 
 
 @Component({

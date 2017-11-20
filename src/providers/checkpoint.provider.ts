@@ -10,8 +10,6 @@ import {Checkpoint} from '../models/Checkpoint';
 import {Checkin} from '../models/Checkin';
 import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
-import * as moment from 'moment';
-import {CrmDataModel} from "../models/crm.data.model";
 import {LogService} from "../services/log.service";
 
 @Injectable()
@@ -20,9 +18,6 @@ export class CheckpointProvider extends LocalDocumentProvider
   protected underlying_model:any = Checkpoint;
 
   protected database_name = "checkpoint";
-
-  //@todo: remove this!!! MOVED TO MODEL!
-  protected remote_table_name = "mkt_Checkpoint";
 
   constructor(protected configurationService: ConfigurationService,
               protected offlineCapableRestService: OfflineCapableRestService)

@@ -11,7 +11,7 @@
   <ion-content>
     <ion-list margin-top>
       <button menuClose ion-item *ngFor="let page of pages" (click)="openPage(page)">
-        <ion-icon name="{{page.icon}}"></ion-icon> {{page.title}}
+        <ion-icon [name]="page.icon"></ion-icon> {{page.title}}
       </button>
     </ion-list>
   </ion-content>

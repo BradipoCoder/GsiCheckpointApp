@@ -3,8 +3,6 @@
  */
 import {CrmDataModel} from './crm.data.model';
 import _ from "lodash";
-import * as moment from 'moment';
-import {LogService} from "../services/log.service";
 
 export class Checkpoint extends CrmDataModel
 {

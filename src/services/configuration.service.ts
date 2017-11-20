@@ -93,7 +93,7 @@ export class ConfigurationService
     let answer = defaultValue;
     let self = this;
 
-    return new Promise(function (resolve, reject)
+    return new Promise(function (resolve)
     {
       self.db.get(key).then((doc) =>
       {
@@ -225,7 +225,7 @@ export class ConfigurationService
     {
       self.db = new PouchDB('configuration', {auto_compaction: true, revs_limit: 10});
 
-      let changes = self.db.changes({
+      self.db.changes({
         since: 'now',
         live: true,
         include_docs: false

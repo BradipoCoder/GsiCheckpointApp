@@ -7,11 +7,9 @@ import {ConfigurationService} from '../services/configuration.service';
 import {UserService} from "../services/user.service";
 import {LocalDocumentProvider} from './local.document.provider';
 import {CrmDataModel} from '../models/crm.data.model';
-import {Checkin} from '../models/Checkin';
 import {Task} from "../models/Task";
 import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
-import * as moment from 'moment';
 import {LogService} from "../services/log.service";
 import {CheckpointProvider} from "./checkpoint.provider";
 import {Checkpoint} from "../models/Checkpoint";
@@ -167,8 +165,8 @@ export class TaskProvider extends LocalDocumentProvider
 
         LogService.log("syncUpStore[Task] - DOCS TO SYNC UP: " + _.size(res.docs));
 
-        Promise.reduce(res.docs, (accu, doc, index, length) => {
-          return new Promise((resolve, reject) => {
+        Promise.reduce(res.docs, (accu, doc) => {
+          return new Promise((resolve) => {
             let task = self.getNewModelInstance(doc);
             let isNewOnRemote = _.startsWith(task.id, CrmDataModel.TEMPORARY_ID_PREFIX);
             let parameters = task.getRestData();

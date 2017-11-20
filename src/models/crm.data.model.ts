@@ -1,7 +1,6 @@
 /**
  * Data Model for SugarCRM modules
  */
-import {LogService} from "../services/log.service";
 import _ from "lodash";
 import * as moment from 'moment';
 
@@ -109,7 +108,7 @@ export class CrmDataModel
     if(_.size(elements))
     {
 
-      let key, val, key_elements, key_name_stub, key_multiplier, new_name;
+      let val, key_elements, key_name_stub, key_multiplier, new_name;
       _.each(elements, (key) => {
 
         key_elements = _.split(key, "__");
@@ -186,22 +185,6 @@ export class CrmDataModel
   }
 
   /**
-   * @returns {Date}
-   */
-  public getDateEntered(): Date
-  {
-    return moment(this.date_entered).toDate();
-  }
-
-  /**
-   * @returns {Date}
-   */
-  public getDateModified(): Date
-  {
-    return moment(this.date_modified).toDate();
-  }
-
-  /**
    *
    * @param date
    * @returns {boolean}
@@ -214,10 +197,9 @@ export class CrmDataModel
   /**
    *
    * @param {string} property
-   * @param {string} [format]
    * @throws {Error}
    */
-  protected checkPropertyDate(property:string, format:string = null):void
+  protected checkPropertyDate(property:string):void
   {
     let dateValue = this.getPropertyValue(property);
     let date = moment(dateValue, CrmDataModel.CRM_DATE_FORMAT);

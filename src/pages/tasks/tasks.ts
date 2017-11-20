@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
 import { TasksInPage} from "./tasks.in";
 import { TasksOutPage} from "./tasks.out";
 
@@ -13,7 +12,7 @@ export class TasksPage {
 
 
 
-  constructor(public navCtrl: NavController) {
+  constructor() {
     this.tab1 = TasksInPage;
     this.tab2 = TasksOutPage;
 

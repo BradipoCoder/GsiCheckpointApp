@@ -1,10 +1,8 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {CheckpointProvider} from '../../providers/checkpoint.provider';
-import {BackgroundService} from "../../services/background.service";
 import {Checkpoint} from "../../models/Checkpoint";
 import * as moment from 'moment';
 import {Subscription} from "rxjs/Subscription";
-import {LogService} from "../../services/log.service";
 
 @Component({
   selector: 'page-checkpoints',
@@ -23,7 +21,7 @@ export class CheckpointsPage implements OnInit, OnDestroy
 
   private dataChangeSubscription: Subscription;
 
-  constructor(private checkpointProvider: CheckpointProvider, private backgroundService: BackgroundService)
+  constructor(private checkpointProvider: CheckpointProvider)
   {
   }
 
@@ -58,28 +56,6 @@ export class CheckpointsPage implements OnInit, OnDestroy
         this.lastRefresh = moment();
         this.is_refreshing = false;
       });
-  }
-
-  public action1(): void
-  {
-    LogService.log("A1 - START");
-    this.backgroundService.start().then(() => {
-      LogService.log("A1 - START DONE.");
-      }, (e) => {
-      LogService.log("A1 - START ERROR - " + e, LogService.LEVEL_ERROR);
-      }
-    );
-  }
-
-  public action2(): void
-  {
-    LogService.log("A2 - STOP");
-    this.backgroundService.stop().then(() => {
-        LogService.log("A2 - STOP DONE.");
-      }, (e) => {
-        LogService.log("A2 - STOP ERROR - " + e, LogService.LEVEL_ERROR);
-      }
-    );
   }
 
   //------------------------------------------------------------------------------------------------------INIT & DESTROY

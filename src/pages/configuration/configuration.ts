@@ -1,11 +1,11 @@
 /* CORE */
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
 /* SERVICES */
 import {BackgroundService} from "../../services/background.service";
 /* PAGES */
 import {ConfigurationSyncstatePage} from './configuration.syncstate';
 import {ConfigurationSettingsPage} from './configuration.settings';
+
 /* OTHER */
 
 @Component({

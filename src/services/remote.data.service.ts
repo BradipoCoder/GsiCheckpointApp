@@ -3,8 +3,6 @@
  *
  */
 import {Injectable} from '@angular/core';
-import {Platform} from "ionic-angular";
-import {Network} from '@ionic-native/network';
 
 /* Services */
 import {OfflineCapableRestService} from './offline.capable.rest.service';
@@ -41,8 +39,6 @@ export class RemoteDataService
 
   constructor(private offlineCapableRestService: OfflineCapableRestService
     , private userService: UserService
-    , private network: Network
-    , private platform: Platform
     , private checkpointProvider: CheckpointProvider
     , private checkinProvider: CheckinProvider
     , private taskProvider: TaskProvider)
@@ -58,7 +54,7 @@ export class RemoteDataService
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
+    return new Promise(function (resolve)
     {
       self.offlineCapableRestService.getEntryList(Checkpoint.DB_TABLE_NAME, {
         select_fields: ['id'],
@@ -72,7 +68,7 @@ export class RemoteDataService
         } else {
           resolve([]);
         }
-      }, (err) => {
+      }, () => {
         resolve([]);
       });
     });
@@ -100,7 +96,7 @@ export class RemoteDataService
   public updateCurrentSessionCheckins(): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
+    return new Promise(function (resolve)
     {
       if(self.updating_session_checkins == true)
       {
@@ -165,7 +161,7 @@ export class RemoteDataService
     let self = this;
     let lastInOutCheckin: Checkin;
 
-    return new Promise(function (resolve, reject)
+    return new Promise(function (resolve)
     {
       //IN/OUT
       self.checkpointProvider.getInOutCheckpoints().then((inOutCheckpoints) =>
@@ -254,7 +250,7 @@ export class RemoteDataService
 
   /**
    * OLD!!!
-   * @todo: PAUSA uses this - convert to storeNewCheckinForCheckpoint and remove this!!!
+   * @todo: PAUSE uses this - convert to storeNewCheckinForCheckpoint and remove this!!!
    * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
    * OLD!!!
    *
@@ -317,7 +313,7 @@ export class RemoteDataService
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
+    return new Promise(function (resolve)
     {
       //LogService.log("DURATION UPDATE - LAST: ", lastCheckin);
 

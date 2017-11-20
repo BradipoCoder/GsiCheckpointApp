@@ -30,9 +30,6 @@ export class LocalDocumentProvider
   protected database_name: string;
   protected database_options: any = {auto_compaction: false};
 
-  //@todo: remove this!!! MOVED TO MODEL!
-  protected remote_table_name: string;
-
   protected sync_configuration: any = {
     syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
     remoteDbTableName: 'some_table',
@@ -87,7 +84,7 @@ export class LocalDocumentProvider
             remoteItems = records;
             //LogService.log("REMOTE-ITEMS: ", remoteItems);
 
-            Promise.reduce(syncFunctions, function (accu, syncFunction, index) {
+            Promise.reduce(syncFunctions, function (accu, syncFunction) {
               return new Promise(function (resolve, reject) {
                 if (!_.isFunction(self[syncFunction]))
                 {
@@ -313,6 +310,7 @@ export class LocalDocumentProvider
   }
 
   /**
+   * @todo: this is not yet implemented
    * @todo: use self.sync_configuration
    * [ called by localDocumentProvider.syncWithRemote ]
    *
@@ -329,7 +327,7 @@ export class LocalDocumentProvider
     //LogService.log("FILTERED (DELETED)ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve) {
-      //LogService.log("syncDownDeleted");
+      LogService.log("syncDownDeleted: " + _.size(itemsToCheck));
       resolve();
     });
   }
@@ -339,7 +337,7 @@ export class LocalDocumentProvider
    * [ called by localDocumentProvider.syncWithRemote ]
    *
    * @param {string} dbTableName
-   * @param {number} [maxRecords]
+   * @param {number} [maxRecords] - @todo: implement this for limiting records to fetch from server
    * @param {number} [itemsAtOnce]
    * @param {string} [query]
    * @returns {Promise<any>}
@@ -427,7 +425,7 @@ export class LocalDocumentProvider
   {
     let self = this;
     let remoteCount, localCount;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       self.getRemoteDataCount().then((cnt) => {
         remoteCount = cnt;
         self.getDatabaseDocumentCount().then((cnt) => {
@@ -448,7 +446,7 @@ export class LocalDocumentProvider
   {
     let self = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       self.findDocuments({
         selector: {
           $or: [
@@ -471,7 +469,7 @@ export class LocalDocumentProvider
     let self = this;
     let dbTableName = self.underlying_model.DB_TABLE_NAME;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       let params = {
         select_fields: ['id'],
         deleted: '0',
@@ -514,7 +512,7 @@ export class LocalDocumentProvider
         {
           document._id = registeredDocument._id;
           document._rev = registeredDocument._rev;
-          self.db.put(document).then((res) => {
+          self.db.put(document).then(() => {
             //LogService.log("Doc updated:", key, document);
             resolve(key);
           });
@@ -524,9 +522,9 @@ export class LocalDocumentProvider
           resolve(key);
         }
 
-      }).catch((e) => {
+      }).catch(() => {
         document._id = key;
-        self.db.put(document).then((res) => {
+        self.db.put(document).then(() => {
           //LogService.log("Doc registered:", key, document);
           resolve(key);
         }).catch((e) => {
@@ -549,7 +547,7 @@ export class LocalDocumentProvider
   protected storeDocuments(documents: any, forceUpdate: boolean = false): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       let promises = [];
       _.each(documents, function (document) {
         promises.push(self.storeDocument(document, forceUpdate));
@@ -625,7 +623,7 @@ export class LocalDocumentProvider
   {
     let self = this;
     let answer = 0;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       self.getDatabaseInfo().then((info) => {
         let docCount = !_.isUndefined(info['doc_count']) ? parseInt(info['doc_count']) : 0;
         let indexCount = _.size(self.getDbIndexDefinition());
@@ -638,26 +636,6 @@ export class LocalDocumentProvider
       })
     });
   }
-
-
-  /**
-   * @todo: Is this not used anymore?
-   *
-   * @param {any} data
-   * @param {function} condition
-   * @param {function} action
-   * @returns @returns {Promise<any>}
-   */
-  protected promiseWhile(data, condition, action): Promise<any>
-  {
-    let whilst = (data): Promise<any> => {
-      return condition(data)
-        ? action(data).then(whilst)
-        : Promise.resolve(data);
-    };
-
-    return whilst(data);
-  };
 
   /**
    *
@@ -684,7 +662,7 @@ export class LocalDocumentProvider
   {
     let self = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       LogService.log("Creating DB: " + self.database_name);
       self.db = new PouchDB(self.database_name, self.database_options);
 
@@ -696,9 +674,6 @@ export class LocalDocumentProvider
         change.db = self.database_name;
         //LogService.log('DB['+self.underlying_model.DB_TABLE_NAME+'] CHANGE: ' +  JSON.stringify(change));
         self.databaseChangeSubject.next(change);
-      }).on('complete', function (info) {
-        //LogService.log('DB['+self.underlying_model.DB_TABLE_NAME+'] COMPLETE: ', info);
-        //self.databaseChangeSubject.complete();
       }).on('error', function (err) {
         LogService.log('DB['+self.underlying_model.DB_TABLE_NAME+'] ERROR: ' + err, LogService.LEVEL_ERROR);
         self.databaseChangeSubject.error(err);
@@ -711,8 +686,7 @@ export class LocalDocumentProvider
         indexCreationPromises.push(self.db.createIndex({index: indexObject}));
       });
 
-      Promise.all(indexCreationPromises).then((res) => {
-        //LogService.log("INDEXES OK: ", res);
+      Promise.all(indexCreationPromises).then(() => {
         resolve();
       });
     });

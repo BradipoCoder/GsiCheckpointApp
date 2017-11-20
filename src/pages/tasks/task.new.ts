@@ -89,7 +89,7 @@ export class TaskNewPage implements OnInit
   {
     let self = this;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       self.taskProvider.store(this.task).then((id) => {
         LogService.log("Task stored with id: " + id);
         this.navCtrl.pop().then(() => {

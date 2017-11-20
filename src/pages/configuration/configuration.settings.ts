@@ -1,7 +1,7 @@
 /* CORE */
 import {Component, OnInit} from '@angular/core';
-import {Platform, NavController, ModalController, ToastController, LoadingController} from 'ionic-angular';
-import { Insomnia } from '@ionic-native/insomnia';
+import {LoadingController, ModalController, NavController, Platform, ToastController} from 'ionic-angular';
+import {Insomnia} from '@ionic-native/insomnia';
 /* SERVICES */
 import {ConfigurationService} from '../../services/configuration.service';
 import {UserService} from '../../services/user.service';
@@ -11,9 +11,7 @@ import {OfflineCapableRestService} from '../../services/offline.capable.rest.ser
 import {LogService} from "../../services/log.service";
 /* PAGES */
 import {ConfigurationPage} from './configuration';
-import {ConfigurationSyncstatePage} from './configuration.syncstate';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
-import {HomePage} from "../home/home";
 /* OTHER */
 import _ from "lodash";
 
@@ -85,7 +83,7 @@ export class ConfigurationSettingsPage implements OnInit
         duration: (5 * 60 * 1000)
       });
 
-      loader.onDidDismiss((data, role) => {
+      loader.onDidDismiss(() => {
         self.navCtrl.push(ConfigurationPage).then(() => {
           LogService.log("CACHE CLEAR - LOADER DISMISSED");
         });
@@ -180,7 +178,7 @@ export class ConfigurationSettingsPage implements OnInit
   {
     let self = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       if (!self.offlineCapableRestService.isNetworkConnected())
       {
         let toast = self.toastCtrl.create({
@@ -200,7 +198,7 @@ export class ConfigurationSettingsPage implements OnInit
         duration: (5 * 60 * 1000)
       });
 
-      loader.onDidDismiss((data, role) => {
+      loader.onDidDismiss(() => {
         LogService.log("APPLICATION RESET- LOADER DISMISSED");
       });
 
@@ -272,7 +270,7 @@ export class ConfigurationSettingsPage implements OnInit
     {
       this.cfg = config;
       this.viewIsReady = true;
-    }).catch((e) =>
+    },() =>
     {
       this.cfg = {};
     });
