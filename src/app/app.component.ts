@@ -12,8 +12,8 @@ import {BackgroundService} from '../services/background.service';
 import {HomePage} from "../pages/home/home";
 import {TasksPage} from "../pages/tasks/tasks";
 import {ConfigurationPage} from "../pages/configuration/configuration";
-import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
-import {CheckinsPage} from "../pages/checkins/checkins";
+// import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
+// import {CheckinsPage} from "../pages/checkins/checkins";
 
 
 @Component({
@@ -41,8 +41,8 @@ export class MekitTracerApp
     this.pages = [
       {title: 'Home', icon: 'home', component: HomePage}
       , {title: 'Segnalazioni', icon: 'text', component: TasksPage}
-      , {title: 'Locali', icon: 'globe', component: CheckpointsPage}
-      , {title: 'Tracciature', icon: 'flag', component: CheckinsPage}
+      // , {title: 'Locali', icon: 'globe', component: CheckpointsPage}
+      // , {title: 'Tracciature', icon: 'flag', component: CheckinsPage}
       , {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage}
       /*, {title: 'Esci', icon: 'power', component: LogoutPage}*/
     ];
