@@ -41,6 +41,16 @@
 
 <!--The block to use to show current status-->
 <ng-template #knownUserBlock>
+  <div *ngIf="is_refreshing; then knownUserBlock_WAIT else knownUserBlock_GO"></div>
+</ng-template>
+
+<ng-template #knownUserBlock_WAIT>
+  <ion-content class="waiting">
+    <h1>Attendere...</h1>
+  </ion-content>
+</ng-template>
+
+<ng-template #knownUserBlock_GO>
   <ion-header>
     <div class="custom-background" [ngClass]="{'paused': isUserHavingABreak()}">
       <ion-navbar padding-right>
@@ -229,7 +239,7 @@
         </ion-col>
       </ion-row>
 
-      <ion-row *ngFor="let checkin of remoteDataService.getCurrentSessionCheckins(); let isFirstRow=first;" [ngClass]="{'first' : isFirstRow}">
+      <ion-row *ngFor="let checkin of checkins; let isFirstRow=first;" [ngClass]="{'first' : isFirstRow}">
         <ion-col class="left" col-9>
           <div (click)="modifyCheckin(checkin)">
 

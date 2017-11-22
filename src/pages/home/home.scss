@@ -48,10 +48,23 @@ page-home {
 
     &.logged-in{
       background: color($colors, lightest);
+      .scroll-content{margin-top:195px !important;}
     }
 
     &.logged-out{
 
+    }
+
+    &.waiting
+    {
+      .fixed-content{margin:0 !important;}
+      .scroll-content{
+        margin:0 !important;
+        display: flex;
+        justify-content: center; /* align horizontal */
+        align-items: center; /* align vertical */
+        color: color($colors, lightest);
+      }
     }
 
     //background: color($colors, lightest);

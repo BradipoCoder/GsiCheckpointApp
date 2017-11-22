@@ -44,8 +44,10 @@ export class HomePage implements OnInit, OnDestroy
 
   private auto_update_timeout: number;
 
-  private is_refreshing = false;
+  private is_refreshing = true; /* use this to put home screen in "UPDATING" state */
   private lastRefresh;
+
+  private checkins: Checkin[];
 
   private networkStateSubscription: Subscription;
   private dataChangeSubscription_CHK: Subscription;
@@ -443,11 +445,9 @@ export class HomePage implements OnInit, OnDestroy
   recalculateShiftTotalDuration(self: HomePage): void
   {
     let durationStr = '';
-
-    let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-    if (_.size(sessionCheckins) > 0)
+    if (_.size(this.checkins) > 0)
     {
-      let shiftStartCheckin: Checkin = _.last(sessionCheckins) as Checkin;
+      let shiftStartCheckin: Checkin = _.last(this.checkins) as Checkin;
       let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
 
       let hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
@@ -470,10 +470,9 @@ export class HomePage implements OnInit, OnDestroy
    */
   recalculateLastCheckinDuration(self: HomePage): void
   {
-    let sessionCheckins = self.remoteDataService.getCurrentSessionCheckins();
-    if (_.size(sessionCheckins) > 0)
+    if (_.size(this.checkins) > 0)
     {
-      let lastCheckin: Checkin = _.first(sessionCheckins) as Checkin;
+      let lastCheckin: Checkin = _.first(this.checkins) as Checkin;
       if (!_.isUndefined(lastCheckin))
       {
         lastCheckin.setDurationFromNow();
@@ -514,7 +513,8 @@ export class HomePage implements OnInit, OnDestroy
     let self = this;
 
     return new Promise(function (resolve, reject) {
-
+      resolve();
+      /*
       if (self.is_refreshing)
       {
         return reject(new Error("Refresh is already on the way...(skipping)"));
@@ -534,6 +534,42 @@ export class HomePage implements OnInit, OnDestroy
         self.is_refreshing = false;
         resolve();
       });
+      */
+    });
+  }
+
+  private refreshCheckin(id): void
+  {
+    LogService.log("Looking for checkin["+id+"]! ");
+    this.checkinProvider.getDocumentById(id).then((doc) => {
+      let checkin: Checkin = _.find(this.checkins, {'id': id});
+      if (checkin)
+      {
+        LogService.log("Found checkin["+id+"]! ");
+
+      }
+    }, (e) => {
+      LogService.log("Error refreshing Task: " + e, LogService.LEVEL_ERROR);
+    });
+  }
+
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  private refreshAllCheckins(): Promise<any>
+  {
+    this.is_refreshing = true;
+    let self = this;
+    return new Promise(function (resolve, reject) {
+      self.remoteDataService.updateCurrentSessionCheckins().then(() => {
+        self.checkins = self.remoteDataService.getCurrentSessionCheckins();
+        self.is_refreshing = false;
+        resolve();
+      }, (e) => {
+        reject(e);
+      });
     });
   }
 
@@ -552,8 +588,10 @@ export class HomePage implements OnInit, OnDestroy
       }
     );
 
+    /* CHECKINS */
     this.dataChangeSubscription_CHK = this.checkinProvider.databaseChangeObservable.subscribe
     ((data: any) => {
+      /*
       if (_.includes(['checkpoint', 'checkin'], data.db))
       {
         LogService.log('HOME - DB[' + data.db + '] CHANGE!');
@@ -563,12 +601,13 @@ export class HomePage implements OnInit, OnDestroy
           //
         });
       }
-      if (data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id))
-      {
-        this.handleNewIncomingTask(data.id);
+      */
+      if(data.db == 'checkin' && !_.isUndefined(data.id) && !_.isEmpty(data.id)) {
+        this.refreshCheckin(data.id);
       }
     });
 
+    /* TASKS */
     this.dataChangeSubscription_TASK = this.taskProvider.databaseChangeObservable.subscribe
     ((data: any) => {
       if (data.db == 'task' && !_.isUndefined(data.id) && !_.isEmpty(data.id))
@@ -578,11 +617,11 @@ export class HomePage implements OnInit, OnDestroy
     });
 
 
-    this.refreshHomeData().then(() => {
-      this.autoUpdateIntevalExecution(this);
-    }, () => {
-      //
+    //start
+    this.refreshAllCheckins().then(() => {
+      self.autoUpdateIntevalExecution(self);
     });
+
   }
 
 
