@@ -284,7 +284,7 @@ export class HomePage implements OnInit, OnDestroy
       }
 
       alert = self.alertCtrl.create({
-        title: 'RIFORNIMENTI',
+        title: 'RIFORNIMENTO',
         subTitle: 'clicca sulle voci che hai rifornito',
         enableBackdropDismiss: false
       });
@@ -300,13 +300,13 @@ export class HomePage implements OnInit, OnDestroy
         });
       });
 
-      alert.addButton({
-        text: 'Cancel',
-        handler: () => {
-          LogService.log("Cancel");
-          resolve([]);
-        }
-      });
+      // alert.addButton({
+      //   text: 'Cancel',
+      //   handler: () => {
+      //     LogService.log("Cancel");
+      //     resolve([]);
+      //   }
+      // });
 
       alert.addButton({
         text: 'Fatto',
