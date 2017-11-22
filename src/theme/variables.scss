@@ -24,10 +24,11 @@ $colors: (
   secondary: #7ecce5,
   danger: #f53d3d,
   not-so-danger: #f5871b,
+  text-color: #3c3c3b,
+  darkest: #ff00ff,
   light: #797978,
   dark: #3c3c3b,
   muted: #9d9c9c,
-  darkest: #222222,
   lightest: #ffffff,
   green-light: #05beac,
   green-dark: #2b998e,
@@ -41,7 +42,7 @@ $app-colors: (
   app-bg: color($colors, green-light),
   menu-bg: color($colors, green-light),
   header-bg: color($colors, green-light),
-  content-color: color($colors, darkest),
+  content-color: color($colors, text-color),
 
 );
 

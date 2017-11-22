@@ -42,8 +42,8 @@ page-home {
 
   ion-content.content
   {
-    .fixed-content{margin-bottom:60px;}
-    .scroll-content{margin-bottom:60px;}
+    .fixed-content{margin-bottom:80px !important;}
+    .scroll-content{margin-bottom:80px !important;}
 
 
     &.logged-in{
@@ -84,12 +84,54 @@ page-home {
       text-align: left;
 
       ion-grid.checkin_list {
-        ion-row {
-          padding:5px;
+        width:100%;
+        padding: 0;
+
+        ion-row
+        {
+          padding:5px 0 5px 16px;
+          ion-col.left{}
+          ion-col.right{
+            background: color($colors, lightest);
+            padding-right:10px;
+          }
+          &.first{
+            background: color($colors, green-light);
+            color: color($colors, lightest);
+            ion-col.right
+            {
+              background: color($colors, green-light);
+              ion-icon{
+                color: color($colors, text-color);
+              }
+            }
+            span.time
+            {
+              color: color($colors, text-color);
+            }
+            ion-icon{
+              color: color($colors, lightest);
+            }
+          }
         }
-        ion-row.first {
-          background: color($colors, green-light);
+
+
+        span.name{
+          white-space: nowrap;
         }
+
+        span.duration{
+          white-space: nowrap;
+        }
+
+        span.checklist_mod
+        {
+          white-space: nowrap;
+          & > span{
+            font-size: 1.2rem;
+          }
+        }
+
       }
     }
 

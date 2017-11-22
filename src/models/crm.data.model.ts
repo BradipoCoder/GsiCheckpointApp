@@ -88,10 +88,11 @@ export class CrmDataModel
           key_elements = _.split(key, "__");
           key_name_stub = key_elements[0];
           key_multiplier = !_.isUndefined(key_elements[1]) ? key_elements[1] : null;
-          new_name = _.startCase(key_name_stub);
+          new_name = _.upperFirst(_.lowerCase(key_name_stub));
+
 
           val = new_name
-            + (!_.isEmpty(key_multiplier) ? "(x" + key_multiplier + ")" : "")
+            + (!_.isEmpty(key_multiplier) ? " (x" + key_multiplier + ")" : "")
           ;
 
           _.set(this.checklist_items, key, val);

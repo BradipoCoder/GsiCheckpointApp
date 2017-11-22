@@ -59,7 +59,7 @@
         <ion-row *ngIf="isUserCheckedIn() && !isUserHavingABreak()">
           <ion-col class="message" col-10>
             <p>Stai lavorando da</p>
-            <h3>
+            <h3 class="workshift-duration">
               <ion-label color="lightest">
                 {{shiftTotalDuration}}
               </ion-label>
@@ -221,32 +221,38 @@
 <ng-template #checkedInActive>
 
   <div class="main">
-    <ion-grid>
-      <ion-row>
-        <ion-col>
-          <h5>Scansiona il <strong>QRcode dell'ambiente</strong> da pulire</h5>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-
-
     <ion-grid class="checkin_list">
 
-      <ion-row *ngFor="let checkin of remoteDataService.getCurrentSessionCheckins()" ngClass="{{checkin.css_class}}">
-        <ion-col col-9>
+      <ion-row class="title">
+        <ion-col>
+          <h5>Clicca il pulsante per scansionare</h5>
+        </ion-col>
+      </ion-row>
+
+      <ion-row *ngFor="let checkin of remoteDataService.getCurrentSessionCheckins(); let isFirstRow=first;" [ngClass]="{'first' : isFirstRow}">
+        <ion-col class="left" col-9>
           <div (click)="modifyCheckin(checkin)">
-            <ion-icon [name]="checkin.icon" item-left></ion-icon>
-            [{{checkin.code}}] - {{checkin.name}} ({{checkin.getFormattedDuration()}})
-            <span *ngIf="checkin.hasChecklistValues()">
-              <ion-icon name="checkmark-circle" *ngIf="checkin.hasChecklistValues()"></ion-icon>
-              {{checkin.getChecklistValueCount()}}
+
+            <span class="name">
+              <ion-icon [name]="checkin.icon" item-left></ion-icon>
+              {{checkin.name}}
             </span>
+
+            <span class="duration">({{checkin.getFormattedDuration()}})</span>
+
+            <span class="checklist_mod" *ngIf="checkin.hasChecklistValues()">
+              <ion-icon name="create" *ngIf="checkin.hasChecklistValues()"></ion-icon>
+              <span>modifica rifornimento</span>
+            </span>
+
           </div>
         </ion-col>
-        <ion-col col-3 text-right="">
+        <ion-col class="right" col-3 text-right="">
           <div>
-            {{checkin.getDatePropertyValue('checkin_date', 'H:mm')}}
-            <ion-icon [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon>
+            <span class="time">
+              {{checkin.getDatePropertyValue('checkin_date', 'H:mm')}}
+            </span>
+            <ion-icon *ngIf="userService.isTrustedUser()" [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon>
           </div>
         </ion-col>
       </ion-row>
