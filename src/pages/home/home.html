@@ -236,7 +236,6 @@
         <ion-col col-9>
           <div (click)="modifyCheckin(checkin)">
             <ion-icon [name]="checkin.icon" item-left></ion-icon>
-            <!--[{{checkin.sync_state}}] -&#45;&#45; {{checkin.name}} ({{checkin.getFormattedDuration()}}) - <small>[{{checkin._id}}]-[{{checkin.id}}]</small>-->
             [{{checkin.code}}] - {{checkin.name}} ({{checkin.getFormattedDuration()}})
             <span *ngIf="checkin.hasChecklistValues()">
               <ion-icon name="checkmark-circle" *ngIf="checkin.hasChecklistValues()"></ion-icon>

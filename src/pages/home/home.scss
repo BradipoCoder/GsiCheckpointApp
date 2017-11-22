@@ -40,13 +40,20 @@ page-home {
     }
   }
 
-  ion-content.content {
+  ion-content.content
+  {
+    .fixed-content{margin-bottom:60px;}
+    .scroll-content{margin-bottom:60px;}
+
+
     &.logged-in{
       background: color($colors, lightest);
     }
+
     &.logged-out{
 
     }
+
     //background: color($colors, lightest);
     text-align: center;
     ion-grid.grid {
