@@ -25,7 +25,7 @@ $colors: (
   danger: #f53d3d,
   not-so-danger: #f5871b,
   text-color: #3c3c3b,
-  darkest: #ff00ff,
+  darkest: #000000,
   light: #797978,
   dark: #3c3c3b,
   muted: #9d9c9c,
@@ -46,12 +46,9 @@ $app-colors: (
 
 );
 
-
 // Variable overrides
-// --------------------------------------------------
 $font-size-base: 1.8rem;
-$toolbar-background: color($app-colors, header-bg);
-$button-md-border-radius: 0px;
+
 
 // App Theme
 // --------------------------------------------------
@@ -60,6 +57,7 @@ $button-md-border-radius: 0px;
 // so that the above variables are used and Ionic's
 // default are overridden.
 @import "../../node_modules/ionic-angular/themes/ionic.theme.default";
+
 
 // Ionicons
 // --------------------------------------------------

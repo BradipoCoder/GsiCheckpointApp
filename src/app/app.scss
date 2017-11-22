@@ -17,6 +17,11 @@
 @import "../theme/variables";
 
 
+ion-app
+{
+  color: color($app-colors, content-color);
+}
+
 /* Menu */
 ion-menu {
   ion-header {
@@ -116,7 +121,7 @@ code {
   font-family: "Roboto", "Helvetica Neue", sans-serif;
   font-size: 11px;
   background: color($colors, green-light);
-  color: color($colors, darkest);
+  color: color($colors, text-color);
   padding: 5px;
   display: inline-block;
   text-align: left;

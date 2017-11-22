@@ -3,7 +3,7 @@
 page-task-new {
   ion-content.content {
     background: color($colors, lightest);
-    color: map-get($colors, darkest);
+    color: map-get($colors, text-color);
 
     ion-list{
       margin:0;
