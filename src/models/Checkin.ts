@@ -5,6 +5,7 @@ import {CrmDataModel} from './crm.data.model';
 import {Checkpoint} from './Checkpoint'
 import _ from "lodash";
 import * as moment from 'moment';
+import {LogService} from "../services/log.service";
 
 export class Checkin extends CrmDataModel
 {
@@ -23,6 +24,7 @@ export class Checkin extends CrmDataModel
   public checklist_c: string = null;
 
   //additional properties
+  protected check_point: Checkpoint = null;
   public css_class: string = "row";
   public icon: string = null;
   public checklist_items: any = null;
@@ -36,11 +38,17 @@ export class Checkin extends CrmDataModel
   constructor(data: any = {})
   {
     super(data);
+    this.setData(data);
+  }
 
-    //console.log("Undefined keys", _.difference(_.keys(data), _.keys(this)));
+  /**
+   *
+   * @param data
+   */
+  public setData(data: any = {}): void
+  {
     let self = this;
-    _.each(_.keys(this), function (key)
-    {
+    _.each(_.keys(this), (key) => {
       if (_.has(data, key))
       {
         _.set(self, key, _.get(data, key, null));
@@ -52,7 +60,6 @@ export class Checkin extends CrmDataModel
     this.checkPropertyDate('date_entered');
     this.checkPropertyDate('date_modified');
 
-
     //type & icon
     this.setType(this.type);
 
@@ -63,7 +70,7 @@ export class Checkin extends CrmDataModel
    *
    * @param {String} type
    */
-  public setType(type:string):void
+  public setType(type: string): void
   {
     this.type = _.includes(
       [Checkpoint.TYPE_IN, Checkpoint.TYPE_OUT, Checkpoint.TYPE_CHK, Checkpoint.TYPE_PAUSE]
@@ -82,17 +89,42 @@ export class Checkin extends CrmDataModel
    *
    * @param {any} elements
    */
-  public setChecklistItemsFromArray(elements:any): void
+  public setChecklistItemsFromArray(elements: any): void
   {
     super.setChecklistItemsFromArray(elements);
     this.checklist_c = this.getChecklistStringFromArray(elements);
   }
 
+  /**
+   *
+   * @param {Checkpoint} checkpoint
+   */
+  public setCheckpoint(checkpoint:Checkpoint)
+  {
+    this.check_point = checkpoint;
+  }
+
+  public getCheckpoint():Checkpoint
+  {
+    return this.check_point;
+  }
+
+  public isCheckpointChecklistAvailable():boolean
+  {
+    let answer = false;
+    if(this.check_point && _.isFunction(this.check_point.isChecklistAvailable))
+    {
+      answer = this.check_point.isChecklistAvailable();
+    }
+    return answer;
+  }
+
+
 
   /**
    *
    */
-  public setDurationFromNow():void
+  public setDurationFromNow(): void
   {
     let checkinDuration = moment().diff(this.checkin_date, "seconds");
     this.duration = checkinDuration.toString();
@@ -130,11 +162,11 @@ export class Checkin extends CrmDataModel
     }
     if (minutes)
     {
-      answer += (!_.isEmpty(answer)?" ":"") + minutes + " min";
+      answer += (!_.isEmpty(answer) ? " " : "") + minutes + " min";
     }
     if (seconds)
     {
-      answer += (!_.isEmpty(answer)?" ":"") + seconds + "s";
+      answer += (!_.isEmpty(answer) ? " " : "") + seconds + "s";
     }
 
     return answer;
@@ -147,17 +179,17 @@ export class Checkin extends CrmDataModel
   public getRestData(): any
   {
     let self = this;
-    let answer:any = {};
+    let answer: any = {};
     let keys = this.getDefinedProperties(['checkin_user']);
-    _.each(keys, function (key)
-    {
-      if(!_.isNull(_.get(self, key, null))) {
+    _.each(keys, function (key) {
+      if (!_.isNull(_.get(self, key, null)))
+      {
         _.set(answer, key, _.get(self, key, null));
       }
     });
 
     //@todo: DATE TIME - UTC OFFSET FIX
-    if(!_.isUndefined(answer.checkin_date))
+    if (!_.isUndefined(answer.checkin_date))
     {
       answer.checkin_date = moment(answer.checkin_date).subtract(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
     }
@@ -169,9 +201,9 @@ export class Checkin extends CrmDataModel
    * @param {[]} additionalExcludeFields
    * @returns {string[]}
    */
-  public getDefinedProperties(additionalExcludeFields:any = []): any
+  public getDefinedProperties(additionalExcludeFields: any = []): any
   {
-    let nonModuleFields = ['css_class', 'icon', 'checklist_items'];
+    let nonModuleFields = ['check_point', 'css_class', 'icon', 'checklist_items'];
     let properties = super.getDefinedProperties();
     return _.difference(_.difference(properties, nonModuleFields), additionalExcludeFields);
   }

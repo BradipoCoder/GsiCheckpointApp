@@ -132,9 +132,8 @@ export class RemoteDataService
             let checkin: Checkin;
             _.each(res.docs, function (doc)
             {
-              checkin = new Checkin(doc);
-              //checkin.check_point = "abc";
-              self.CURRENT_SESSION_CHECKINS.push(new Checkin(doc));
+              checkin = self.checkinProvider.getNewModelInstance(doc);
+              self.CURRENT_SESSION_CHECKINS.push(checkin);
             });
           }
 
@@ -179,7 +178,7 @@ export class RemoteDataService
           {
             let mostRecentCheckin = _.last(_.sortBy(res.docs, ['checkin_date']));
             //LogService.log("MOST RECENT CHECKIN: ", mostRecentCheckin);
-            lastInOutCheckin = new Checkin(mostRecentCheckin);
+            lastInOutCheckin = self.checkinProvider.getNewModelInstance(mostRecentCheckin);
           }
           resolve(lastInOutCheckin);
         }).catch((e) =>
@@ -211,7 +210,7 @@ export class RemoteDataService
 
     return new Promise(function (resolve, reject)
     {
-      checkin = new Checkin({
+      checkin = self.checkinProvider.getNewModelInstance({
         name: checkpoint.name,
         duration: 0,
         description: '',
@@ -266,7 +265,7 @@ export class RemoteDataService
     {
       self.checkpointProvider.getCheckpoint({selector: {code: code}}).then((relativeCheckpoint) =>
       {
-        let checkin = new Checkin({
+        let checkin = self.checkinProvider.getNewModelInstance({
           name: relativeCheckpoint.name,
           duration: 0,
           description: '',
@@ -333,7 +332,7 @@ export class RemoteDataService
           return;
         }
 
-        let previousCheckin = new Checkin(res.docs[0]);
+        let previousCheckin = self.checkinProvider.getNewModelInstance(res.docs[0]);
 
         if (previousCheckin.type == Checkpoint.TYPE_OUT)
         {

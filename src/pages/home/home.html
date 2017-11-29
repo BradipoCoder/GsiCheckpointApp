@@ -250,8 +250,8 @@
 
             <span class="duration">({{checkin.getFormattedDuration()}})</span>
 
-            <span class="checklist_mod" *ngIf="checkin.hasChecklistValues()">
-              <ion-icon name="create" *ngIf="checkin.hasChecklistValues()"></ion-icon>
+            <span class="checklist_mod" *ngIf="checkin.isCheckpointChecklistAvailable()">
+              <ion-icon name="create"></ion-icon>
               <span>modifica rifornimento</span>
             </span>
 

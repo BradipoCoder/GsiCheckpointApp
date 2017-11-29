@@ -11,6 +11,8 @@ import {Checkin} from '../models/Checkin';
 import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
 import {LogService} from "../services/log.service";
+import {CheckpointProvider} from "./checkpoint.provider";
+import {Checkpoint} from "../models/Checkpoint";
 
 @Injectable()
 export class CheckinProvider extends LocalDocumentProvider
@@ -23,6 +25,7 @@ export class CheckinProvider extends LocalDocumentProvider
     protected configurationService: ConfigurationService
     , protected userService: UserService
     , protected offlineCapableRestService: OfflineCapableRestService
+    ,protected checkpointProvider:CheckpointProvider
   )
   {
     super(configurationService, offlineCapableRestService);
@@ -47,6 +50,36 @@ export class CheckinProvider extends LocalDocumentProvider
 
   /**
    *
+   * @param {{}} [data]
+   * @returns {Checkin}
+   */
+  public getNewModelInstance(data:any = {}): Checkin
+  {
+    let model:Checkin = super.getNewModelInstance(data);
+    //do something with all models
+    this.setRelatedCheckpointOnCheckin(model);
+    LogService.log("New Checkpoint Instance: " + model.id);
+
+    return model;
+  }
+
+  /**
+   *
+   * @param {Checkin} checkin
+   */
+  public setRelatedCheckpointOnCheckin(checkin:Checkin):void
+  {
+    if(!_.isEmpty(checkin.mkt_checkpoint_id_c))
+    {
+      this.checkpointProvider.getCheckpoint({selector: {id: checkin.mkt_checkpoint_id_c}}).then((checkpoint:Checkpoint) => {
+        checkin.setCheckpoint(checkpoint);
+        //LogService.log("setRelatedCheckpointOnCheckin DONE:" + JSON.stringify(checkpoint));
+      });
+    }
+  }
+
+  /**
+   *
    * @param {Checkin} checkin
    * @param {Boolean} [forceUpdate]
    * @param {String} [findById] - when document contains the new id - you need to use this param to find the document
@@ -59,7 +92,7 @@ export class CheckinProvider extends LocalDocumentProvider
 
 
   /**
-   * Returns checkpoints found by options
+   * Returns Checkins found by options
    *
    * @returns {Promise<any>}
    */
@@ -73,7 +106,7 @@ export class CheckinProvider extends LocalDocumentProvider
         {
           let docs = _.concat([], res.docs);
           _.each(docs, function (doc) {
-            answer.push(new Checkin(doc));
+            answer.push(self.getNewModelInstance(doc));
           });
         }
         resolve(answer);
@@ -95,7 +128,7 @@ export class CheckinProvider extends LocalDocumentProvider
     {
       self.getDocumentById(id).then((doc) =>
       {
-        let checkin = new Checkin(doc);
+        let checkin = self.getNewModelInstance(doc);
         resolve(checkin);
       }).catch((e) =>
       {
@@ -131,7 +164,7 @@ export class CheckinProvider extends LocalDocumentProvider
         if (_.size(res.docs) == 1)
         {
           let doc = res.docs[0];
-          let checkin = new Checkin(doc);
+          let checkin = self.getNewModelInstance(doc);
           resolve(checkin);
         } else {
           reject(new Error("Could not identify last checkin operation[type="+type+"]!"));
@@ -174,7 +207,7 @@ export class CheckinProvider extends LocalDocumentProvider
           {
             return new Promise(function (resolve)
             {
-              let checkin = new Checkin(doc);
+              let checkin = self.getNewModelInstance(doc);
               let isNewOnRemote = _.startsWith(checkin.id, CrmDataModel.TEMPORARY_ID_PREFIX);
               let parameters = checkin.getRestData();
               if (isNewOnRemote)

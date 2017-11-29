@@ -1,12 +1,18 @@
 /** CORE */
 import {Injectable} from '@angular/core';
+
 /** SERVICES */
 import {OfflineCapableRestService} from '../services/offline.capable.rest.service';
 import {ConfigurationService} from '../services/configuration.service';
 
 import {LogService} from "../services/log.service";
+
 /** MODELS */
 import {CrmDataModel} from '../models/crm.data.model';
+import {Task} from "../models/Task";
+import {Checkpoint} from "../models/Checkpoint";
+import {Checkin} from "../models/Checkin";
+
 /** OTHER */
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
@@ -53,7 +59,7 @@ export class LocalDocumentProvider
   /**
    *
    * @param {{}} data
-   * @returns {any}
+   * @returns {Task|Checkpoint|Checkin|any}
    */
   public getNewModelInstance(data:any): any
   {
@@ -503,12 +509,13 @@ export class LocalDocumentProvider
 
     return new Promise(function (resolve, reject) {
       self.getDocumentById(key).then((registeredDocument: any) => {
-        //LogService.log("Docs found:", key, registeredDocument);
+        //LogService.log("Doc found by key["+key+"]: " +  JSON.stringify(registeredDocument));
         doUpdate = document.isNewer(moment(registeredDocument.date_modified).toDate());
         if (doUpdate || forceUpdate)
         {
           document._id = registeredDocument._id;
           document._rev = registeredDocument._rev;
+
           self.db.put(document).then(() => {
             //LogService.log("Doc updated:", key, document);
             resolve(key);

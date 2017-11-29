@@ -52,6 +52,16 @@ export class Checkpoint extends CrmDataModel
     this.setChecklistItemsFromString(this.checklist_c);
   }
 
+
+  /**
+   * Returns true if we have options enabled in crm for this checkpoint
+   * @returns {boolean}
+   */
+  public isChecklistAvailable():boolean
+  {
+    return !_.isEmpty(this.checklist_c);
+  }
+
   /**
    * @param {[]} additionalExcludeFields
    * @returns {string[]}

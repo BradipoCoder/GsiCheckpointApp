@@ -52,11 +52,10 @@ export class Task extends CrmDataModel
    *
    * @param data
    */
-  public setData(data: any = {}):void
+  public setData(data: any = {}): void
   {
     let self = this;
-    _.each(_.keys(this), function (key)
-    {
+    _.each(_.keys(this), (key) => {
       if (_.has(data, key))
       {
         _.set(self, key, _.get(data, key, null));
@@ -66,12 +65,12 @@ export class Task extends CrmDataModel
     this.setPriority(this.priority);
     this.setStatus(this.status);
 
-    if(_.isEmpty(this.date_start))
+    if (_.isEmpty(this.date_start))
     {
       this.date_start = moment().format(CrmDataModel.CRM_DATE_FORMAT);
     }
 
-    if(_.isEmpty(this.date_due))
+    if (_.isEmpty(this.date_due))
     {
       this.date_due = this.date_start;
     }
@@ -84,7 +83,7 @@ export class Task extends CrmDataModel
    *
    * @param {String} status
    */
-  public setStatus(status:string):void
+  public setStatus(status: string): void
   {
     this.status = _.includes(
       [Task.STATUS_NOT_STARTED, Task.STATUS_IN_PROGRESS, Task.STATUS_COMPLETED, Task.STATUS_PENDING_INPUT, Task.STATUS_DEFERRED]
@@ -95,14 +94,14 @@ export class Task extends CrmDataModel
    *
    * @param {String} priority
    */
-  public setPriority(priority:string):void
+  public setPriority(priority: string): void
   {
     this.priority = _.includes(
       [Task.PRIORITY_HIGH, Task.PRIORITY_MEDIUM, Task.PRIORITY_LOW]
       , priority) ? priority : Task.PRIORITY_MEDIUM;
 
     //icon & color
-    switch(this.priority)
+    switch (this.priority)
     {
       case Task.PRIORITY_HIGH:
         this.icon = 'alert';
@@ -154,23 +153,23 @@ export class Task extends CrmDataModel
   public getRestData(): any
   {
     let self = this;
-    let answer:any = {};
+    let answer: any = {};
     let keys = this.getDefinedProperties(['']);
-    _.each(keys, function (key)
-    {
-      if(!_.isNull(_.get(self, key, null))) {
+    _.each(keys, function (key) {
+      if (!_.isNull(_.get(self, key, null)))
+      {
         _.set(answer, key, _.get(self, key, null));
       }
     });
 
     //@todo: DATE TIME - UTC OFFSET FIX
-    if(!_.isUndefined(answer.date_start))
+    if (!_.isUndefined(answer.date_start))
     {
       answer.date_start = moment(answer.date_start).subtract(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
     }
 
     //@todo: DATE TIME - UTC OFFSET FIX
-    if(!_.isUndefined(answer.date_due))
+    if (!_.isUndefined(answer.date_due))
     {
       answer.date_due = moment(answer.date_due).subtract(CrmDataModel.UTC_OFFSET_HOURS, "hours").format(CrmDataModel.CRM_DATE_FORMAT);
     }
@@ -182,7 +181,7 @@ export class Task extends CrmDataModel
    * @param {[]} additionalExcludeFields
    * @returns {string[]}
    */
-  public getDefinedProperties(additionalExcludeFields:any = []): any
+  public getDefinedProperties(additionalExcludeFields: any = []): any
   {
     let nonModuleFields = ['icon', 'icon_color', 'check_point'];
     let properties = super.getDefinedProperties();

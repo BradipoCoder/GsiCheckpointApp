@@ -54,10 +54,10 @@ export class TaskProvider extends LocalDocumentProvider
   public getNewModelInstance(data:any = {}): Task
   {
     let model:Task = super.getNewModelInstance(data);
+    //do something with all models
     this.setRelatedCheckpointOnTask(model);
-    //do something with all tasks
-    LogService.log("New Task Instance..." + model.id);
-    //
+    LogService.log("New Checkpoint Instance: " + model.id);
+
     return model;
   }
 
@@ -71,7 +71,7 @@ export class TaskProvider extends LocalDocumentProvider
     {
       this.checkpointProvider.getCheckpoint({selector: {id: task.parent_id}}).then((checkpoint:Checkpoint) => {
         task.check_point = checkpoint;
-        LogService.log("setRelatedCheckpointOnTask DONE:" + checkpoint.id);
+        //LogService.log("setRelatedCheckpointOnTask DONE:" + checkpoint.id);
       });
     }
   }

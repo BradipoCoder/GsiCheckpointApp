@@ -44,7 +44,8 @@ export class HomePage implements OnInit, OnDestroy
 
   private auto_update_timeout: number;
 
-  private is_refreshing = true; /* use this to put home screen in "UPDATING" state */
+  private is_refreshing = true;
+  /* use this to put home screen in "UPDATING" state */
   private lastRefresh;
 
   private checkins: Checkin[];
@@ -214,22 +215,28 @@ export class HomePage implements OnInit, OnDestroy
    */
   protected modifyCheckin(checkin: Checkin)
   {
-    LogService.log('Modify Checkin:' + checkin.code + " - " + checkin.mkt_checkpoint_id_c);
     this.checkpointProvider.getCheckpoint({selector: {id: checkin.mkt_checkpoint_id_c}})
       .then((relativeCheckpoint: Checkpoint) => {
-        LogService.log('Checkpoint: ' + relativeCheckpoint.id);
-        this.presentCheckpointChecklistSelector(checkin, relativeCheckpoint).then((selectedValues) => {
-          LogService.log('Re-saving checkin with checkbox selected data:' + JSON.stringify(selectedValues));
-          checkin.setChecklistItemsFromArray(selectedValues);
-          checkin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
-          this.checkinProvider.store(checkin, true).then(() => {
-            LogService.log('Modified, stored and queued for save');
+        if (relativeCheckpoint.isChecklistAvailable())
+        {
+          LogService.log('Modify Checkin:' + checkin.code + " - " + checkin.mkt_checkpoint_id_c);
+          //LogService.log('Checkpoint: ' + relativeCheckpoint.id);
+
+          this.presentCheckpointChecklistSelector(checkin, relativeCheckpoint).then((selectedValues) => {
+            checkin.setChecklistItemsFromArray(selectedValues);
+            checkin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
+            this.checkinProvider.store(checkin, true).then(() => {
+              LogService.log('Modified, stored and queued for save');
+            }, (e) => {
+              LogService.log(e, LogService.LEVEL_ERROR);
+            });
           }, (e) => {
             LogService.log(e, LogService.LEVEL_ERROR);
           });
-        }, (e) => {
-          LogService.log(e, LogService.LEVEL_ERROR);
-        });
+        } else
+        {
+          LogService.log("The checkpoint relative to this checkin does not have checklist options: " + relativeCheckpoint.code, LogService.LEVEL_WARN);
+        }
       }, (e) => {
         LogService.log(e, LogService.LEVEL_ERROR);
       });
@@ -504,54 +511,40 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
-   * @todo: we should implement an id based refresh where we substitute documents singularly
    *
-   * @returns {Promise<any>}
+   * @param {string} id
    */
-  private refreshHomeData(): Promise<any>
-  {
-    let self = this;
-
-    return new Promise(function (resolve, reject) {
-      resolve();
-      /*
-      if (self.is_refreshing)
-      {
-        return reject(new Error("Refresh is already on the way...(skipping)"));
-      }
-
-      let fiveSecondsAgo = moment().subtract(5, 'seconds');
-      if (self.lastRefresh && self.lastRefresh.isAfter(fiveSecondsAgo))
-      {
-        return reject(new Error("Skipping refresh - too many!"));
-      }
-
-      self.is_refreshing = true;
-
-      self.remoteDataService.updateCurrentSessionCheckins().then(() => {
-        //LogService.warn("HOMEDATA refresh - done");
-        self.lastRefresh = moment();
-        self.is_refreshing = false;
-        resolve();
-      });
-      */
-    });
-  }
-
   private refreshCheckin(id): void
   {
-    LogService.log("Looking for checkin["+id+"]! ");
-    this.checkinProvider.getDocumentById(id).then((doc) => {
+    LogService.log("Looking for checkin[" + id + "]! ");
+    this.checkinProvider.getDocumentById(id).then((storedDocument) => {
       let checkin: Checkin = _.find(this.checkins, {'id': id});
+      if (!checkin)
+      {
+        //id passed by parameter can also be temporary id (ID___n) but in this.checkins
+        //we store checkins (after saving to crm) by their real CRM id - so if we must search by that id
+        id = storedDocument.id;
+        LogService.log("Found checkin by CRM doc id[" + id + "]! ");
+        checkin = _.find(this.checkins, {'id': id});
+      }
+
       if (checkin)
       {
-        LogService.log("Found checkin["+id+"]! ");
+        //
+        delete storedDocument.check_point;
+        checkin.setData(storedDocument);
 
+        this.checkins = _.reverse(_.sortBy(this.checkins, ["checkin_date"]));
+        LogService.log("Checkin[" + id + "] has been updated.");
+      } else
+      {
+        LogService.log("Checkin not found - adding...");
       }
     }, (e) => {
       LogService.log("Error refreshing Task: " + e, LogService.LEVEL_ERROR);
     });
   }
+
 
 
   /**
@@ -602,7 +595,8 @@ export class HomePage implements OnInit, OnDestroy
         });
       }
       */
-      if(data.db == 'checkin' && !_.isUndefined(data.id) && !_.isEmpty(data.id)) {
+      if (data.db == 'checkin' && !_.isUndefined(data.id) && !_.isEmpty(data.id))
+      {
         this.refreshCheckin(data.id);
       }
     });
