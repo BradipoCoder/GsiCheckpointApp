@@ -19,7 +19,7 @@ export class ConfigurationUnlockerPage
    *
    * @type {string}
    */
-  unlock_code:string = "";
+  unlock_code:string = "MKT";
 
   constructor(public viewCtrl: ViewController)
   {}

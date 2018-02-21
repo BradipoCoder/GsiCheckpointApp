@@ -22,10 +22,9 @@ export class BackgroundService
   private execution_count = 0;
   private execution_count_max = 0;
 
-  private startup_delay_ms = (30 * 1000);
+  private startup_delay_ms = (5 * 1000);//@todo:put me back to 15
 
-
-  private execution_interval_slow_ms = (30 * 1000);
+  private execution_interval_slow_ms = (5 * 1000);//@todo: put me back to 30
   private execution_interval_fast_ms = (0.5 * 1000);
   private execution_interval_ms = this.execution_interval_slow_ms;
 
@@ -61,14 +60,12 @@ export class BackgroundService
     let reprogram = function (self) {
       if(self.stop_requested)
       {
-        self.is_running = false;
         self.execution_count = 0;
         return;
       }
 
       if (self.execution_count_max && self.execution_count >= self.execution_count_max)
       {
-        self.is_running = false;
         self.execution_count = 0;
         LogService.log("BackgroundService max execution limit " + self.execution_count_max + " reached. Interval execution stopped.", LogService.LEVEL_WARN);
         return;
@@ -93,8 +90,10 @@ export class BackgroundService
     LogService.log("BSE[" + self.execution_count + "/" + self.execution_count_max + "].");
     self.executionRun(self)
       .then(() => {
+        self.is_running = false;
         //LogService.log("executionRun: DONE!");
       }, () => {
+        self.is_running = false;
         //LogService.warn("executionRun: ERROR! - " + e);
       }).then(() => {
       LogService.log("BSE RUN[" + self.execution_count + "]: DONE.");
@@ -144,6 +143,7 @@ export class BackgroundService
 
 
     return new Promise(function (resolve, reject) {
+      clearTimeout(self.auto_update_timeout);
       waitInterval = setInterval(() => {
         waitCount++;
         LogService.log("waiting to stop[" + waitCount + "/" + waitMaxCount + "]...");
@@ -253,7 +253,7 @@ export class BackgroundService
   {
     setTimeout(this.intervalExecution, this.startup_delay_ms, this);
 
-    return new Promise(function (resolve) {
+    return new Promise(resolve => {
       resolve();
     });
   }

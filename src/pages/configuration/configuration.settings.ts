@@ -75,6 +75,57 @@ export class ConfigurationSettingsPage implements OnInit
         });
       }
 
+      let msg = "Stopping background service...";
+      LogService.log(msg);
+      self.backgroundService.stop().then(() => {
+        msg = "Background service stopped.";
+        LogService.log(msg);
+        resolve();
+
+
+      }, e => {
+        msg = "Stopping background service error: " + e;
+        LogService.log(msg, LogService.LEVEL_ERROR);
+        resolve();
+      });
+
+
+
+    });
+  }
+
+/**
+   * !!! NETWORK CONNECTION REQUIRED !!!
+   * destroy and recreate databases and load remote data
+   *
+   * @returns {Promise<any>}
+   */
+  cleanCacheOrig(): Promise<any>
+  {
+    let self = this;
+
+    return new Promise(function (resolve, reject)
+    {
+      if (!self.offlineCapableRestService.isNetworkConnected())
+      {
+        let toast = self.toastCtrl.create({
+          message: "Nessuna connessione! Connettiti alla rete e riprova.",
+          duration: 5000,
+          position: 'top'
+        });
+        toast.present().then(() => {
+          resolve();
+        });
+        return;
+      }
+
+      if (self.platform.is("mobile"))
+      {
+        self.insomnia.keepAwake().then(() => {
+          LogService.log("KEEP AWAKE ON!");
+        });
+      }
+
       let loaderContent = "<strong>Eliminazione cache</strong><br />";
       let msg;
 

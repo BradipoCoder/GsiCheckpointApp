@@ -61,6 +61,8 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     };
   }
 
+
+  /* Force quick sync - not useful and makes confusion - disabled on intertface*/
   public quickSync():void
   {
     let self = this;

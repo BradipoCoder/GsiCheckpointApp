@@ -15,7 +15,7 @@ import {LogService} from "../services/log.service";
 @Injectable()
 export class CheckpointProvider extends LocalDocumentProvider
 {
-  protected underlying_model:any = Checkpoint;
+  protected underlying_model: any = Checkpoint;
 
   protected database_name = "checkpoint";
 
@@ -85,19 +85,21 @@ export class CheckpointProvider extends LocalDocumentProvider
   public getCheckpoint(options: any): Promise<Checkpoint>
   {
     let self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       self.findDocuments(options).then((res) => {
         if (_.size(res.docs) < 1)
         {
-          return reject(new Error("Codice locale sconosciuto!"));
+          return reject(new Error("Codice locale sconosciuto!" + JSON.stringify(options)));
         }
+
         if (_.size(res.docs) > 1)
         {
           return reject(new Error("Locali multipli per il codice!"));
         }
+
         let checkpoint = new Checkpoint(res.docs[0]);
         resolve(checkpoint);
-      }).catch((e) => {
+      }, (e) => {
         reject(e);
       });
     });
@@ -110,7 +112,7 @@ export class CheckpointProvider extends LocalDocumentProvider
    * @param {string} def
    * @returns {Promise<any>}
    */
-  public getCheckpointData(id:string, key:string, def = null): Promise<Checkpoint>
+  public getCheckpointData(id: string, key: string, def = null): Promise<Checkpoint>
   {
     let self = this;
     LogService.log("getCheckpointData - Looking for CP: " + id);
@@ -177,6 +179,7 @@ export class CheckpointProvider extends LocalDocumentProvider
    * @param {Checkin} checkin
    * @returns {Promise<any>}
    */
+
   /*
   public setTypeOnCheckin(checkin: Checkin): Promise<any>
   {
@@ -195,7 +198,7 @@ export class CheckpointProvider extends LocalDocumentProvider
   /**
    * @returns {any}
    */
-  protected getDbIndexDefinition():any
+  protected getDbIndexDefinition(): any
   {
     return _.concat(super.getDbIndexDefinition(), [
       {

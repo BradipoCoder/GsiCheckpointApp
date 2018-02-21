@@ -17,16 +17,14 @@ import {Checkpoint} from "../models/Checkpoint";
 @Injectable()
 export class CheckinProvider extends LocalDocumentProvider
 {
-  protected underlying_model:any = Checkin;
+  protected underlying_model: any = Checkin;
 
   database_name = "checkin";
 
-  constructor(
-    protected configurationService: ConfigurationService
+  constructor(protected configurationService: ConfigurationService
     , protected userService: UserService
     , protected offlineCapableRestService: OfflineCapableRestService
-    ,protected checkpointProvider:CheckpointProvider
-  )
+    , protected checkpointProvider: CheckpointProvider)
   {
     super(configurationService, offlineCapableRestService);
 
@@ -53,12 +51,12 @@ export class CheckinProvider extends LocalDocumentProvider
    * @param {{}} [data]
    * @returns {Checkin}
    */
-  public getNewModelInstance(data:any = {}): Checkin
+  public getNewModelInstance(data: any = {}): Checkin
   {
-    let model:Checkin = super.getNewModelInstance(data);
+    let model: Checkin = super.getNewModelInstance(data);
     //do something with all models
     this.setRelatedCheckpointOnCheckin(model);
-    LogService.log("New Checkpoint Instance: " + model.id);
+    LogService.log("New Checkin Instance: " + model.id);
 
     return model;
   }
@@ -67,13 +65,19 @@ export class CheckinProvider extends LocalDocumentProvider
    *
    * @param {Checkin} checkin
    */
-  public setRelatedCheckpointOnCheckin(checkin:Checkin):void
+  public setRelatedCheckpointOnCheckin(checkin: Checkin): void
   {
-    if(!_.isEmpty(checkin.mkt_checkpoint_id_c))
+    if (!_.isEmpty(checkin.mkt_checkpoint_id_c))
     {
-      this.checkpointProvider.getCheckpoint({selector: {id: checkin.mkt_checkpoint_id_c}}).then((checkpoint:Checkpoint) => {
+      let checkpointId = checkin.mkt_checkpoint_id_c;
+      let options = {
+        selector: {id: checkpointId}
+      };
+      this.checkpointProvider.getCheckpoint(options).then((checkpoint: Checkpoint) => {
         checkin.setCheckpoint(checkpoint);
         //LogService.log("setRelatedCheckpointOnCheckin DONE:" + JSON.stringify(checkpoint));
+      }, (e) => {
+        LogService.log("Unable to set related Checkpoint("+checkpointId+")", LogService.LEVEL_WARN);
       });
     }
   }
@@ -124,14 +128,11 @@ export class CheckinProvider extends LocalDocumentProvider
   public getCheckinById(id: string): Promise<Checkin>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.getDocumentById(id).then((doc) =>
-      {
+    return new Promise(function (resolve, reject) {
+      self.getDocumentById(id).then((doc) => {
         let checkin = self.getNewModelInstance(doc);
         resolve(checkin);
-      }).catch((e) =>
-      {
+      }).catch((e) => {
         reject(e);
       });
     });
@@ -144,8 +145,7 @@ export class CheckinProvider extends LocalDocumentProvider
   public getlastCheckinOperationByType(type: string = null): Promise<Checkin>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       let options = {
         selector: {
           checkin_date: {$gt: null},
@@ -154,23 +154,22 @@ export class CheckinProvider extends LocalDocumentProvider
         limit: 1
       };
 
-      if(!_.isEmpty(type))
+      if (!_.isEmpty(type))
       {
         options.selector["type"] = type;
       }
 
-      self.findDocuments(options).then((res) =>
-      {
+      self.findDocuments(options).then((res) => {
         if (_.size(res.docs) == 1)
         {
           let doc = res.docs[0];
           let checkin = self.getNewModelInstance(doc);
           resolve(checkin);
-        } else {
-          reject(new Error("Could not identify last checkin operation[type="+type+"]!"));
+        } else
+        {
+          reject(new Error("Could not identify last checkin operation[type=" + type + "]!"));
         }
-      }, (e) =>
-      {
+      }, (e) => {
         reject(e);
       });
     });
@@ -185,8 +184,7 @@ export class CheckinProvider extends LocalDocumentProvider
     let self = this;
     let dbTableName = self.underlying_model.DB_TABLE_NAME;
 
-    return new Promise(function (resolve)
-    {
+    return new Promise(function (resolve) {
       //LogService.log("syncWithRemote_PUSH - START ---------------");
 
       self.findDocuments({
@@ -197,16 +195,13 @@ export class CheckinProvider extends LocalDocumentProvider
           ]
         },
         /*fields: ['checkin_date', 'mkt_checkpoint_id_c'],*/
-      }).then((res) =>
-      {
+      }).then((res) => {
         if (_.size(res.docs))
         {
           let docs = _.concat([""], res.docs);//for Promise.reduce
 
-          Promise.reduce(docs, function (accu, doc)
-          {
-            return new Promise(function (resolve)
-            {
+          Promise.reduce(docs, function (accu, doc) {
+            return new Promise(function (resolve) {
               let checkin = self.getNewModelInstance(doc);
               let isNewOnRemote = _.startsWith(checkin.id, CrmDataModel.TEMPORARY_ID_PREFIX);
               let parameters = checkin.getRestData();
@@ -215,8 +210,7 @@ export class CheckinProvider extends LocalDocumentProvider
                 _.unset(parameters, 'id');
               }
               LogService.log("PUSHING TO REMOTE WITH PARAMS: " + JSON.stringify(parameters));
-              self.offlineCapableRestService.setEntry(dbTableName, (isNewOnRemote ? false : checkin.id), parameters).then((res) =>
-              {
+              self.offlineCapableRestService.setEntry(dbTableName, (isNewOnRemote ? false : checkin.id), parameters).then((res) => {
                 if (!res || _.isUndefined(res.id) || !_.isArray(res.entry_list) || _.size(res.entry_list) == 0)
                 {
                   throw new Error("failed to save on remote!");
@@ -226,21 +220,17 @@ export class CheckinProvider extends LocalDocumentProvider
                 checkin.id = res.id;
                 checkin.sync_state = CrmDataModel.SYNC_STATE__IN_SYNC;
                 return self.storeDocument(checkin, true, currentLocalStorageId);
-              }).then(() =>
-              {
+              }).then(() => {
                 resolve();
-              }).catch((e) =>
-              {
+              }).catch((e) => {
                 LogService.log("Remote save error! " + e, LogService.LEVEL_WARN);
                 //reject(e);
                 resolve();
               });
             });
-          }).then(() =>
-          {
+          }).then(() => {
             resolve();
-          }).catch((e) =>
-          {
+          }).catch((e) => {
             LogService.log("syncWithRemote_PUSH[reduce] error! " + e, LogService.LEVEL_WARN);
             resolve();
           });
@@ -249,8 +239,7 @@ export class CheckinProvider extends LocalDocumentProvider
           LogService.log("CHECKIN PROVIDER - NOTHING TO SYNC UP");
           resolve();
         }
-      }).catch((e) =>
-      {
+      }).catch((e) => {
         LogService.log("syncWithRemote_PUSH[find doc] error! " + e, LogService.LEVEL_WARN);
         resolve();
       });
@@ -260,7 +249,7 @@ export class CheckinProvider extends LocalDocumentProvider
   /**
    * @returns {any}
    */
-  protected getDbIndexDefinition():any
+  protected getDbIndexDefinition(): any
   {
     return _.concat(super.getDbIndexDefinition(), [
       {
@@ -292,13 +281,10 @@ export class CheckinProvider extends LocalDocumentProvider
   public initialize(): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve, reject)
-    {
-      self.setupDatabase().then(() =>
-      {
+    return new Promise(function (resolve, reject) {
+      self.setupDatabase().then(() => {
         resolve();
-      }).catch((e) =>
-      {
+      }).catch((e) => {
         reject(e);
       });
     });
