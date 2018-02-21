@@ -217,6 +217,32 @@ export class BackgroundService
     this.execution_interval_ms = this.execution_interval_slow_ms;
   }
 
+  //---------------------------------------------------------------------------------------------FULL SYNC ALL PROVIDERS
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public fullySyncAllProviders(): Promise<any>
+  {
+    let self = this;
+
+    this.dataProviders = [
+      this.checkpointProvider,
+    ];
+
+    return Promise.reduce(this.dataProviders, (accu, provider, index) => {
+      LogService.log("[FULL-SYNC]PROVIDER#" + index + " - " + provider.constructor.name);
+      return new Promise((resolve) => {
+        provider.getSyncableDataCountDown().then(count => {
+          LogService.log("[FULL-SYNC]PROVIDER#" + index + " - count: " + count);
+          if(count === 0) {
+            resolve();
+          }
+        });
+      });
+    }, null);
+  }
+
   //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
   /**
    *
@@ -251,7 +277,7 @@ export class BackgroundService
    */
   public initialize(): Promise<any>
   {
-    setTimeout(this.intervalExecution, this.startup_delay_ms, this);
+    //setTimeout(this.intervalExecution, this.startup_delay_ms, this);
 
     return new Promise(resolve => {
       resolve();

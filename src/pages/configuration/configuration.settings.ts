@@ -16,7 +16,6 @@ import {ConfigurationUnlockerPage} from './configuration.unlocker';
 import _ from "lodash";
 
 
-
 @Component({
   selector: 'page-configuration-settings',
   templateUrl: 'configuration.settings.html'
@@ -28,7 +27,7 @@ export class ConfigurationSettingsPage implements OnInit
   private viewIsReady: boolean;
 
   constructor(private navCtrl: NavController
-    , private platform:Platform
+    , private platform: Platform
     , private toastCtrl: ToastController
     , private modalCtrl: ModalController
     , private loadingCtrl: LoadingController
@@ -53,8 +52,7 @@ export class ConfigurationSettingsPage implements OnInit
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise((resolve) => {
       if (!self.offlineCapableRestService.isNetworkConnected())
       {
         let toast = self.toastCtrl.create({
@@ -78,23 +76,56 @@ export class ConfigurationSettingsPage implements OnInit
       let msg = "Stopping background service...";
       LogService.log(msg);
       self.backgroundService.stop().then(() => {
-        msg = "Background service stopped.";
+        msg = "* Background service stopped.";
         LogService.log(msg);
+        //
+        msg = "Resetting provider sync offsets...";
+        LogService.log(msg);
+        return self.backgroundService.resetDataProvidersSyncOffset();//--------------------->
+      }).then(() => {
+        msg = "* Provider sync offsets were reset.";
+        LogService.log(msg);
+        //
+        msg = "Logging out user...";
+        LogService.log(msg);
+        return self.userService.logout();//--------------------->
+      }).then(() => {
+        msg = "Initializing user service...";
+        LogService.log(msg);
+        return self.userService.initialize();//--------------------->
+      }).then(() => {
+        msg = "Logging in user...";
+        LogService.log(msg);
+        return self.userService.login(self.cfg.crm_username, self.cfg.crm_password);//--------------------->
+      }).then(() => {
+        msg = "Configuring user...";
+        LogService.log(msg);
+        return self.userService.configureWithOfflineUserData();//--------------------->
+      }).then(() => {
+        msg = "Destroying databases...";
+        LogService.log(msg);
+        return self.remoteDataService.destroyLocalDataStorages();//--------------------->
+      }).then(() => {
+        msg = "Initializing remote data service...";
+        LogService.log(msg);
+        return self.remoteDataService.initialize();//--------------------->
+      }).then(() => {
+        msg = "Starting full provider sync...";
+        LogService.log(msg);
+        //self.backgroundService.setSyncIntervalFast();
+        return self.backgroundService.fullySyncAllProviders();
+      }).then(() => {
+        LogService.log("DONE!", LogService.LEVEL_WARN);
         resolve();
-
-
-      }, e => {
-        msg = "Stopping background service error: " + e;
+      }).catch(e => {
+        msg = "CACHE CLEAN ERROR: " + e;
         LogService.log(msg, LogService.LEVEL_ERROR);
         resolve();
       });
-
-
-
     });
   }
 
-/**
+  /**
    * !!! NETWORK CONNECTION REQUIRED !!!
    * destroy and recreate databases and load remote data
    *
@@ -104,8 +135,7 @@ export class ConfigurationSettingsPage implements OnInit
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       if (!self.offlineCapableRestService.isNetworkConnected())
       {
         let toast = self.toastCtrl.create({
@@ -148,57 +178,48 @@ export class ConfigurationSettingsPage implements OnInit
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.backgroundService.stop();
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Resetting provider sync offsets...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.backgroundService.resetDataProvidersSyncOffset();
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Logging out user...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.userService.logout();
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Initializing user service...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.userService.initialize();
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Logging in user...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.userService.login(self.cfg.crm_username, self.cfg.crm_password);
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Configuring user...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.userService.configureWithOfflineUserData();
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Destroying databases...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.remoteDataService.destroyLocalDataStorages();
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Initializing remote data service...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         return self.remoteDataService.initialize();
-      }).then(() =>
-      {
+      }).then(() => {
         msg = "Starting background service...";
         LogService.log(msg);
         loader.setContent(loaderContent + msg);
         self.backgroundService.setSyncIntervalFast();
         return self.backgroundService.start();
-      }).then(() =>
-      {
+      }).then(() => {
         loader.dismiss().then(() => {
           LogService.log("CACHE CLEAR OK", LogService.LEVEL_WARN);
           resolve();
@@ -225,7 +246,7 @@ export class ConfigurationSettingsPage implements OnInit
    *
    * @returns {Promise<any>}
    */
-  saveAndResetApplication():  Promise<any>
+  saveAndResetApplication(): Promise<any>
   {
     let self = this;
 
@@ -253,12 +274,10 @@ export class ConfigurationSettingsPage implements OnInit
         LogService.log("APPLICATION RESET- LOADER DISMISSED");
       });
 
-      loader.present().then(() =>
-      {
+      loader.present().then(() => {
         LogService.log("Stopping background service...");
         self.backgroundService.stop().then(() => {
-          self.configurationService.setMultipleConfigs(self.cfg).then(() =>
-          {
+          self.configurationService.setMultipleConfigs(self.cfg).then(() => {
             self.configurationService.unlockWithCode("");//lock it
             LogService.log("Configuration values were saved.");
             return self.cleanCache();
@@ -278,8 +297,7 @@ export class ConfigurationSettingsPage implements OnInit
   onUnlockConfigForm(): void
   {
     let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage, false, {});
-    unlockModal.onDidDismiss(data =>
-    {
+    unlockModal.onDidDismiss(data => {
       let unlock_code = _.get(data, "unlock_code", "");
       this.configurationService.unlockWithCode(unlock_code);
       if (!this.configurationService.isUnlocked())
@@ -317,12 +335,10 @@ export class ConfigurationSettingsPage implements OnInit
    */
   private getConfiguration(): void
   {
-    this.configurationService.getConfigObject().then((config) =>
-    {
+    this.configurationService.getConfigObject().then((config) => {
       this.cfg = config;
       this.viewIsReady = true;
-    },() =>
-    {
+    }, () => {
       this.cfg = {};
     });
   }

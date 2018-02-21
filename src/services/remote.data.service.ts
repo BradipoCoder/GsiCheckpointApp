@@ -436,9 +436,9 @@ export class RemoteDataService
       }).then(() =>
       {
         resolve();
-      }, (e) => {
+      }).catch(e => {
         return reject(e);
-      })
+      });
     });
   }
 }

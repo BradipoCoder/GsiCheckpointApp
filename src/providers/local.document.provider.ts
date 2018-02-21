@@ -61,7 +61,7 @@ export class LocalDocumentProvider
    * @param {{}} data
    * @returns {Task|Checkpoint|Checkin|any}
    */
-  public getNewModelInstance(data:any): any
+  public getNewModelInstance(data: any): any
   {
     return new this.underlying_model(data);
   }
@@ -193,7 +193,7 @@ export class LocalDocumentProvider
               resolve();
               return;
             }
-            LogService.log("NEW DOCS : #"+ _.size(documents));
+            LogService.log("NEW DOCS : #" + _.size(documents));
 
             self.storeDocuments(documents)
               .then(() => {
@@ -257,9 +257,9 @@ export class LocalDocumentProvider
         let remoteDoc;
         _.each(localDocs, (localDoc) => {
           remoteDoc = _.find(itemsToCheck, {id: localDoc.id});
-          if(remoteDoc)
+          if (remoteDoc)
           {
-            if(remoteDoc.date_modified.isAfter(localDoc.date_modified))
+            if (remoteDoc.date_modified.isAfter(localDoc.date_modified))
             {
               updateIdArray.push(localDoc.id);
             }
@@ -408,14 +408,22 @@ export class LocalDocumentProvider
 
   /**
    * Resets offset key to ZERO (before full sync)
-   * [ called by localDocumentProvider.syncWithRemote ]
+   * This key holds the index where automatic background sync is at the moment
    *
    * @returns {Promise<any>}
    */
   public resetSyncOffsetToZero(): Promise<any>
   {
+    let self = this;
     let configCheckKey = this.underlying_model.DB_TABLE_NAME + "_sync_offset";
-    return this.configurationService.setConfig(configCheckKey, 0, false, true);
+    return new Promise(function (resolve, reject) {
+      self.configurationService.setConfig(configCheckKey, 0, false, true).then(() => {
+        //LogService.log("Sync Offset for table(" + self.underlying_model.DB_TABLE_NAME + ") has been reset to zero.");
+        resolve();
+      }, e => {
+        reject(e);
+      });
+    });
   }
 
   /**
@@ -478,7 +486,7 @@ export class LocalDocumentProvider
         deleted: '0',
         max_results: 1
       };
-      if(!_.isUndefined(self.sync_configuration.remoteQuery) && !_.isEmpty(self.sync_configuration.remoteQuery))
+      if (!_.isUndefined(self.sync_configuration.remoteQuery) && !_.isEmpty(self.sync_configuration.remoteQuery))
       {
         params["query"] = self.sync_configuration.remoteQuery;
       }
@@ -491,7 +499,6 @@ export class LocalDocumentProvider
       });
     });
   }
-
 
 
   /**
@@ -571,7 +578,6 @@ export class LocalDocumentProvider
   {
     return this.db.find(options);
   }
-
 
 
   /**
@@ -679,14 +685,14 @@ export class LocalDocumentProvider
         //LogService.log('DB['+self.underlying_model.DB_TABLE_NAME+'] CHANGE: ' +  JSON.stringify(change));
         self.databaseChangeSubject.next(change);
       }).on('error', function (err) {
-        LogService.log('DB['+self.underlying_model.DB_TABLE_NAME+'] ERROR: ' + err, LogService.LEVEL_ERROR);
+        LogService.log('DB[' + self.underlying_model.DB_TABLE_NAME + '] ERROR: ' + err, LogService.LEVEL_ERROR);
         self.databaseChangeSubject.error(err);
       });
 
       //CREATE INDICES
       let indexCreationPromises = [];
       _.each(self.getDbIndexDefinition(), function (indexObject) {
-        LogService.log("Creating DB["+self.database_name+"] INDEX: " + JSON.stringify(indexObject));
+        LogService.log("Creating DB[" + self.database_name + "] INDEX: " + JSON.stringify(indexObject));
         indexCreationPromises.push(self.db.createIndex({index: indexObject}));
       });
 
@@ -701,7 +707,7 @@ export class LocalDocumentProvider
    * field 'id' is always indexed
    * @returns {any}
    */
-  protected getDbIndexDefinition():any
+  protected getDbIndexDefinition(): any
   {
     return [
       {
