@@ -27,7 +27,17 @@ plugins/android.json
 plugins/ios.json
 www/
 
-
 .DS_Store
 Thumbs.db
 
+# Exclude compiled typescript files from src root
+src/app/*.js
+src/app/*.js.map
+src/models/*.js
+src/models/*.js.map
+src/pages/*/*.js
+src/pages/*/*.js.map
+src/providers/*.js
+src/providers/*.js.map
+src/services/*.js
+src/services/*.js.map
