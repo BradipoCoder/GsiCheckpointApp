@@ -56,8 +56,7 @@ export class CheckinProvider extends LocalDocumentProvider
     let model: Checkin = super.getNewModelInstance(data);
     //do something with all models
     this.setRelatedCheckpointOnCheckin(model);
-    LogService.log("New Checkin Instance: " + model.id);
-
+    //LogService.log("New Checkin Instance: " + model.id);
     return model;
   }
 

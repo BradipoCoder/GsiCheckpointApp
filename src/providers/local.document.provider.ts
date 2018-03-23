@@ -358,7 +358,7 @@ export class LocalDocumentProvider
                 itemsAtOnce = maxRecords - syncOffset;
               }
               /* max_results: 0 below would result in loading 20 items (SugarCRM's default) so let's limit it to one */
-              if (itemsAtOnce == 0)
+              if (itemsAtOnce <= 0)
               {
                 itemsAtOnce = 1;
               }

@@ -128,7 +128,8 @@ export class CodeScanService
     let codes:any = [];
     codes[Checkpoint.TYPE_IN] = ["CSI-IN"];
     codes[Checkpoint.TYPE_OUT] = ["CSI-OUT"];
-    codes[Checkpoint.TYPE_CHK] = ["124", "248", "A158", "AT76", "S103"];
+    codes[Checkpoint.TYPE_CHK] = ["108", "142", "211", "274", "AT03", "ES12"];
+    //codes[Checkpoint.TYPE_CHK] = ["124", "248", "A158", "AT76", "S103"];
     //codes[Checkpoint.TYPE_CHK] = ["AT88"];//"AT76",
 
     let allowFakes = codes[expected_type];
