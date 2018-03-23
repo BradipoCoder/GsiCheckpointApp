@@ -7,8 +7,10 @@ import {CheckpointProvider} from '../../providers/checkpoint.provider';
 import {CheckinProvider} from '../../providers/checkin.provider';
 /* SERVICES */
 import {BackgroundService} from "../../services/background.service";
+import {RemoteDataService} from '../../services/remote.data.service';
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
 import {LogService} from "../../services/log.service";
+import {UserService} from "../../services/user.service";
 /* OTHER */
 import _ from "lodash";
 import {Promise} from '../../../node_modules/bluebird'
@@ -40,7 +42,9 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     , private checkpointProvider:CheckpointProvider
     , private checkinProvider:CheckinProvider
     , private offlineCapableRestService: OfflineCapableRestService
-    , private backgroundService: BackgroundService)
+    , private backgroundService: BackgroundService
+    , private remoteDataService: RemoteDataService
+    , private userService: UserService)
   {
     this.viewIsReady = false;
 
@@ -61,40 +65,52 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     };
   }
 
+  /* ------------------------------------------------------------------------------------------ INTERFACE ADMIN STUFF */
 
-  /* Force quick sync - not useful and makes confusion - disabled on intertface*/
-  public quickSync():void
+  public doSomething():void
   {
-    let self = this;
-
-    return new Promise(function (resolve) {
-      if (!self.offlineCapableRestService.isNetworkConnected())
-      {
-        let toast = self.toastCtrl.create({
-          message: "Nessuna connessione! Connettiti alla rete e riprova.",
-          duration: 5000,
-          position: 'top'
-        });
-        toast.present().then(() => {
-          resolve();
-        });
-        return;
-      }
-
-      if (self.platform.is("mobile"))
-      {
-        self.insomnia.keepAwake().then(() => {
-          LogService.log("KEEP AWAKE ON!");
-        });
-      }
-
-      self.backgroundService.lockSyncPage();
-      self.backgroundService.setSyncIntervalFast();
-      self.updateCounts().then(() => {
-        resolve();
-      });
+    this.backgroundService.syncDataProviders().then(() => {
+      LogService.log("doSomething DONE.");
+    }, e => {
+      LogService.log("doSomething ERROR! " + e, LogService.LEVEL_ERROR);
     });
   }
+
+  /**
+   * killAllData
+   */
+  public killAllData():void
+  {
+      let msg = "Stopping background service...";
+      LogService.log(msg);
+      this.backgroundService.stop().then(() => {
+        msg = "* Background service stopped.";
+        LogService.log(msg);
+        //
+        msg = "Resetting provider sync offsets...";
+        LogService.log(msg);
+        return this.backgroundService.resetDataProvidersSyncOffset();//--------------------->
+      }).then(() => {
+        msg = "* Provider sync offsets were reset.";
+        LogService.log(msg);
+        //
+        msg = "Destroying databases...";
+        LogService.log(msg);
+        return this.remoteDataService.destroyLocalDataStorages();
+      }).then(() => {
+        msg = "Initializing remote data service...";
+        LogService.log(msg);
+        return this.remoteDataService.initialize();
+      }).then(() => {
+        LogService.log("DONE!", LogService.LEVEL_WARN);
+      }).catch(e => {
+        msg = "CACHE CLEAN ERROR: " + e;
+        LogService.log(msg, LogService.LEVEL_ERROR);
+      });
+
+  }
+
+  /* ------------------------------------------------------------------------------------------ INTERFACE ADMIN STUFF */
 
   /**
    * Do NOT use this method directly especially for repeated events (like DB CHANGE)

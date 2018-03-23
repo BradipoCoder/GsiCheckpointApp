@@ -75,20 +75,13 @@ export class LocalDocumentProvider
   public syncWithRemote(): Promise<any>
   {
     let self = this;
-
     let syncFunctions = self.sync_configuration.syncFunctions;
-    let remoteDbTableName = self.sync_configuration.remoteDbTableName;
-    let remoteQuery = self.sync_configuration.remoteQuery;
-    let maxRecords = self.sync_configuration.maxRecords;
-    let processRecordsAtOnce = self.sync_configuration.processRecordsAtOnce;
-
     let remoteItems = [];
 
     return new Promise(function (resolve, reject) {
-      self.syncWithRemoteGetItems(remoteDbTableName, maxRecords, processRecordsAtOnce, remoteQuery)
+      self.syncWithRemoteGetItems(self.sync_configuration.remoteDbTableName, self.sync_configuration.maxRecords, self.sync_configuration.processRecordsAtOnce, self.sync_configuration.remoteQuery)
         .then((records: any) => {
             remoteItems = records;
-            //LogService.log("REMOTE-ITEMS: ", remoteItems);
 
             Promise.reduce(syncFunctions, function (accu, syncFunction) {
               return new Promise(function (resolve, reject) {
@@ -102,7 +95,7 @@ export class LocalDocumentProvider
                 let syncPromise = self[syncFunction].call(self, remoteItems);
 
                 syncPromise.then(() => {
-                  //LogService.log("FN(" + syncFunction + ") done.");
+                  LogService.log("FN(" + syncFunction + ") done.");
                   resolve();
                 }, (e) => {
                   LogService.log("FN(" + syncFunction + ") fail: " + e, LogService.LEVEL_ERROR);
@@ -112,7 +105,7 @@ export class LocalDocumentProvider
               });
             }, null)
               .then(() => {
-                  //LogService.log("Promise Reduce done.");
+                  LogService.log("Promise Reduce done.");
                   resolve();
                 }, (e) => {
                   return reject(new Error("syncWithRemote error: " + e));
@@ -330,7 +323,7 @@ export class LocalDocumentProvider
     //LogService.log("FILTERED (DELETED)ITEMS: " + _.size(itemsToCheck));
 
     return new Promise(function (resolve) {
-      LogService.log("syncDownDeleted: " + _.size(itemsToCheck));
+      //LogService.log("syncDownDeleted: " + _.size(itemsToCheck));
       resolve();
     });
   }
@@ -358,20 +351,27 @@ export class LocalDocumentProvider
         .then((cfg) => {
             config = cfg;
             syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
-            //LogService.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
-            //LogService.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
-
-            //@todo: needs to be implemented
-            /*
-            if(maxRecords && syncOffset + itemsAtOnce > maxRecords)
+            if (maxRecords > 0)
             {
-              itemsAtOnce = maxRecords - syncOffset;
+              if (syncOffset + itemsAtOnce > maxRecords)
+              {
+                itemsAtOnce = maxRecords - syncOffset;
+              }
+              /* max_results: 0 below would result in loading 20 items (SugarCRM's default) so let's limit it to one */
+              if (itemsAtOnce == 0)
+              {
+                itemsAtOnce = 1;
+              }
             }
-            */
+
+            LogService.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
+            //LogService.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
+            LogService.log("ITEMS AT ONCE[maxRecords:" + maxRecords + "]: " + itemsAtOnce);
+
 
             self.offlineCapableRestService.getEntryList(dbTableName, {
               select_fields: ['id', 'date_entered', 'date_modified', 'deleted'],
-              order_by: 'date_entered ASC',
+              order_by: 'date_entered DESC',
               deleted: '1',
               query: query,
               offset: syncOffset,
@@ -386,15 +386,18 @@ export class LocalDocumentProvider
                 });
 
                 //LogService.log("RECORDS: " + JSON.stringify(records));
-                let newSyncOffset = _.size(records) == itemsAtOnce ? syncOffset + itemsAtOnce : 0;
+
+                //let newSyncOffset = _.size(records) == itemsAtOnce ? syncOffset + itemsAtOnce : 0;
+                let newSyncOffset = syncOffset + _.size(records);
+                LogService.log("New SyncOffset: " + newSyncOffset);
+
                 self.configurationService.setConfig(configCheckKey, newSyncOffset, false, true)
                   .then(() => {
                     //LogService.log("CFGKEY written");
+                    resolve(records);
                   }, (e) => {
                     return reject(new Error("Set Config item error: " + e));
                   });
-
-                resolve(records);
               }, (e) => {
                 return reject(new Error("Get remote Items error: " + e));
               }
@@ -435,14 +438,17 @@ export class LocalDocumentProvider
   public getSyncableDataCountDown(): Promise<number>
   {
     let self = this;
+    let maxRecords = self.sync_configuration.maxRecords;
     let remoteCount, localCount;
     return new Promise(function (resolve) {
       self.getRemoteDataCount().then((cnt) => {
-        remoteCount = cnt;
+        remoteCount = maxRecords > 0 && cnt > maxRecords ? maxRecords : cnt;
+        //remoteCount = cnt;
         self.getDatabaseDocumentCount().then((cnt) => {
           localCount = cnt;
           let diff = remoteCount - localCount;
           diff = diff > 0 ? diff : 0;
+
           resolve(diff);
         }, () => {
           resolve(0)
@@ -474,6 +480,22 @@ export class LocalDocumentProvider
     });
   }
 
+  public getSyncableDataCountUpAndDown(): Promise<number>
+  {
+    let self = this;
+    return new Promise(function (resolve) {
+      let countPromises = [
+        self.getSyncableDataCountUp(),
+        self.getSyncableDataCountDown(),
+      ];
+      Promise.all(countPromises).then((data: Array<any>) => {
+        let total: number = 0;
+        total += parseInt(data[0]);
+        total += parseInt(data[1]);
+        resolve(total);
+      });
+    });
+  }
 
   public getRemoteDataCount(): Promise<number>
   {

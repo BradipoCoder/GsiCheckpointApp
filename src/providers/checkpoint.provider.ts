@@ -34,7 +34,7 @@ export class CheckpointProvider extends LocalDocumentProvider
       syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
       remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
       remoteQuery: "account_id_c = '3aaaca35-bf86-5e1b-488b-591abe50a893'",//CSI checkpoints
-      processRecordsAtOnce: 25,
+      processRecordsAtOnce: 80,
       maxRecords: 0
     };
   }

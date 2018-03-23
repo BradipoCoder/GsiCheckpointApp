@@ -11,6 +11,8 @@ import {TaskProvider} from "../providers/task.provider";
 
 /* Other */
 import {Promise} from '../../node_modules/bluebird'
+import _ from "lodash";
+import {LocalDocumentProvider} from "../providers/local.document.provider";
 
 
 @Injectable()
@@ -36,9 +38,9 @@ export class BackgroundService
   private syncPageLocked = false;
 
   constructor(private checkpointProvider: CheckpointProvider
-              , private checkinProvider: CheckinProvider
-              , private taskProvider: TaskProvider
-              ,private userService: UserService)
+    , private checkinProvider: CheckinProvider
+    , private taskProvider: TaskProvider
+    , private userService: UserService)
   {
     this.dataProviders = [
       this.checkpointProvider,
@@ -57,8 +59,8 @@ export class BackgroundService
     /**
      * @param self
      */
-    let reprogram = function (self) {
-      if(self.stop_requested)
+    let reprogram = function (self: BackgroundService) {
+      if (self.stop_requested)
       {
         self.execution_count = 0;
         return;
@@ -82,24 +84,24 @@ export class BackgroundService
     }
 
     self.is_running = true;
+
     if (self.execution_count > 1000000)
     {
       self.execution_count = 0;
     }
     self.execution_count++;
-    LogService.log("BSE[" + self.execution_count + "/" + self.execution_count_max + "].");
-    self.executionRun(self)
-      .then(() => {
-        self.is_running = false;
-        //LogService.log("executionRun: DONE!");
-      }, () => {
-        self.is_running = false;
-        //LogService.warn("executionRun: ERROR! - " + e);
-      }).then(() => {
-      LogService.log("BSE RUN[" + self.execution_count + "]: DONE.");
-      reprogram(self);
-    });
 
+    LogService.log("BSE[" + self.execution_count + "/" + self.execution_count_max + "].");
+
+    self.executionRun(self).then(() => {
+        self.is_running = false;
+        LogService.log("BSE RUN[" + self.execution_count + "]: DONE.");
+        reprogram(self);
+      }, (e) => {
+        self.is_running = false;
+        LogService.log("BSE RUN[" + self.execution_count + "]: ERROR. " + e);
+        reprogram(self);
+      });
   }
 
 
@@ -112,12 +114,7 @@ export class BackgroundService
   {
     return new Promise(function (resolve, reject) {
       self.userService.autologin().then(() => {
-          //done
-        }, (e) => {
-          return reject(e);
-        }
-      ).then(() => {
-          return self.syncDataProviders();
+        return self.syncDataProviders();
         }, (e) => {
           return reject(e);
         }
@@ -185,7 +182,7 @@ export class BackgroundService
   /**
    * @returns {boolean}
    */
-  public isSyncPageLocked():boolean
+  public isSyncPageLocked(): boolean
   {
     return this.syncPageLocked;
   }
@@ -204,7 +201,7 @@ export class BackgroundService
   /**
    * Set interval to do fast execution riprogramming
    */
-  public setSyncIntervalFast():void
+  public setSyncIntervalFast(): void
   {
     this.execution_interval_ms = this.execution_interval_fast_ms;
   }
@@ -212,7 +209,7 @@ export class BackgroundService
   /**
    * Set interval to do fast execution riprogramming
    */
-  public setSyncIntervalSlow():void
+  public setSyncIntervalSlow(): void
   {
     this.execution_interval_ms = this.execution_interval_slow_ms;
   }
@@ -235,7 +232,8 @@ export class BackgroundService
       return new Promise((resolve) => {
         provider.getSyncableDataCountDown().then(count => {
           LogService.log("[FULL-SYNC]PROVIDER#" + index + " - count: " + count);
-          if(count === 0) {
+          if (count === 0)
+          {
             resolve();
           }
         });
@@ -246,15 +244,50 @@ export class BackgroundService
   //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
   /**
    *
+   * Call providers in order as specified in the this.dataProviders array
+   *
    * @returns {Promise<any>}
    */
   public syncDataProviders(): Promise<any>
   {
-    return Promise.reduce(this.dataProviders, function(accu, provider, index)
-    {
-      LogService.log("[SYNC]PROVIDER#" + index + " - " + provider.constructor.name);
-      return provider.syncWithRemote();
-    }, null);
+    return new Promise((resolve, reject) => {
+
+      let countPromises = [];
+      _.forEach(this.dataProviders, (provider: LocalDocumentProvider) => {
+        countPromises.push(provider.getSyncableDataCountUpAndDown());
+      });
+
+      Promise.all(countPromises).then((countData: Array<number>) => {
+        //LogService.log("---COUNT DATA" + JSON.stringify(countData));
+
+        let providerToSync: any = false;
+
+        _.forEach(countData, (count: number, index: number) => {
+          if (count > 0)
+          {
+            providerToSync = <LocalDocumentProvider>this.dataProviders[index];
+            LogService.log(index + "> " + providerToSync.constructor.name + ": " + count);
+            return false; //exit loop
+          }
+        });
+
+        if (providerToSync === false)
+        {
+          LogService.log("All providers are in sync.");
+          return resolve();
+        }
+
+        if (providerToSync instanceof LocalDocumentProvider)
+        {
+          LogService.log("syncDataProviders calling provider to sync: " + providerToSync.constructor.name);
+          providerToSync.syncWithRemote().then(() => {
+            resolve();
+          }, e => {
+            reject(e);
+          });
+        }
+      });
+    });
   }
 
   /**
@@ -263,8 +296,7 @@ export class BackgroundService
    */
   public resetDataProvidersSyncOffset(): Promise<any>
   {
-    return Promise.reduce(this.dataProviders, function(accu, provider, index)
-    {
+    return Promise.reduce(this.dataProviders, function (accu, provider, index) {
       LogService.log("[RST]PROVIDER#" + index + " - " + provider.constructor.name);
       return provider.resetSyncOffsetToZero();
     }, null);
@@ -277,7 +309,7 @@ export class BackgroundService
    */
   public initialize(): Promise<any>
   {
-    //setTimeout(this.intervalExecution, this.startup_delay_ms, this);
+    setTimeout(this.intervalExecution, this.startup_delay_ms, this);
 
     return new Promise(resolve => {
       resolve();

@@ -41,8 +41,8 @@ export class CheckinProvider extends LocalDocumentProvider
       syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted', 'syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY'],
       remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
       remoteQuery: "",
-      processRecordsAtOnce: 25,
-      maxRecords: 100
+      processRecordsAtOnce: 15,
+      maxRecords: 30
     };
   }
 

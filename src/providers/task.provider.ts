@@ -41,8 +41,8 @@ export class TaskProvider extends LocalDocumentProvider
       syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted', 'syncUpStore'],//, 'syncUpStore'
       remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
       remoteQuery: "",
-      processRecordsAtOnce: 25,
-      maxRecords: 3
+      processRecordsAtOnce: 15,
+      maxRecords: 30
     };
   }
 
