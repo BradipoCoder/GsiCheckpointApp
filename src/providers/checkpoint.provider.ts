@@ -19,6 +19,8 @@ export class CheckpointProvider extends LocalDocumentProvider
 
   protected database_name = "checkpoint";
 
+  protected codeIdCache:any = {};
+
   constructor(protected configurationService: ConfigurationService,
               protected offlineCapableRestService: OfflineCapableRestService)
   {
@@ -86,10 +88,25 @@ export class CheckpointProvider extends LocalDocumentProvider
   {
     let self = this;
     return new Promise((resolve, reject) => {
+
+      //try to use in-memory code-id to speed up code search
+      if(!_.isUndefined(options.selector) && !_.isUndefined(options.selector.code))
+      {
+        //LogService.log("Looking for checkpoint by CODE: "  + options.selector.code);
+        let candidate = _.find(self.codeIdCache, ['code', options.selector.code]);
+        if(!_.isUndefined(candidate.id))
+        {
+          options.selector = {"id": candidate.id};
+          LogService.log("CP - used cache for code("+candidate.code+") to get id : "  + candidate.id);
+        }
+      }
+
+      //LogService.log("getCheckpoint OPTIONS: "  + JSON.stringify(options));
+
       self.findDocuments(options).then((res) => {
         if (_.size(res.docs) < 1)
         {
-          return reject(new Error("Codice locale sconosciuto!" + JSON.stringify(options)));
+          return reject(new Error("Locale sconosciuto!" + JSON.stringify(options)));
         }
 
         if (_.size(res.docs) > 1)
@@ -105,28 +122,6 @@ export class CheckpointProvider extends LocalDocumentProvider
     });
   }
 
-  /**
-   *
-   * @param {string} id
-   * @param {string} key
-   * @param {string} def
-   * @returns {Promise<any>}
-   */
-  public getCheckpointData(id: string, key: string, def = null): Promise<Checkpoint>
-  {
-    let self = this;
-    LogService.log("getCheckpointData - Looking for CP: " + id);
-
-    return new Promise(function (resolve) {
-      self.getCheckpoint({selector: {id: id}}).then((checkpoint: Checkpoint) => {
-        LogService.log("getCheckpointData - FOUND CP: " + checkpoint.name);
-        let answer = !_.isUndefined(checkpoint[key]) ? checkpoint[key] : def;
-        resolve(answer);
-      }, () => {
-        resolve(def);
-      });
-    });
-  }
 
   /**
    * Returns all IN and OUT type checkpoints
@@ -154,46 +149,27 @@ export class CheckpointProvider extends LocalDocumentProvider
   }
 
   /**
-   *
-   * @param {any} documents
+   * codeIdCache will be used to quickly find document id by code - in memory search
    * @returns {Promise<any>}
    */
-  /*
-  public setTypeOnCheckins(documents): Promise<any>
+  private createInMemoryCodeIdArray(): Promise<any>
   {
     let self = this;
-
     return new Promise(function (resolve, reject) {
-      let promises = [];
-      _.each(documents, function (checkin) {
-        promises.push(self.setTypeOnCheckin(checkin));
-      });
-      Promise.all(promises).then((newDocs) => {
-        resolve(newDocs);
-      });
-    });
-  }*/
-
-  /**
-   *
-   * @param {Checkin} checkin
-   * @returns {Promise<any>}
-   */
-
-  /*
-  public setTypeOnCheckin(checkin: Checkin): Promise<any>
-  {
-    let self = this;
-
-    return new Promise(function (resolve) {
-      self.db.get(checkin.mkt_checkpoint_id_c).then((checkpoint: Checkpoint) => {
-        checkin.setType(checkpoint.type);
-        resolve(checkin);
-      }).catch(() => {
-        resolve(checkin);
+      self.findDocuments({
+        selector: {},
+        fields: ['code', 'id'],
+      }).then((res) => {
+        if (!_.isUndefined(res.docs) && _.size(res.docs))
+        {
+          self.codeIdCache = res.docs;
+          //LogService.log("ID-CODE ARR: " + JSON.stringify(self.codeIdCache));
+          LogService.log("ID-CODE array length: " + _.size(self.codeIdCache));
+          resolve();
+        }
       });
     });
-  }*/
+  }
 
   /**
    * @returns {any}
@@ -239,6 +215,8 @@ export class CheckpointProvider extends LocalDocumentProvider
     let self = this;
     return new Promise(function (resolve, reject) {
       self.setupDatabase().then(() => {
+        return self.createInMemoryCodeIdArray();
+      }).then(() => {
         resolve();
       }).catch((e) => {
         reject(e);

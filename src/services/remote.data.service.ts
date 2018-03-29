@@ -96,7 +96,7 @@ export class RemoteDataService
   public updateCurrentSessionCheckins(): Promise<any>
   {
     let self = this;
-    return new Promise(function (resolve)
+    return new Promise((resolve) =>
     {
       if(self.updating_session_checkins == true)
       {
@@ -176,6 +176,7 @@ export class RemoteDataService
         {
           if (_.size(res.docs))
           {
+            //LogService.log("CHECKIN LIST: " + JSON.stringify(res.docs));
             let mostRecentCheckin = _.last(_.sortBy(res.docs, ['checkin_date']));
             //LogService.log("MOST RECENT CHECKIN: ", mostRecentCheckin);
             lastInOutCheckin = self.checkinProvider.getNewModelInstance(mostRecentCheckin);

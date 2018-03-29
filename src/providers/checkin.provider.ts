@@ -259,10 +259,11 @@ export class CheckinProvider extends LocalDocumentProvider
         name: 'idx_checkpoint',
         fields: ['mkt_checkpoint_id_c']
       },
+      /*
       {
         name: 'idx_date_checkpoint',
         fields: ['checkin_date', 'mkt_checkpoint_id_c']
-      },
+      },*/
       {
         name: 'idx_date_type',
         fields: ['checkin_date', 'type']

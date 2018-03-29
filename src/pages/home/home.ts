@@ -555,7 +555,7 @@ export class HomePage implements OnInit, OnDestroy
   {
     this.is_refreshing = true;
     let self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       self.remoteDataService.updateCurrentSessionCheckins().then(() => {
         self.checkins = self.remoteDataService.getCurrentSessionCheckins();
         self.is_refreshing = false;
@@ -584,17 +584,6 @@ export class HomePage implements OnInit, OnDestroy
     /* CHECKINS */
     this.dataChangeSubscription_CHK = this.checkinProvider.databaseChangeObservable.subscribe
     ((data: any) => {
-      /*
-      if (_.includes(['checkpoint', 'checkin'], data.db))
-      {
-        LogService.log('HOME - DB[' + data.db + '] CHANGE!');
-        self.refreshHomeData().then(() => {
-          self.autoUpdateIntevalExecution(self);
-        }, () => {
-          //
-        });
-      }
-      */
       if (data.db == 'checkin' && !_.isUndefined(data.id) && !_.isEmpty(data.id))
       {
         this.refreshCheckin(data.id);
