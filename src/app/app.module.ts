@@ -32,8 +32,6 @@ import {ConfigurationPage} from "../pages/configuration/configuration";
 import {ConfigurationSettingsPage} from "../pages/configuration/configuration.settings";
 import {ConfigurationSyncstatePage} from "../pages/configuration/configuration.syncstate";
 import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
-// import {HomeCheckinViewPage} from "../pages/home/home.checkin.view";
-// import {HomeTaskViewPage} from "../pages/home/home.task.view";
 import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
 import {LogoutPage} from "../pages/logout/logout";
@@ -42,8 +40,11 @@ import {TaskNewPage} from "../pages/tasks/task.new";
 import {TasksInPage} from "../pages/tasks/tasks.in";
 import {TasksOutPage} from "../pages/tasks/tasks.out";
 
-
-
+/* Pages[HOME] */
+// import {HomeCheckinViewPage} from "../pages/home/home.checkin.view";
+// import {HomeTaskViewPage} from "../pages/home/home.task.view";
+import {HomeNoConfPage} from '../pages/home/home-no-conf/home-no-conf';
+import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinlist';
 /* Other/Utils/Tools */
 
 @NgModule({
@@ -55,8 +56,8 @@ import {TasksOutPage} from "../pages/tasks/tasks.out";
     , ConfigurationSettingsPage
     , ConfigurationSyncstatePage
     , ConfigurationUnlockerPage
-    // , HomeCheckinViewPage
-    // , HomeTaskViewPage
+    , HomeNoConfPage
+    , HomeCheckinlistPage
     , HomePage
     , InfoPage
     , LogoutPage
@@ -73,8 +74,8 @@ import {TasksOutPage} from "../pages/tasks/tasks.out";
     , ConfigurationSettingsPage
     , ConfigurationSyncstatePage
     , ConfigurationUnlockerPage
-    // , HomeCheckinViewPage
-    // , HomeTaskViewPage
+    , HomeNoConfPage
+    , HomeCheckinlistPage
     , HomePage
     , InfoPage
     , LogoutPage

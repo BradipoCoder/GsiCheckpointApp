@@ -498,7 +498,6 @@ export class HomePage implements OnInit, OnDestroy
     self.recalculateShiftTotalDuration(self);
     self.recalculateLastCheckinDuration(self);
     self.auto_update_timeout = setTimeout(self.autoUpdateIntevalExecution, (10 * 1000), self);
-
   }
 
   /**

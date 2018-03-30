@@ -16,7 +16,7 @@ export class UserService
   private user_data: any = {};
   public is_initialized = false;
   public is_user_configured = false;
-  public last_error: Error;
+  public last_error: Error = new Error("OK");
   private db: any;
 
   private autologin_skips = 0;
