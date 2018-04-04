@@ -64,16 +64,16 @@ export class MekitTracerApp
       return this.userService.initialize();
     }).then(() => {
       LogService.log("APP: User service initialized.");
-      return this.remoteDataService.initialize();//do NOT load data
+      return this.remoteDataService.initialize();
     }).then(() => {
       LogService.log("APP: RemoteData service initialized.");
       return this.backgroundService.initialize();
     }).then(() => {
       LogService.log("APP: Background service initialized.");
       this.presentStartupPage();
-    }, (e) => {
+    }).catch(e => {
       LogService.log("APP-INIT-ERROR: " + e, LogService.LEVEL_ERROR);
-    });
+    })
   }
 
   presentStartupPage(): void

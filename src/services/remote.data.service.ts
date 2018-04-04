@@ -23,15 +23,19 @@ import _ from "lodash";
 import * as moment from 'moment';
 import { Promise } from '../../node_modules/bluebird'
 import {LogService} from "./log.service";
+import {LocalDocumentProvider} from "../providers/local.document.provider";
 //import * as Bluebird from "bluebird";
 /*import md5 from '../../node_modules/blueimp-md5';*/
 
 @Injectable()
 export class RemoteDataService
 {
+  private providers: LocalDocumentProvider[];
+
   private last_checkin_operation: Checkin;
 
   private updating_session_checkins = false;
+
   private CURRENT_SESSION_CHECKINS: Checkin[];
 
   /* for Home - HomeCheckinViewPage*/
@@ -43,6 +47,11 @@ export class RemoteDataService
     , private checkinProvider: CheckinProvider
     , private taskProvider: TaskProvider)
   {
+    this.providers = [
+      this.checkpointProvider,
+      this.checkinProvider,
+      this.taskProvider,
+    ]
   }
 
   //----------------------------------------------------------------------------------------------------------CHECKPOINT
@@ -426,36 +435,13 @@ export class RemoteDataService
 
     return new Promise(function (resolve, reject)
     {
-      //reject(new Error("RDS - MANUAL BLOCK!"));
-
-      self.checkpointProvider.initialize().then(() =>
-      {
-        return reject(new Error("RDS - MANUAL BLOCK! - OK"));
-      }, (e) => {
-        return reject(new Error("RDS - MANUAL BLOCK! - ERR: " + e));
-      });
-
-      /*
-      //reset
-      self.last_checkin_operation = null;
-
-      self.checkpointProvider.initialize().then(() =>
-      {
-        return self.checkinProvider.initialize();
-      }, (e) => {
-        return reject(e);
-      }).then(() => {
-        return self.taskProvider.initialize();
-      }, (e) => {
-        return reject(e);
-      }).then(() =>
-      {
+      Promise.reduce(self.providers, (accu, provider) => {
+        return provider.initialize();
+      }, null).then(() => {
         resolve();
       }, (e) => {
-        return reject(e);
+        reject(new Error("RDS - MANUAL BLOCK === ERR!" + e));
       });
-      */
     });
   }
 }
-

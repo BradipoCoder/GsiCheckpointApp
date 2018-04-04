@@ -163,10 +163,9 @@ export class CheckpointProvider extends LocalDocumentProvider
         if (!_.isUndefined(res.docs) && _.size(res.docs))
         {
           self.codeIdCache = res.docs;
-          //LogService.log("ID-CODE ARR: " + JSON.stringify(self.codeIdCache));
           LogService.log("ID-CODE array length: " + _.size(self.codeIdCache));
-          resolve();
         }
+        resolve();
       });
     });
   }
@@ -180,10 +179,12 @@ export class CheckpointProvider extends LocalDocumentProvider
       {
         name: 'idx_date_modified',
         fields: ['date_modified']
-      }, {
+      },
+      {
         name: 'idx_date_entered',
         fields: ['date_entered']
-      }, {
+      },
+      {
         name: 'idx_sync_last_check',
         fields: ['sync_last_check']
       },
@@ -211,12 +212,13 @@ export class CheckpointProvider extends LocalDocumentProvider
    */
   public initialize(): Promise<any>
   {
-    //super.initialize();
     let self = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       self.setupDatabase().then(() => {
+        LogService.log("DB checkpoint created.");
         return self.createInMemoryCodeIdArray();
       }).then(() => {
+        LogService.log("MEM checkpoint created.");
         resolve();
       }).catch((e) => {
         reject(e);

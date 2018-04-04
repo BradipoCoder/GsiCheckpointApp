@@ -264,12 +264,24 @@ export class UserService
     });
   }
 
+  /**
+   *
+   */
+  private createDatabase(): void
+  {
+    this.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
+    LogService.log("new user database was created");
+  }
 
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
   public initialize(): Promise<any>
   {
     let self = this;
     this.is_initialized = false;
-
     return new Promise(function (resolve) {
       self.unsetOfflineUserData();
       self.createDatabase();
@@ -283,47 +295,34 @@ export class UserService
             self.last_error = new Error("Configuration is incomplete!");
             LogService.log("Configuration is incomplete!", LogService.LEVEL_WARN);
             resolve();
+          } else
+          {
+            self.configureWithOfflineUserData().then(() => {
+              self.autologin().then(() => {
+                  resolve()
+                }, (e) => {
+                  LogService.log("Unsuccessful autologin! " + e, LogService.LEVEL_WARN);
+                  resolve()
+                }
+              );
+            }, (e) => {
+              self.autologin().then(() => {
+                  resolve()
+                }, (e) => {
+                  self.last_error = new Error("User data is not available! " + e);
+                  LogService.log(self.last_error.message, LogService.LEVEL_WARN);
+                  resolve();
+                }
+              );
+            });
           }
-
-          return self.configureWithOfflineUserData();
         }, (e) => {
           self.last_error = new Error("Configuration object is not available! " + e);
           LogService.log(self.last_error.message, LogService.LEVEL_WARN);
           resolve();
-        }).then(() => {
-          self.autologin().then(() => {
-              resolve()
-            }, (e) => {
-              LogService.log("Unsuccessful autologin! " + e, LogService.LEVEL_WARN);
-              resolve()
-            }
-          );
-        }, () => {
-
-          self.autologin().then(() => {
-              resolve()
-            }, (e) => {
-              self.last_error = new Error("User data is not available! " + e);
-              LogService.log(self.last_error.message, LogService.LEVEL_WARN);
-              return resolve();
-            }
-          );
-
-        }
-      );
-
+        });
     });
   }
-
-  /**
-   *
-   */
-  private createDatabase(): void
-  {
-    this.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
-    LogService.log("new user database was created");
-  }
-
 }
 
 

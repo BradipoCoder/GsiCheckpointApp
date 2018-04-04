@@ -703,10 +703,11 @@ export class LocalDocumentProvider
   {
     let self = this;
 
-    return new Promise(function (resolve) {
-      LogService.log("Creating DB: " + self.database_name);
+    return new Promise((resolve, reject) => {
       self.db = new PouchDB(self.database_name, self.database_options);
+      LogService.log("Created DB: " + self.database_name);
 
+      // CHANGE LISTENERS
       self.db.changes({
         since: 'now',
         live: true,
@@ -723,12 +724,16 @@ export class LocalDocumentProvider
       //CREATE INDICES
       let indexCreationPromises = [];
       _.each(self.getDbIndexDefinition(), function (indexObject) {
-        LogService.log("Creating DB[" + self.database_name + "] INDEX: " + JSON.stringify(indexObject));
+        //LogService.log("Creating DB[" + self.database_name + "] INDEX: " + JSON.stringify(indexObject));
         indexCreationPromises.push(self.db.createIndex({index: indexObject}));
       });
 
       Promise.all(indexCreationPromises).then(() => {
+        LogService.log("DB " + self.database_name + " indexes OK.");
         resolve();
+      }).catch((e) => {
+        LogService.log("DB SETUP ERROR: " + e);
+        reject(e);
       });
     });
   }
