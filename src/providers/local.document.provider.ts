@@ -16,6 +16,7 @@ import {Checkin} from "../models/Checkin";
 /** OTHER */
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
+import Dexie from 'dexie';
 import _ from "lodash";
 import * as moment from 'moment';
 import {Promise} from '../../node_modules/bluebird'
@@ -25,7 +26,7 @@ import {Observable} from "rxjs/Observable";
 
 PouchDB.plugin(PouchDBFind);
 //PouchDB.debug.enable('pouchdb:find');
-PouchDB.debug.disable('pouchdb:find');
+//PouchDB.debug.disable('pouchdb:find');
 
 
 @Injectable()
@@ -459,6 +460,9 @@ export class LocalDocumentProvider
     });
   }
 
+  /**
+   * @returns {Promise<number>}
+   */
   public getSyncableDataCountUp(): Promise<number>
   {
     let self = this;
@@ -480,6 +484,10 @@ export class LocalDocumentProvider
     });
   }
 
+  /**
+   *
+   * @returns {Promise<number>}
+   */
   public getSyncableDataCountUpAndDown(): Promise<number>
   {
     let self = this;
@@ -496,6 +504,7 @@ export class LocalDocumentProvider
       });
     });
   }
+
 
   public getRemoteDataCount(): Promise<number>
   {

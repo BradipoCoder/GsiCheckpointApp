@@ -54,25 +54,25 @@ export class MekitTracerApp
   {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
-      LogService.log("Platform is ready. Let's go!");
+      LogService.log("APP: Platform is ready. Let's go!");
       return this.configurationService.initialize();
     }).then(() => {
-      LogService.log("Configuration service initialized.");
+      LogService.log("APP: Configuration service initialized.");
       return this.logService.initialize();
     }).then(() => {
-      LogService.log("Log service initialized.");
+      LogService.log("APP: Log service initialized.");
       return this.userService.initialize();
     }).then(() => {
-      LogService.log("User service initialized.");
+      LogService.log("APP: User service initialized.");
       return this.remoteDataService.initialize();//do NOT load data
     }).then(() => {
-      LogService.log("RemoteData service initialized.");
+      LogService.log("APP: RemoteData service initialized.");
       return this.backgroundService.initialize();
     }).then(() => {
-      LogService.log("BackgroundService service initialized.");
+      LogService.log("APP: Background service initialized.");
       this.presentStartupPage();
-    }).catch((e) => {
-      LogService.log("App initialization error: " + e, LogService.LEVEL_ERROR);
+    }, (e) => {
+      LogService.log("APP-INIT-ERROR: " + e, LogService.LEVEL_ERROR);
     });
   }
 

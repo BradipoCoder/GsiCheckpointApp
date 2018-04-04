@@ -426,20 +426,35 @@ export class RemoteDataService
 
     return new Promise(function (resolve, reject)
     {
+      //reject(new Error("RDS - MANUAL BLOCK!"));
+
+      self.checkpointProvider.initialize().then(() =>
+      {
+        return reject(new Error("RDS - MANUAL BLOCK! - OK"));
+      }, (e) => {
+        return reject(new Error("RDS - MANUAL BLOCK! - ERR: " + e));
+      });
+
+      /*
       //reset
       self.last_checkin_operation = null;
 
       self.checkpointProvider.initialize().then(() =>
       {
         return self.checkinProvider.initialize();
+      }, (e) => {
+        return reject(e);
       }).then(() => {
         return self.taskProvider.initialize();
+      }, (e) => {
+        return reject(e);
       }).then(() =>
       {
         resolve();
-      }).catch(e => {
+      }, (e) => {
         return reject(e);
       });
+      */
     });
   }
 }

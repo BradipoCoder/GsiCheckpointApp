@@ -147,7 +147,7 @@ export class Checkin extends CrmDataModel
    * duration is stored in seconds
    * @returns {string}
    */
-  getFormattedDuration(): string
+  getFormattedDuration(displaySeconds = true): string
   {
     let answer = '';
     let checkinDuration = parseInt(this.getPropertyValue("duration"));
@@ -164,7 +164,7 @@ export class Checkin extends CrmDataModel
     {
       answer += (!_.isEmpty(answer) ? " " : "") + minutes + " min";
     }
-    if (seconds)
+    if (displaySeconds && seconds)
     {
       answer += (!_.isEmpty(answer) ? " " : "") + seconds + "s";
     }

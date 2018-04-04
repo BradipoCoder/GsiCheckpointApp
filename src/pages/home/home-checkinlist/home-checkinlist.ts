@@ -5,24 +5,26 @@ import {
   Platform,
   NavController,
   ToastController,
-  LoadingController,
-  AlertController,
-  ModalController
+  /*LoadingController,*/
+  /*AlertController,*/
+  /*ModalController*/
 } from 'ionic-angular';
 /* Import: services */
 import {LogService} from "../../../services/log.service";
 import {UserService} from '../../../services/user.service';
 import {RemoteDataService} from '../../../services/remote.data.service';
+import {CodeScanService} from '../../../services/code.scan.service';
 
 /* Import: models */
 import {Checkin} from "../../../models/Checkin";
 import {HomePage} from "../home";
-import {CrmDataModel} from "../../../models/crm.data.model";
-import {Checkpoint} from "../../../models/Checkpoint";
+//import {CrmDataModel} from "../../../models/crm.data.model";
+//import {Checkpoint} from "../../../models/Checkpoint";
 /* Import: pages */
 //import {TaskNewPage} from "../../tasks/task.new";
 /* Import: utilities */
-//import _ from "lodash";
+import _ from "lodash";
+import * as moment from 'moment';
 
 @Component({
   selector: 'page-home-checkinlist',
@@ -47,9 +49,9 @@ import {Checkpoint} from "../../../models/Checkpoint";
                 {{shiftTotalDuration}}
               </ion-label>
             </h3>
-          </ion-col>          
+          </ion-col>
         </ion-row>
-        
+
         <div class="buttons">
           <ion-fab bottom right class="qr-scan-fab">
             <button ion-fab color="yellow-light" (tap)="scanQRCode(['CHK', 'OUT'])">
@@ -63,10 +65,10 @@ import {Checkpoint} from "../../../models/Checkpoint";
             </button>
           </ion-fab>
         </div>
-        
+
       </ion-grid>
     </ion-header>
-    
+
     <ion-content class="checkinlist">
       <ion-grid class="checkin_list">
 
@@ -85,7 +87,7 @@ import {Checkpoint} from "../../../models/Checkpoint";
               {{checkin.name}}
             </span>
 
-              <span class="duration">({{checkin.getFormattedDuration()}})</span>
+              <span class="duration">({{checkin.getFormattedDuration(displaySeconds)}})</span>
 
               <span class="checklist_mod" *ngIf="checkin.isCheckpointChecklistAvailable()">
               <ion-icon name="create"></ion-icon>
@@ -99,7 +101,8 @@ import {Checkpoint} from "../../../models/Checkpoint";
             <span class="time">
               {{checkin.getDatePropertyValue('checkin_date', 'H:mm')}}
             </span>
-              <ion-icon *ngIf="userService.isTrustedUser()" [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon>
+              <ion-icon *ngIf="userService.isTrustedUser()"
+                        [name]="checkin.sync_state == 'in-sync' ? 'cloud-done' : 'sync'" item-right></ion-icon>
             </div>
           </ion-col>
         </ion-row>
@@ -128,7 +131,9 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
 {
   private checkins: Checkin[];
 
-  private shiftTotalDuration: string = "?";
+  private shiftTotalDuration: string = "";
+
+  private displaySeconds: boolean = false;
 
   private auto_update_timeout: number;
 
@@ -137,13 +142,21 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
     , protected navCtrl: NavController
     , protected toastCtrl: ToastController
     , protected remoteDataService: RemoteDataService
+    , protected codeScanService: CodeScanService
     , protected userService: UserService)
   {
   }
 
   public scanQRCode(allowedTypes: any): void
   {
-    LogService.log("Coming soon...");
+    let barcodeText;
+    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) => {
+      barcodeText = barcodeData.text;
+      LogService.log("BARCODE: " + barcodeText);
+      this.navCtrl.setRoot(HomePage).then(() => {
+        LogService.log("Reset home call done.");
+      })
+    });
   }
 
   /**
@@ -221,16 +234,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
     return !this.platform.is("core");
   }
 
-  /**
-   * @param {HomeCheckinlistPage} self
-   */
-  private autoUpdateIntevalExecution(self: HomeCheckinlistPage): void
-  {
-    //self.recalculateShiftTotalDuration(self);
-    //self.recalculateLastCheckinDuration(self);
-    LogService.log("tick...");
-  }
-
+  //-------------------------------------------------------------------------------------------------------------REFRESH
   /**
    *
    * @returns {Promise<any>}
@@ -248,14 +252,73 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
     });
   }
 
+  //-----------------------------------------------------------------------------------------------------------INTERVALS
+  /**
+   * @param {HomeCheckinlistPage} self
+   */
+  recalculateShiftTotalDuration(self: HomeCheckinlistPage): void
+  {
+    let hours, minutes, seconds;
+    let durationStr = '';
+    if (_.size(self.checkins) > 0)
+    {
+      let shiftStartCheckin: Checkin = _.last(self.checkins) as Checkin;
+      let shiftStartCheckinDuration = moment().diff(shiftStartCheckin.checkin_date, "seconds");
+
+      hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
+      minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
+      if(self.displaySeconds)
+      {
+        seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
+      }
+
+      if (hours)
+      {
+        durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
+      }
+      durationStr += minutes + " min";
+      if(self.displaySeconds)
+      {
+        durationStr += " " + seconds + "s";
+      }
+    }
+
+    self.shiftTotalDuration = durationStr;
+  }
+
+  /**
+   * @param {HomeCheckinlistPage} self
+   */
+  recalculateLastCheckinDuration(self: HomeCheckinlistPage): void
+  {
+    if (_.size(self.checkins) > 0)
+    {
+      let lastCheckin: Checkin = _.first(self.checkins) as Checkin;
+      if (!_.isUndefined(lastCheckin))
+      {
+        lastCheckin.setDurationFromNow();
+      }
+    }
+  }
+
+  /**
+   * @param {HomeCheckinlistPage} self
+   */
+  private autoUpdateIntevalExecution(self: HomeCheckinlistPage): void
+  {
+    self.recalculateShiftTotalDuration(self);
+    self.recalculateLastCheckinDuration(self);
+    //LogService.log("tick...");
+  }
+
+  //------------------------------------------------------------------------------------------------------INIT & DESTROY
   ngOnInit(): void
   {
     let self = this;
-    //start
     this.refreshAllCheckins().then(() => {
-      self.auto_update_timeout = setInterval(self.autoUpdateIntevalExecution, (10 * 1000), self);
-      //self.autoUpdateIntevalExecution(self);
       LogService.log("Checkins refreshed.");
+      self.autoUpdateIntevalExecution(self);
+      self.auto_update_timeout = setInterval(self.autoUpdateIntevalExecution, (5 * 1000), self);
     });
   }
 

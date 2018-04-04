@@ -4,6 +4,7 @@ import {NavController} from 'ionic-angular';
 /* Import: services */
 import {LogService} from "../../services/log.service";
 import {UserService} from '../../services/user.service';
+import {CodeScanService} from '../../services/code.scan.service';
 /* Import: pages */
 import {HomeNoConfPage} from './home-no-conf/home-no-conf';
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
@@ -15,9 +16,9 @@ import {ConfigurationPage} from "../configuration/configuration";
   selector: 'page-home',
   template: `
     <ion-content text-center>
-      <button ion-button margin-top color="not-so-danger" (click)="testActionOne()">
-        Test
-      </button>
+      <!--<button ion-button margin-top color="not-so-danger" (click)="testActionOne()">-->
+        <!--Test-->
+      <!--</button>-->
       <div class="spinner">
         <img width="398" height="598" src="assets/image/spinner.gif" />
       </div>
@@ -27,6 +28,7 @@ import {ConfigurationPage} from "../configuration/configuration";
 export class HomePage implements OnInit, OnDestroy
 {
   constructor(protected navCtrl: NavController
+    ,protected codeScanService: CodeScanService
     ,protected userService: UserService)
   {
   }
@@ -48,17 +50,13 @@ export class HomePage implements OnInit, OnDestroy
    *
    * @returns {Promise<any>}
    */
-  checkApplicationConfiguration(): Promise<any>
+  private checkIfApplicationIsConfiguration(): Promise<any>
   {
     let self = this;
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if(!self.userService.is_user_configured)
       {
-        self.navCtrl.push(HomeNoConfPage).then(() => {
-          return self.navCtrl.setRoot(HomeNoConfPage);
-        }).then(() => {
-          resolve();
-        });
+        reject(new Error("Application is not configured!"));
       } else {
         resolve();
       }
@@ -66,47 +64,41 @@ export class HomePage implements OnInit, OnDestroy
   }
 
   /**
-   * @description Check if user has initiated a new checkin code registration
+   * @description Check if user has initiated a new code registration
    *
    * @var self.userService.is_user_configured
    *
    * @returns {Promise<any>}
    */
-  checkNewCodeRegistration(): Promise<any>
+  private checkIfCodeRegistrationIsInProgress(): Promise<any>
   {
     let self = this;
-    return new Promise((resolve) => {
-      if(false)
+    return new Promise((resolve, reject) => {
+      if(self.codeScanService.isCodeScanInProgress())
       {
-        // self.navCtrl.push(HomeNoConfPage).then(() => {
-        //   return self.navCtrl.setRoot(HomeNoConfPage);
-        // }).then(() => {
-        //   resolve();
-        // });
+        reject(new Error("CODE REG IN PROGRESS"));
       } else {
         resolve();
       }
     });
   }
 
-  /**
-   * Go to checkin list page
-   */
-  goToCheckinListPage(): void
-  {
-    //this.navCtrl.push(HomeCheckinlistPage).then(() => {
-      this.navCtrl.setRoot(HomeCheckinlistPage);
-    //});
-  }
-
   ngOnInit(): void
   {
-    this.checkApplicationConfiguration().then(() => {
-      return this.checkNewCodeRegistration();
-    }).then( () => {
-      return this.navCtrl.setRoot(HomeCheckinlistPage);
-    }).then(() => {
-      LogService.log("HOME INIT DONE.");
+    this.checkIfApplicationIsConfiguration().then(() => {
+      this.checkIfCodeRegistrationIsInProgress().then(() => {
+        return this.navCtrl.setRoot(HomeCheckinlistPage).then(() => {
+          LogService.log("HOME INIT DONE.");
+        });
+      }, (e) => {
+        LogService.log("ROUTER: " + e);
+        // go to code reg page
+      });
+    }, (e) => {
+      LogService.log("ROUTER: " + e);
+      this.navCtrl.setRoot(HomeNoConfPage).then(() => {
+        //LogService.log("CONF PAGE REACHED.");
+      });
     });
   }
 

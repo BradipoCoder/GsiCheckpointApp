@@ -19,6 +19,8 @@ export class CodeScanService
 
   private isMobileDevice:boolean;
 
+  private _isCodeScanInProgress:boolean = false;
+
   constructor(private barcodeScanner:BarcodeScanner
   , private platform:Platform
   , private remoteDataService:RemoteDataService )
@@ -35,6 +37,7 @@ export class CodeScanService
   public scanQR(options={}):Promise<any>
   {
     let self = this;
+    this.setCodeScanInProgress(true);
     return new Promise(function (resolve, reject)
     {
       self.scan(options).then((barcodeData) => {
@@ -118,7 +121,7 @@ export class CodeScanService
    * @param {any} options
    * @returns {{format: string, cancelled: boolean, text: string}}
    */
-  getFakeQRCode(options:any):any
+  private getFakeQRCode(options:any):any
   {
     let allowed_types:any = _.has(options, "allowed_types")
       ? _.get(options, "allowed_types") as any
@@ -155,6 +158,17 @@ export class CodeScanService
       cancelled: false,
       text: code
     }
+  }
+
+
+  public isCodeScanInProgress(): boolean
+  {
+    return this._isCodeScanInProgress;
+  }
+
+  public setCodeScanInProgress(value: boolean)
+  {
+    this._isCodeScanInProgress = value;
   }
 }
 

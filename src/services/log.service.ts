@@ -109,7 +109,7 @@ export class LogService
       }
     } else
     {
-      //console.error("WILL NOT LOG("+level+" in "+LogService.logLevel+"): " + msg);
+      console.info("NO-LOG: " + msg);
     }
   }
 }
