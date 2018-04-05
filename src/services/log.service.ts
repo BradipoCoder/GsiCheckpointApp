@@ -13,6 +13,8 @@ export class LogService
   public static readonly LEVEL_ERROR: string = "ERROR";
   public static readonly LEVEL_NONE: string = "NONE";
 
+  public static last_error: Error = new Error("OK");
+
   private static logLevel = LogService.LEVEL_INFO;
 
   constructor(private configurationService: ConfigurationService)
@@ -111,5 +113,24 @@ export class LogService
     {
       console.info("NO-LOG: " + msg);
     }
+  }
+
+  /**
+   *
+   * @param {Error} error
+   */
+  public static error(error: Error): void
+  {
+    LogService.last_error = error;
+    LogService.log("^ERR:" + error.message, LogService.LEVEL_ERROR);
+  }
+
+  /**
+   *
+   * @returns {string}
+   */
+  public static getLastErrorMessage(): string
+  {
+    return LogService.last_error.message;
   }
 }

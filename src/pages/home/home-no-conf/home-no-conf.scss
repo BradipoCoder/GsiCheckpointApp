@@ -1,0 +1,9 @@
+@import "../../../theme/variables";
+
+page-home-no-conf
+{
+  pre.error{
+    font-size: 1.5rem;
+    color: color($colors, yellow-light);
+  }
+}

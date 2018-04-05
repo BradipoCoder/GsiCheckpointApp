@@ -56,7 +56,8 @@ export class HomePage implements OnInit, OnDestroy
     return new Promise((resolve, reject) => {
       if(!self.userService.is_user_configured)
       {
-        reject(new Error("Application is not configured!"));
+        LogService.error(new Error("L'applicazione non è stata ancora configurata."));
+        return reject();
       } else {
         resolve();
       }
@@ -94,8 +95,7 @@ export class HomePage implements OnInit, OnDestroy
         LogService.log("ROUTER: " + e);
         // go to code reg page
       });
-    }, (e) => {
-      LogService.log("ROUTER: " + e);
+    }, () => {
       this.navCtrl.setRoot(HomeNoConfPage).then(() => {
         //LogService.log("CONF PAGE REACHED.");
       });

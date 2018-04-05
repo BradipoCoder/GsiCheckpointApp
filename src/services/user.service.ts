@@ -13,10 +13,13 @@ import {LogService} from "./log.service";
 export class UserService
 {
   private authenticated: boolean = false;
+
   private user_data: any = {};
+
   public is_initialized = false;
+
   public is_user_configured = false;
-  public last_error: Error = new Error("OK");
+
   private db: any;
 
   private autologin_skips = 0;
@@ -163,8 +166,7 @@ export class UserService
           resolve();
         });
       }).catch((e) => {
-        self.last_error = e;
-        LogService.log("LOGOUT ERROR! " + e);
+        LogService.error(e);//"LOGOUT ERROR! " +
         self.authenticated = false;
         self.is_initialized = false;
       });
@@ -198,25 +200,25 @@ export class UserService
                       self.storeOfflineUserData(self.user_data).then(() => {
                           resolve();
                         }, (e) => {
-                          LogService.log("LOGIN ERROR! " + e);
+                          LogService.error(e);
                           self.authenticated = false;
                           return reject(e);
                         }
                       );
                     }, (e) => {
-                      LogService.log("LOGIN ERROR! " + e);
+                      LogService.error(e);
                       self.authenticated = false;
                       return reject(e);
                     }
                   );
                 }, (e) => {
-                  LogService.log("LOGIN ERROR! " + e);
+                  LogService.error(e);
                   self.authenticated = false;
                   return reject(e);
                 }
               );
           }, (e) => {
-            LogService.log("LOGIN ERROR! " + e);
+            LogService.error(e);
             self.authenticated = false;
             return reject(e);
           }
@@ -242,17 +244,21 @@ export class UserService
             config = cfg;
             if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
             {
-              return reject(new Error("AUTOLOGIN - missing username or password"));
+              let error = new Error("AUTOLOGIN - missing username or password");
+              LogService.error(error);
+              return reject(error);
             }
             return self.login(cfg.crm_username, cfg.crm_password);
           }, () => {
-            return reject(new Error("AUTOLOGIN - Configuration object is not available!"));
+            let error = new Error("AUTOLOGIN - Configuration object is not available!");
+            LogService.error(error);
+            return reject(error);
           })
           .then(() => {
             LogService.log("AUTOLOGIN SUCCESS");
             resolve();
           }, (e) => {
-            LogService.log("AUTOLOGIN FAILED: " + e);
+            LogService.error(e);
             return reject(e);
           });
       } else
@@ -270,7 +276,7 @@ export class UserService
   private createDatabase(): void
   {
     this.db = new PouchDB('user', {auto_compaction: true, revs_limit: 10});
-    LogService.log("new user database was created");
+    LogService.log("New user database created.");
   }
 
 
@@ -292,8 +298,7 @@ export class UserService
 
           if (_.isEmpty(cfg.crm_username) || _.isEmpty(cfg.crm_password))
           {
-            self.last_error = new Error("Configuration is incomplete!");
-            LogService.log("Configuration is incomplete!", LogService.LEVEL_WARN);
+            LogService.error(new Error("Configuration is incomplete!"));
             resolve();
           } else
           {
@@ -301,7 +306,7 @@ export class UserService
               self.autologin().then(() => {
                   resolve()
                 }, (e) => {
-                  LogService.log("Unsuccessful autologin! " + e, LogService.LEVEL_WARN);
+                  LogService.error(e);
                   resolve()
                 }
               );
@@ -309,16 +314,14 @@ export class UserService
               self.autologin().then(() => {
                   resolve()
                 }, (e) => {
-                  self.last_error = new Error("User data is not available! " + e);
-                  LogService.log(self.last_error.message, LogService.LEVEL_WARN);
+                  LogService.error(e);
                   resolve();
                 }
               );
             });
           }
         }, (e) => {
-          self.last_error = new Error("Configuration object is not available! " + e);
-          LogService.log(self.last_error.message, LogService.LEVEL_WARN);
+          LogService.error(e);
           resolve();
         });
     });
