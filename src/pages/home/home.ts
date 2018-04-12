@@ -7,6 +7,7 @@ import {UserService} from '../../services/user.service';
 import {CodeScanService} from '../../services/code.scan.service';
 /* Import: pages */
 import {HomeNoConfPage} from './home-no-conf/home-no-conf';
+import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
 import {ConfigurationPage} from "../configuration/configuration";
 /* Import: utilities */
@@ -77,7 +78,9 @@ export class HomePage implements OnInit, OnDestroy
     return new Promise((resolve, reject) => {
       if(self.codeScanService.isCodeScanInProgress())
       {
-        reject(new Error("CODE REG IN PROGRESS"));
+        //reject(new Error("CODE REG IN PROGRESS"));
+        this.navCtrl.setRoot(HomeCodeRegPage);
+
       } else {
         resolve();
       }

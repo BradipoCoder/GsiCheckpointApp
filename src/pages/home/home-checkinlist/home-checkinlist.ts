@@ -147,12 +147,15 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
   {
   }
 
+  /**
+   *
+   * @param {string[]} allowedTypes
+   */
   public scanQRCode(allowedTypes: any): void
   {
     let barcodeText;
-    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) => {
-      barcodeText = barcodeData.text;
-      LogService.log("BARCODE: " + barcodeText);
+    this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcode) => {
+      LogService.log("SCANNED BARCODE: " + barcode);
       this.navCtrl.setRoot(HomePage).then(() => {
         LogService.log("Reset home call done.");
       })

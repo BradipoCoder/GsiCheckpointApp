@@ -10,6 +10,7 @@ import {Checkpoint} from '../models/Checkpoint';
 
 
 import _ from "lodash";
+import {createSkipSelf} from "@angular/compiler/src/core";
 
 
 @Injectable()
@@ -21,6 +22,11 @@ export class CodeScanService
 
   private _isCodeScanInProgress:boolean = false;
 
+  private _scannedCodeToRegister:string = null;
+
+  /**
+   * Constructor
+   */
   constructor(private barcodeScanner:BarcodeScanner
   , private platform:Platform
   , private remoteDataService:RemoteDataService )
@@ -32,23 +38,34 @@ export class CodeScanService
    *
    *
    * @param {any} options
-   * @returns {Promise<any>}
+   * @returns {Promise<string>}
    */
-  public scanQR(options={}):Promise<any>
+  public scanQR(options={}):Promise<string>
   {
     let self = this;
-    this.setCodeScanInProgress(true);
     return new Promise(function (resolve, reject)
     {
-      self.scan(options).then((barcodeData) => {
-        if(barcodeData.format != CodeScanService.BARCODE_TYPE_QR)
-        {
-          reject(new Error("The scanned image is not a QR Code!"));
-        }
-        resolve(barcodeData);
-      }, (e) => {
-        reject(e);
-      });
+      if(!self.isCodeScanInProgress())
+      {
+        self.setCodeScanInProgress(true);
+        self.scan(options).then((barcodeData) => {
+          if(barcodeData.format != CodeScanService.BARCODE_TYPE_QR)
+          {
+            self.setCodeScanInProgress(false);
+            reject(new Error("The scanned image is not a QR Code!"));
+          }
+          self._scannedCodeToRegister = barcodeData.text;
+          resolve(barcodeData.text);
+        }, (e) => {
+          self.setCodeScanInProgress(false);
+          reject(e);
+        });
+      } else
+      {
+        //@todo: should we reset?
+        //self.setCodeScanInProgress(false);
+        reject(new Error("Code scan is already in progress!"));
+      }
     });
   }
 
@@ -70,6 +87,7 @@ export class CodeScanService
         self.barcodeScanner.scan(options).then((barcodeData) => {
           try {
             self.scanCheck(barcodeData, options);
+
             resolve(barcodeData);
           } catch(e)
           {
@@ -140,14 +158,18 @@ export class CodeScanService
     /*
      * unallow the same codes to be returned twice in a row
      */
-    let lastCheckinOperation = this.remoteDataService.getLastOperation();
-    if(lastCheckinOperation.type == Checkpoint.TYPE_CHK && !_.isEmpty(lastCheckinOperation.code))
-    {
-      allowFakes = _.pull(allowFakes, lastCheckinOperation.code);
-      if(!_.size(allowFakes))
+    try {
+      let lastCheckinOperation = this.remoteDataService.getLastOperation();
+      if(lastCheckinOperation.type == Checkpoint.TYPE_CHK && !_.isEmpty(lastCheckinOperation.code))
       {
-        allowFakes = codes[expected_type];
+        allowFakes = _.pull(allowFakes, lastCheckinOperation.code);
+        if(!_.size(allowFakes))
+        {
+          allowFakes = codes[expected_type];
+        }
       }
+    } catch(e) {
+      //all of them
     }
 
     let code = _.sample(allowFakes);
@@ -160,14 +182,29 @@ export class CodeScanService
     }
   }
 
+  /**
+   *
+   * @returns {string}
+   */
+  public getScannedCodeToRegister()
+  {
+    return this._scannedCodeToRegister;
+  }
 
   public isCodeScanInProgress(): boolean
   {
     return this._isCodeScanInProgress;
   }
 
+  /**
+   * @param {boolean} value
+   */
   public setCodeScanInProgress(value: boolean)
   {
+    if(value === true)
+    {
+      this._scannedCodeToRegister = null;
+    }
     this._isCodeScanInProgress = value;
   }
 }

@@ -240,7 +240,7 @@ export class RemoteDataService
       {
         LogService.log("New Checkin stored with id: " + checkinId);
         return self.checkinProvider.getCheckinById(checkinId);
-      }).then((newCheckin) =>
+      }).then((newCheckin:Checkin) =>
       {
         checkin = newCheckin;
         return self.updateDurationOfPreviousCheckin(checkin);
@@ -258,11 +258,12 @@ export class RemoteDataService
   }
 
   /**
-   * OLD!!!
-   * @todo: PAUSE uses this - convert to storeNewCheckinForCheckpoint and remove this!!!
+   *
+   * @todo: OLD!!! - PAUSE uses this - convert to storeNewCheckinForCheckpoint and remove this!!!
    * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
    * OLD!!!
    *
+   * @deprecated
    * @param {string} code
    * @returns {Promise<string>}
    */
@@ -289,11 +290,11 @@ export class RemoteDataService
           sync_state: CrmDataModel.SYNC_STATE__NEW
         });
         return self.checkinProvider.store(checkin);
-      }).then((checkinId) =>
+      }).then((checkinId:string) =>
       {
         LogService.log("New Checkin stored with id: ", checkinId);
         return self.checkinProvider.getCheckinById(checkinId);
-      }).then((checkin) =>
+      }).then((checkin:Checkin) =>
       {
         newCheckin = checkin;
         return self.updateDurationOfPreviousCheckin(newCheckin);
@@ -377,9 +378,9 @@ export class RemoteDataService
    */
   public getLastOperation(): Checkin
   {
-    if (_.isNull(this.last_checkin_operation))
+    if (_.isUndefined(this.last_checkin_operation) || _.isNull(this.last_checkin_operation))
     {
-      throw new Error("Last Checkin operation has not been identified yet");
+      throw new Error("Last Checkin operation has not been identified yet!");
     }
     return this.last_checkin_operation;
   }
