@@ -94,7 +94,7 @@ export class CheckpointProvider extends LocalDocumentProvider
       {
         //LogService.log("Looking for checkpoint by CODE: "  + options.selector.code);
         let candidate = _.find(self.codeIdCache, ['code', options.selector.code]);
-        if(!_.isUndefined(candidate.id))
+        if(candidate && !_.isUndefined(candidate.id))
         {
           options.selector = {"id": candidate.id};
           LogService.log("CP - used cache for code("+candidate.code+") to get id : "  + candidate.id);
@@ -102,7 +102,6 @@ export class CheckpointProvider extends LocalDocumentProvider
       }
 
       //LogService.log("getCheckpoint OPTIONS: "  + JSON.stringify(options));
-
       self.findDocuments(options).then((res) => {
         if (_.size(res.docs) < 1)
         {
@@ -163,7 +162,9 @@ export class CheckpointProvider extends LocalDocumentProvider
         if (!_.isUndefined(res.docs) && _.size(res.docs))
         {
           self.codeIdCache = res.docs;
-          LogService.log("ID-CODE array length: " + _.size(self.codeIdCache));
+          LogService.log("MEM - ID-CODE array length: " + _.size(self.codeIdCache));
+        } else {
+          LogService.log("MEM - no data" + JSON.stringify(res));
         }
         resolve();
       });

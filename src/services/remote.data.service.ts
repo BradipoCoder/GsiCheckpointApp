@@ -210,15 +210,14 @@ export class RemoteDataService
    * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
    *
    * @param {Checkpoint} checkpoint
-   * @param {any} [checklistItems]
-   * @returns {Promise<string>}
+   * @returns {Promise<Checkin>}
    */
-  public storeNewCheckinForCheckpoint(checkpoint: Checkpoint, checklistItems: any = []): Promise<Checkin>
+  public storeNewCheckinForCheckpoint(checkpoint: Checkpoint): Promise<Checkin>
   {
     let self = this;
     let checkin: Checkin;
 
-    return new Promise(function (resolve, reject)
+    return new Promise((resolve, reject) =>
     {
       checkin = self.checkinProvider.getNewModelInstance({
         name: checkpoint.name,
@@ -234,8 +233,15 @@ export class RemoteDataService
         sync_state: CrmDataModel.SYNC_STATE__NEW
       });
 
-      checkin.setChecklistItemsFromArray(checklistItems);
+      self.checkinProvider.store(checkin).then((checkinId) =>
+      {
+        LogService.log("New Checkin stored with id: " + checkinId);
+        resolve(checkin);
+      }, (e) => {
+        return reject(e);
+      });
 
+      /*
       self.checkinProvider.store(checkin).then((checkinId) =>
       {
         LogService.log("New Checkin stored with id: " + checkinId);
@@ -254,6 +260,7 @@ export class RemoteDataService
       {
         return reject(e);
       });
+    */
     });
   }
 

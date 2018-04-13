@@ -21,7 +21,7 @@ import {ConfigurationPage} from "../configuration/configuration";
         <!--Test-->
       <!--</button>-->
       <div class="spinner">
-        <img width="398" height="598" src="assets/image/spinner.gif" />
+        <img width="71" height="61" src="assets/image/spinner.gif" />
       </div>
     </ion-content>
   `

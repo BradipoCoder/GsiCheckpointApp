@@ -153,12 +153,18 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
    */
   public scanQRCode(allowedTypes: any): void
   {
-    let barcodeText;
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcode) => {
       LogService.log("SCANNED BARCODE: " + barcode);
       this.navCtrl.setRoot(HomePage).then(() => {
         LogService.log("Reset home call done.");
       })
+    }, (e) => {
+      let toast = this.toastCtrl.create({
+        message: e,
+        duration: 3000,
+        position: 'top'
+      });
+      toast.present();
     });
   }
 

@@ -149,6 +149,7 @@ export class BackgroundService
           clearInterval(waitInterval);
           waitInterval = null;
           self.stop_requested = false;
+          LogService.log("Background service is now stopped.");
           resolve();
         }
         if (waitCount > waitMaxCount)

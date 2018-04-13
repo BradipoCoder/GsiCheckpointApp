@@ -42,7 +42,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     , private checkpointProvider:CheckpointProvider
     , private checkinProvider:CheckinProvider
     , private offlineCapableRestService: OfflineCapableRestService
-    , private backgroundService: BackgroundService
+    , protected backgroundService: BackgroundService
     , private remoteDataService: RemoteDataService
     , private userService: UserService)
   {

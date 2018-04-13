@@ -22,6 +22,15 @@
         <ion-icon name="ice-cream"></ion-icon>
         <ion-label>Kill all data</ion-label>
       </button>
+
+      <button ion-button icon-left (click)="backgroundService.start()" color="light">
+        <ion-icon name="clock"></ion-icon>
+        <ion-label>Start Timer</ion-label>
+      </button>
+      <button ion-button icon-left (click)="backgroundService.stop()" color="light">
+        <ion-icon name="hand"></ion-icon>
+        <ion-label>Stop Timer</ion-label>
+      </button>
     </div>
     <!--ADMIN ONLY-->
 

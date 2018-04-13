@@ -87,7 +87,7 @@ export class HomePage implements OnInit, OnDestroy
     this.recalculateLastCheckinDuration(this);
 
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcodeData) => {
-      barcodeText = barcodeData.text;
+      barcodeText = ""; /*barcodeData.text;*/
       LogService.log("BARCODE: " + barcodeText);
 
       loader = this.loadingCtrl.create({
