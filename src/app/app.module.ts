@@ -45,6 +45,7 @@ import {TasksOutPage} from "../pages/tasks/tasks.out";
 // import {HomeTaskViewPage} from "../pages/home/home.task.view";
 import {HomeNoConfPage} from '../pages/home/home-no-conf/home-no-conf';
 import {HomeCodeRegPage} from '../pages/home/home-code-reg/home-code-reg';
+import {HomeCodeChecklistPage} from '../pages/home/home-code-checklist/home-code-checklist';
 import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinlist';
 /* Other/Utils/Tools */
 
@@ -59,6 +60,7 @@ import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinli
     , ConfigurationUnlockerPage
     , HomeNoConfPage
     , HomeCodeRegPage
+    , HomeCodeChecklistPage
     , HomeCheckinlistPage
     , HomePage
     , InfoPage
@@ -78,6 +80,7 @@ import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinli
     , ConfigurationUnlockerPage
     , HomeNoConfPage
     , HomeCodeRegPage
+    , HomeCodeChecklistPage
     , HomeCheckinlistPage
     , HomePage
     , InfoPage

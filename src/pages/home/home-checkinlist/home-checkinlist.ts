@@ -157,7 +157,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
       LogService.log("SCANNED BARCODE: " + barcode);
       this.navCtrl.setRoot(HomePage).then(() => {
         LogService.log("Reset home call done.");
-      })
+      });
     }, (e) => {
       let toast = this.toastCtrl.create({
         message: e,
@@ -174,7 +174,9 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
    */
   protected modifyCheckin(checkin: Checkin)
   {
-    LogService.log("Coming soon...");
+    this.remoteDataService.setCheckinToModify(checkin);
+    this.navCtrl.setRoot(HomePage);
+
     /*
     this.checkpointProvider.getCheckpoint({selector: {id: checkin.mkt_checkpoint_id_c}})
       .then((relativeCheckpoint: Checkpoint) => {
@@ -183,7 +185,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
           LogService.log('Modify Checkin:' + checkin.code + " - " + checkin.mkt_checkpoint_id_c);
           //LogService.log('Checkpoint: ' + relativeCheckpoint.id);
 
-          this.presentCheckpointChecklistSelector(checkin, relativeCheckpoint).then((selectedValues) => {
+          this.handleCheckpointChecklistSelection(checkin, relativeCheckpoint).then((selectedValues) => {
             checkin.setChecklistItemsFromArray(selectedValues);
             checkin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
             this.checkinProvider.store(checkin, true).then(() => {

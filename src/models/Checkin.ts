@@ -93,6 +93,10 @@ export class Checkin extends CrmDataModel
   {
     super.setChecklistItemsFromArray(elements);
     this.checklist_c = this.getChecklistStringFromArray(elements);
+    if(this.sync_state === Checkin.SYNC_STATE__IN_SYNC)
+    {
+      this.sync_state = Checkin.SYNC_STATE__CHANGED;
+    }
   }
 
   /**

@@ -21,7 +21,6 @@ export class CodeScanService
   private isMobileDevice:boolean;
 
   private _isCodeScanInProgress:boolean = false;
-
   private _scannedCodeToRegister:string = null;
 
   /**
@@ -54,7 +53,7 @@ export class CodeScanService
             self.setCodeScanInProgress(false);
             reject(new Error("The scanned image is not a QR Code!"));
           }
-          self._scannedCodeToRegister = barcodeData.text;
+          self.setCodeToRegister(barcodeData.text);
           resolve(barcodeData.text);
         }, (e) => {
           self.setCodeScanInProgress(false);
@@ -149,7 +148,8 @@ export class CodeScanService
     let codes:any = [];
     codes[Checkpoint.TYPE_IN] = ["CSI-IN"];
     codes[Checkpoint.TYPE_OUT] = ["CSI-OUT"];
-    codes[Checkpoint.TYPE_CHK] = ["108", "142", "211", "274", "AT03", "ES12"];
+    //codes[Checkpoint.TYPE_CHK] = ["108", "142", "211", "274", "AT03", "ES12"];//normali
+    codes[Checkpoint.TYPE_CHK] = ["151", "360", "AT61"];//bagni
     //codes[Checkpoint.TYPE_CHK] = ["124", "248", "A158", "AT76", "S103"];
     //codes[Checkpoint.TYPE_CHK] = ["AT88"];//"AT76",
 
@@ -201,11 +201,20 @@ export class CodeScanService
    */
   public setCodeScanInProgress(value: boolean)
   {
-    if(value === true)
+    if(value === false)
     {
-      this._scannedCodeToRegister = null;
+      this.setCodeToRegister(null);
     }
     this._isCodeScanInProgress = value;
+  }
+
+  /**
+   * Set the code to check for wehn registering/modifying(checklist)
+   * @param {any} value
+   */
+  public setCodeToRegister(value:any):void
+  {
+    this._scannedCodeToRegister = !_.isEmpty(value) ? value : null;
   }
 }
 

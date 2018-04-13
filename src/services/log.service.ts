@@ -118,11 +118,13 @@ export class LogService
   /**
    *
    * @param {Error} error
+   * @param {string} prefix
    */
-  public static error(error: Error): void
+  public static error(error: Error, prefix:string = ""): void
   {
     LogService.last_error = error;
-    LogService.log("^ERR:" + error.message, LogService.LEVEL_ERROR);
+    prefix = (prefix ? prefix : "^ERROR") + ": ";
+    LogService.log(prefix + error.message, LogService.LEVEL_ERROR);
   }
 
   /**

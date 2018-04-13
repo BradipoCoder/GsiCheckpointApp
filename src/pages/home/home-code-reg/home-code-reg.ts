@@ -1,6 +1,6 @@
 /* Import: Core */
 import {Component, OnInit} from '@angular/core';
-import {NavController} from 'ionic-angular';
+import {NavController,AlertController} from 'ionic-angular';
 /* Import: services */
 import {CodeScanService} from '../../../services/code.scan.service';
 import {RemoteDataService} from "../../../services/remote.data.service";
@@ -14,7 +14,7 @@ import {HomePage} from "../home";
 import {Checkin} from "../../../models/Checkin";
 
 /* Import: utilities */
-//import _ from "lodash";
+import _ from "lodash";
 
 @Component({
   selector: 'page-home-code-reg',
@@ -60,6 +60,7 @@ export class HomeCodeRegPage implements OnInit
   private messages:any = [];
 
   constructor(protected navCtrl: NavController
+              , protected alertCtrl: AlertController
               , protected codeScanService: CodeScanService
               , protected remoteDataService: RemoteDataService
               , protected logService: LogService
@@ -70,15 +71,13 @@ export class HomeCodeRegPage implements OnInit
   }
 
   /**
-   * @todo: remove me!
+   *
    */
-  registerErrorAndReset(): void
+  protected registerErrorAndReset(): void
   {
     //@todo: register error here
     this.codeScanService.setCodeScanInProgress(false);
-    this.navCtrl.setRoot(HomePage).then(() => {
-      LogService.log("--- RESET HOME ---");
-    });
+    this.navCtrl.setRoot(HomePage);
   }
 
   /**
@@ -101,8 +100,7 @@ export class HomeCodeRegPage implements OnInit
    */
   private getMessages(): string
   {
-    let answer = this.messages.join("\n");
-    return answer;
+    return this.messages.join("\n");
   }
 
   /**
@@ -112,7 +110,6 @@ export class HomeCodeRegPage implements OnInit
   protected registerNewCheckinForCheckpoint(checkpoint: Checkpoint): Promise<Checkin>
   {
     let self = this;
-    let loader;
     let checkin: Checkin;
 
     return new Promise(function (resolve, reject) {
@@ -122,61 +119,12 @@ export class HomeCodeRegPage implements OnInit
 
       self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint).then((registeredCheckin:Checkin) => {
         checkin = registeredCheckin;
-        LogService.log("Registration OK: [" + checkin.code + "] " + checkin.name);
+        LogService.log("Checkin registration OK: [" + checkin.code + "] " + checkin.name);
         self.messages.push("Registrazione ok.");
         resolve(checkin);
-
       }, (e) => {
         return reject(e);
       });
-
-
-      /*.then((registeredCheckin: Checkin) => {
-        checkin = registeredCheckin;
-        loader.dismiss();
-
-        let msg = "Sei entrato in: [" + checkin.code + "] " + checkin.name;
-
-        if (checkin.type == Checkpoint.TYPE_OUT)
-        {
-          msg = "Fine turno";
-          self.presentLogoutScreen = true;
-        } else if (checkin.type == Checkpoint.TYPE_IN)
-        {
-          self.presentLogoutScreen = false;
-          msg = "Inizio turno";
-        }
-        loader.setContent(msg);
-
-        return self.presentCheckpointChecklistSelector(checkin, checkpoint);
-      }).then((selectedValues) => {
-        //LogService.log('Checkbox selected data:' + JSON.stringify(selectedValues));
-        if (_.isEmpty(selectedValues))
-        {
-          resolve(checkin);
-          return;
-        }
-
-        LogService.log('Re-saving checkin with checkbox selected data:' + JSON.stringify(selectedValues));
-        checkin.setChecklistItemsFromArray(selectedValues);
-        return self.checkinProvider.store(checkin, true);
-      }).then(() => {
-        resolve(checkin);
-        //DONE
-      }, (e) => {
-        if (!_.isUndefined(loader))
-        {
-          loader.dismiss();
-        }
-        reject(e);
-      }).catch((e) => {
-        if (!_.isUndefined(loader))
-        {
-          loader.dismiss();
-        }
-        reject(e);
-      });
-      */
     });
   }
 
@@ -190,9 +138,16 @@ export class HomeCodeRegPage implements OnInit
       LogService.log("Found Checkpoint: " + checkpoint.id);
       this.messages.push("locale identificato");
 
-      this.registerNewCheckinForCheckpoint(checkpoint).then(() => {
+      this.registerNewCheckinForCheckpoint(checkpoint).then((checkin:Checkin) => {
         LogService.log('Checkpoint registration OK');
         this.codeScanService.setCodeScanInProgress(false);
+
+        if (checkpoint.hasChecklistValues())
+        {
+          this.remoteDataService.setCheckinToModify(checkin);
+        } else {
+          this.codeScanService.setCodeToRegister(false);
+        }
         this.navCtrl.setRoot(HomePage).then(() => {
           LogService.log("--- RESET HOME ---");
         });

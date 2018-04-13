@@ -38,6 +38,8 @@ export class RemoteDataService
 
   private CURRENT_SESSION_CHECKINS: Checkin[];
 
+  private _CHECKIN_TO_MODIFY_: Checkin;
+
   /* for Home - HomeCheckinViewPage*/
   public HomeCheckinViewPageData:any;
 
@@ -51,7 +53,9 @@ export class RemoteDataService
       this.checkpointProvider,
       this.checkinProvider,
       this.taskProvider,
-    ]
+    ];
+
+    this._CHECKIN_TO_MODIFY_ = null;
   }
 
   //----------------------------------------------------------------------------------------------------------CHECKPOINT
@@ -242,7 +246,7 @@ export class RemoteDataService
       }).then((newCheckin:Checkin) =>
       {
         checkin = newCheckin;
-        LogService.log("LOADED NEW CHECKIN: " + JSON.stringify(checkin));
+        LogService.log("LOADED NEW CHECKIN: " /*+ JSON.stringify(checkin)*/);
         return self.updateDurationOfPreviousCheckin(checkin);
       }, (e) => {
         return reject(e);
@@ -399,6 +403,19 @@ export class RemoteDataService
     return _.last(this.CURRENT_SESSION_CHECKINS) as Checkin;
   }
 
+  /**
+   *
+   * @returns {Checkin}
+   */
+  public getCheckinToModify(): Checkin
+  {
+    return this._CHECKIN_TO_MODIFY_;
+  }
+
+  public setCheckinToModify(value: Checkin)
+  {
+    this._CHECKIN_TO_MODIFY_ = !_.isEmpty(value) ? value : null;
+  }
 
   /**
    * Destroys and recreates databases

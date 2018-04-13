@@ -1,16 +1,19 @@
 /* Import: Core */
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {NavController} from 'ionic-angular';
 /* Import: services */
 import {LogService} from "../../services/log.service";
 import {UserService} from '../../services/user.service';
 import {CodeScanService} from '../../services/code.scan.service';
+import {RemoteDataService} from "../../services/remote.data.service";
 /* Import: pages */
 import {HomeNoConfPage} from './home-no-conf/home-no-conf';
 import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
+import {HomeCodeChecklistPage} from "./home-code-checklist/home-code-checklist";
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
 import {ConfigurationPage} from "../configuration/configuration";
 /* Import: utilities */
+
 //import _ from "lodash";
 
 @Component({
@@ -18,19 +21,20 @@ import {ConfigurationPage} from "../configuration/configuration";
   template: `
     <ion-content text-center>
       <!--<button ion-button margin-top color="not-so-danger" (click)="testActionOne()">-->
-        <!--Test-->
+      <!--Test-->
       <!--</button>-->
       <div class="spinner">
-        <img width="71" height="61" src="assets/image/spinner.gif" />
+        <img width="71" height="61" src="assets/image/spinner.gif"/>
       </div>
     </ion-content>
   `
 })
-export class HomePage implements OnInit, OnDestroy
+export class HomePage implements OnInit
 {
   constructor(protected navCtrl: NavController
-    ,protected codeScanService: CodeScanService
-    ,protected userService: UserService)
+    , protected codeScanService: CodeScanService
+    , protected remoteDataService: RemoteDataService
+    , protected userService: UserService)
   {
   }
 
@@ -51,15 +55,16 @@ export class HomePage implements OnInit, OnDestroy
    *
    * @returns {Promise<any>}
    */
-  private checkIfApplicationIsConfiguration(): Promise<any>
+  private ___route___config_check(): Promise<any>
   {
     let self = this;
     return new Promise((resolve, reject) => {
-      if(!self.userService.is_user_configured)
+      if (!self.userService.is_user_configured)
       {
-        LogService.error(new Error("L'applicazione non è stata ancora configurata."));
-        return reject();
-      } else {
+        self.navCtrl.setRoot(HomeNoConfPage);
+        return reject(new Error("L'applicazione non è stata ancora configurata."));
+      } else
+      {
         resolve();
       }
     });
@@ -71,17 +76,39 @@ export class HomePage implements OnInit, OnDestroy
    * @var self.userService.is_user_configured
    *
    * @returns {Promise<any>}
+   * @private
    */
-  private checkIfCodeRegistrationIsInProgress(): Promise<any>
+  private ___route___code_registration(): Promise<any>
   {
     let self = this;
     return new Promise((resolve, reject) => {
-      if(self.codeScanService.isCodeScanInProgress())
+      if (self.codeScanService.isCodeScanInProgress())
       {
-        //reject(new Error("CODE REG IN PROGRESS"));
         this.navCtrl.setRoot(HomeCodeRegPage);
+        return reject(new Error("Code registration in progress..."));
+      } else
+      {
+        resolve();
+      }
+    });
+  }
 
-      } else {
+  /**
+   * @description Check if there is a code(new|existing) on which user requested checklist modification
+   *
+   * @returns {Promise<any>}
+   * @private
+   */
+  private ___route___code_checklist(): Promise<any>
+  {
+    let self = this;
+    return new Promise((resolve, reject) => {
+      if (self.remoteDataService.getCheckinToModify())
+      {
+        this.navCtrl.setRoot(HomeCodeChecklistPage);
+        return reject(new Error("Checkin modification in progress..."));
+      } else
+      {
         resolve();
       }
     });
@@ -89,24 +116,16 @@ export class HomePage implements OnInit, OnDestroy
 
   ngOnInit(): void
   {
-    this.checkIfApplicationIsConfiguration().then(() => {
-      this.checkIfCodeRegistrationIsInProgress().then(() => {
-        return this.navCtrl.setRoot(HomeCheckinlistPage).then(() => {
-          LogService.log("HOME INIT DONE.");
-        });
-      }, (e) => {
-        LogService.log("ROUTER: " + e);
-        // go to code reg page
-      });
-    }, () => {
-      this.navCtrl.setRoot(HomeNoConfPage).then(() => {
-        //LogService.log("CONF PAGE REACHED.");
-      });
+    this.___route___config_check().then(() => {
+      return this.___route___code_registration();
+    }).then(() => {
+      return this.___route___code_checklist();
+    }).then(() => {
+      return this.navCtrl.setRoot(HomeCheckinlistPage);
+    }).then(() => {
+      LogService.log("*** HOME INIT DONE ***");
+    }).catch(e => {
+      LogService.error(e, "HOME INIT REJECTION");
     });
-  }
-
-  ngOnDestroy(): void
-  {
-    //
   }
 }
