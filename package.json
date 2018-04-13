@@ -33,8 +33,6 @@
     "axios": "^0.18.0",
     "bluebird": "^3.5.0",
     "blueimp-md5": "^2.7.0",
-    "cordova-android": "^7.1.0",
-    "cordova-plugin-compat": "^1.2.0",
     "cordova-plugin-console": "^1.0.7",
     "cordova-plugin-device": "^2.0.1",
     "cordova-plugin-insomnia": "git+https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git",
@@ -54,7 +52,7 @@
     "pouchdb": "^6.4.3",
     "pouchdb-find": "^6.4.3",
     "qs": "^6.5.0",
-    "rxjs": "5.5.9",
+    "rxjs": "5.5.10",
     "sugarcrm-js-rest-consumer": "^1.0.3",
     "sw-toolbox": "3.6.0",
     "underscore": "^1.8.3",
@@ -84,9 +82,10 @@
         "MAX_STORE": "2"
       },
       "cordova-plugin-network-information": {},
-      "phonegap-plugin-barcodescanner": {},
       "cordova-sqlite-storage": {},
-      "cordova-plugin-compat": {}
+      "phonegap-plugin-barcodescanner": {
+        "ANDROID_SUPPORT_V4_VERSION": "27.+"
+      }
     },
     "platforms": [
       "android"
