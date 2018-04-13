@@ -236,31 +236,23 @@ export class RemoteDataService
       self.checkinProvider.store(checkin).then((checkinId) =>
       {
         LogService.log("New Checkin stored with id: " + checkinId);
+        return self.checkinProvider.getCheckinById(checkinId);
+      }, (e) => {
+        return reject(e);
+      }).then((newCheckin:Checkin) =>
+      {
+        checkin = newCheckin;
+        LogService.log("LOADED NEW CHECKIN: " + JSON.stringify(checkin));
+        return self.updateDurationOfPreviousCheckin(checkin);
+      }, (e) => {
+        return reject(e);
+      }).then(() => {
+        LogService.log("PREVIOUS CHECKIN DURATION UPDATED.");
+        //removed: return self.updateCurrentSessionCheckins();
         resolve(checkin);
       }, (e) => {
         return reject(e);
       });
-
-      /*
-      self.checkinProvider.store(checkin).then((checkinId) =>
-      {
-        LogService.log("New Checkin stored with id: " + checkinId);
-        return self.checkinProvider.getCheckinById(checkinId);
-      }).then((newCheckin:Checkin) =>
-      {
-        checkin = newCheckin;
-        return self.updateDurationOfPreviousCheckin(checkin);
-      }).then(() =>
-      {
-        return self.updateCurrentSessionCheckins();
-      }).then(() =>
-      {
-        resolve(checkin);
-      }).catch((e) =>
-      {
-        return reject(e);
-      });
-    */
     });
   }
 

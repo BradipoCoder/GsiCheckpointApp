@@ -56,7 +56,7 @@ export class TaskProvider extends LocalDocumentProvider
     let model:Task = super.getNewModelInstance(data);
     //do something with all models
     this.setRelatedCheckpointOnTask(model);
-    LogService.log("New Checkpoint Instance: " + model.id);
+    //LogService.log("New Task Instance: " + model.id);
 
     return model;
   }

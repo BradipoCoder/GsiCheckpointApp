@@ -131,7 +131,7 @@ export class CheckinProvider extends LocalDocumentProvider
       self.getDocumentById(id).then((doc) => {
         let checkin = self.getNewModelInstance(doc);
         resolve(checkin);
-      }).catch((e) => {
+      },(e) => {
         reject(e);
       });
     });
