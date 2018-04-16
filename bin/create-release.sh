@@ -21,6 +21,10 @@ if [ -f "${APKDIR}/app-release-signed.apk" ]; then
   rm -rf "${APKDIR}/app-release-signed.apk"
 fi
 
+# increment version in package.json - "version": "0.2.1",
+perl -i -pe 's/"version": "\d+\.\d+\.\K(\d+)/ $1+1 /e' package.json
+# increment version in config.xml - version="0.2.1"
+perl -i -pe 's/version="\d+\.\d+\.\K(\d+)/ $1+1 /e' config.xml
 
 
 echo "Creating unsigned release version..."
