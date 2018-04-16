@@ -80,21 +80,23 @@ import * as moment from 'moment';
 
         <ion-row *ngFor="let checkin of checkins; let isFirstRow=first;" [ngClass]="{'first' : isFirstRow}">
           <ion-col class="left" col-9>
-            <div (click)="modifyCheckin(checkin)">
 
             <span class="name">
               <ion-icon [name]="checkin.icon" item-left></ion-icon>
               {{checkin.name}}
             </span>
 
-              <span class="duration">({{checkin.getFormattedDuration(displaySeconds)}})</span>
+              <span class="duration" *ngIf="isFirstRow">({{checkin.getFormattedDuration(displaySeconds)}})</span>
 
-              <span class="checklist_mod" *ngIf="checkin.isCheckpointChecklistAvailable()">
-                <ion-icon name="create"></ion-icon>
-                <span>modifica rifornimento</span>
+              <span class="checklist_mod" *ngIf="isFirstRow && checkin.isCheckpointChecklistAvailable()" (click)="modifyCheckin(checkin)">
+                  <ion-icon name="create"></ion-icon>
+                  <span>modifica rifornimento</span>
               </span>
-
-            </div>
+            
+              <span *ngIf="userService.isTrustedUser()">
+                [ {{checkin.getFormattedCheckinDate()}} ]
+              </span>
+            
           </ion-col>
           <ion-col class="right" col-3 text-right="">
             <div>

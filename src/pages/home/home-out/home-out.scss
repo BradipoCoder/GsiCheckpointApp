@@ -1,0 +1,23 @@
+@import "../../../theme/variables";
+
+page-home-out {
+
+  ion-header {
+    /**/
+    }
+
+  ion-content {
+
+    .buttons {
+      margin-top: 2rem;
+      ion-fab.qr-scan-fab {
+        bottom: auto;
+        right: auto;
+      }
+    }
+  }
+
+  ion-footer {
+    /**/
+  }
+}

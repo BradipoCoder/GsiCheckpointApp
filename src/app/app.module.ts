@@ -48,6 +48,7 @@ import {HomeCodeRegPage} from '../pages/home/home-code-reg/home-code-reg';
 import {HomeCodeChecklistPage} from '../pages/home/home-code-checklist/home-code-checklist';
 import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinlist';
 import {HomePausePage} from "../pages/home/home-pause/home-pause";
+import {HomeOutPage} from "../pages/home/home-out/home-out";
 
 /* Other/Utils/Tools */
 
@@ -65,6 +66,7 @@ import {HomePausePage} from "../pages/home/home-pause/home-pause";
     , HomeCodeChecklistPage
     , HomeCheckinlistPage
     , HomePausePage
+    , HomeOutPage
     , HomePage
     , InfoPage
     , LogoutPage
@@ -86,6 +88,7 @@ import {HomePausePage} from "../pages/home/home-pause/home-pause";
     , HomeCodeChecklistPage
     , HomeCheckinlistPage
     , HomePausePage
+    , HomeOutPage
     , HomePage
     , InfoPage
     , LogoutPage

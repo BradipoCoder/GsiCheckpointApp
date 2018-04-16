@@ -16,9 +16,9 @@ import {Checkin} from "../models/Checkin";
 /** OTHER */
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
-import Dexie from 'dexie';
 import _ from "lodash";
 import * as moment from 'moment';
+import 'moment-timezone';
 import {Promise} from '../../node_modules/bluebird'
 import Rx from "rxjs/Rx";
 import {Subject} from "rxjs/Subject";
@@ -27,7 +27,6 @@ import {Observable} from "rxjs/Observable";
 PouchDB.plugin(PouchDBFind);
 //PouchDB.debug.enable('pouchdb:find');
 //PouchDB.debug.disable('pouchdb:find');
-
 
 @Injectable()
 export class LocalDocumentProvider
@@ -380,13 +379,23 @@ export class LocalDocumentProvider
             }).then((res) => {
                 let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
 
+
+
                 //create date objects
                 _.each(records, (record) => {
+
+                  //@fixme: correct date from here
+                  let date_entered = record.date_entered;
+                  let d1 = moment(date_entered);
+                  let d2 = d1.clone().tz("Europe/Rome");
+
+                  LogService.log("D1: " + d1.format("YYYY-MM-DD HH:mm:ss") + "   D2: " + d2.format("YYYY-MM-DD HH:mm:ss"));
+
                   record.date_entered = moment(record.date_entered);
                   record.date_modified = moment(record.date_modified);
                 });
 
-                //LogService.log("RECORDS: " + JSON.stringify(records));
+              //LogService.log("RECORDS: " + JSON.stringify(records));
 
                 //let newSyncOffset = _.size(records) == itemsAtOnce ? syncOffset + itemsAtOnce : 0;
                 let newSyncOffset = syncOffset + _.size(records);

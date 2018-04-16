@@ -11,11 +11,10 @@ import {HomeNoConfPage} from './home-no-conf/home-no-conf';
 import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
 import {HomeCodeChecklistPage} from "./home-code-checklist/home-code-checklist";
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
-import {ConfigurationPage} from "../configuration/configuration";
 import {Checkpoint} from "../../models/Checkpoint";
 import {HomePausePage} from "./home-pause/home-pause";
+import {HomeOutPage} from "./home-out/home-out";
 /* Import: utilities */
-
 //import _ from "lodash";
 
 @Component({
@@ -86,7 +85,7 @@ export class HomePage implements OnInit
     return new Promise((resolve, reject) => {
       if (self.codeScanService.isCodeScanInProgress())
       {
-        this.navCtrl.setRoot(HomeCodeRegPage);
+        self.navCtrl.setRoot(HomeCodeRegPage);
         return reject(new Error("Code registration in progress..."));
       } else
       {
@@ -107,7 +106,7 @@ export class HomePage implements OnInit
     return new Promise((resolve, reject) => {
       if (self.remoteDataService.getCheckinToModify())
       {
-        this.navCtrl.setRoot(HomeCodeChecklistPage);
+        self.navCtrl.setRoot(HomeCodeChecklistPage);
         return reject(new Error("Checkin modification in progress..."));
       } else
       {
@@ -136,8 +135,38 @@ export class HomePage implements OnInit
 
       if (is_paused)
       {
-        this.navCtrl.setRoot(HomePausePage);
+        self.navCtrl.setRoot(HomePausePage);
         return reject(new Error("User is having a break..."));
+      } else
+      {
+        resolve();
+      }
+    });
+  }
+
+  /**
+   * @description Check if user is checked out (ready to start working again)
+   *
+   * @returns {Promise<any>}
+   * @private
+   */
+  private ___route___user_out(): Promise<any>
+  {
+    let self = this;
+    return new Promise((resolve, reject) => {
+      let is_out = false;
+      try
+      {
+        is_out = self.remoteDataService.getLastOperation().type == Checkpoint.TYPE_OUT;
+      } catch (e)
+      {
+        is_out = false;
+      }
+
+      if (is_out)
+      {
+        self.navCtrl.setRoot(HomeOutPage);
+        return reject(new Error("User is checked out..."));
       } else
       {
         resolve();
@@ -156,6 +185,8 @@ export class HomePage implements OnInit
       return this.___route___code_checklist();
     }).then(() => {
       return this.___route___user_break();
+    }).then(() => {
+      return this.___route___user_out();
     }).then(() => {
       return this.navCtrl.setRoot(HomeCheckinlistPage);
     }).then(() => {
