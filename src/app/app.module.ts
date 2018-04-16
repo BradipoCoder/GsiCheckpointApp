@@ -47,6 +47,8 @@ import {HomeNoConfPage} from '../pages/home/home-no-conf/home-no-conf';
 import {HomeCodeRegPage} from '../pages/home/home-code-reg/home-code-reg';
 import {HomeCodeChecklistPage} from '../pages/home/home-code-checklist/home-code-checklist';
 import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinlist';
+import {HomePausePage} from "../pages/home/home-pause/home-pause";
+
 /* Other/Utils/Tools */
 
 @NgModule({
@@ -62,6 +64,7 @@ import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinli
     , HomeCodeRegPage
     , HomeCodeChecklistPage
     , HomeCheckinlistPage
+    , HomePausePage
     , HomePage
     , InfoPage
     , LogoutPage
@@ -82,6 +85,7 @@ import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinli
     , HomeCodeRegPage
     , HomeCodeChecklistPage
     , HomeCheckinlistPage
+    , HomePausePage
     , HomePage
     , InfoPage
     , LogoutPage

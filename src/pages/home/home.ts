@@ -12,6 +12,8 @@ import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
 import {HomeCodeChecklistPage} from "./home-code-checklist/home-code-checklist";
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
 import {ConfigurationPage} from "../configuration/configuration";
+import {Checkpoint} from "../../models/Checkpoint";
+import {HomePausePage} from "./home-pause/home-pause";
 /* Import: utilities */
 
 //import _ from "lodash";
@@ -114,12 +116,46 @@ export class HomePage implements OnInit
     });
   }
 
+  /**
+   * @description Check if user is having a break
+   *
+   * @returns {Promise<any>}
+   */
+  ___route___user_break(): Promise<any>
+  {
+    let self = this;
+    return new Promise((resolve, reject) => {
+      let is_paused = false;
+      try
+      {
+        is_paused = self.remoteDataService.getLastOperation().type == Checkpoint.TYPE_PAUSE;
+      } catch (e)
+      {
+        is_paused = false;
+      }
+
+      if (is_paused)
+      {
+        this.navCtrl.setRoot(HomePausePage);
+        return reject(new Error("User is having a break..."));
+      } else
+      {
+        resolve();
+      }
+    });
+  }
+
   ngOnInit(): void
   {
-    this.___route___config_check().then(() => {
+    LogService.log("*** HOME INIT START ***");
+    this.remoteDataService.updateCurrentSessionCheckins().then(() => {
+      return this.___route___config_check();
+    }).then(() => {
       return this.___route___code_registration();
     }).then(() => {
       return this.___route___code_checklist();
+    }).then(() => {
+      return this.___route___user_break();
     }).then(() => {
       return this.navCtrl.setRoot(HomeCheckinlistPage);
     }).then(() => {

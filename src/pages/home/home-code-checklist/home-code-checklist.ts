@@ -1,6 +1,6 @@
 /* Import: Core */
 import {Component, OnInit} from '@angular/core';
-import {NavController,AlertController} from 'ionic-angular';
+import {NavController, AlertController} from 'ionic-angular';
 /* Import: services */
 import {CodeScanService} from '../../../services/code.scan.service';
 import {RemoteDataService} from "../../../services/remote.data.service";
@@ -21,13 +21,11 @@ import _ from "lodash";
   selector: 'page-home-code-checklist',
   template: `
     <ion-content text-center>
-      
+
       <ion-grid margin-top>
         <ion-row>
           <ion-col>
-            <ion-label color="darkest">
-              <h3>CHECKLIST</h3>
-            </ion-label>
+            <!--CHECKLIST-->
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -36,18 +34,16 @@ import _ from "lodash";
 })
 export class HomeCodeChecklistPage implements OnInit
 {
-  private messages:any = [];
+  private messages: any = [];
 
   constructor(protected navCtrl: NavController
     , protected alertCtrl: AlertController
     , protected codeScanService: CodeScanService
     , protected remoteDataService: RemoteDataService
-    , protected logService: LogService
     , protected checkpointProvider: CheckpointProvider
     , protected checkinProvider: CheckinProvider
   )
   {
-    //
   }
 
   /**
@@ -70,7 +66,7 @@ export class HomeCodeChecklistPage implements OnInit
       }
 
       alert = self.alertCtrl.create({
-        title: 'RIFORNIMENTO',
+        title: 'RIFORNIMENTO - ' + checkpoint.code,
         subTitle: 'clicca sulle voci che hai rifornito',
         enableBackdropDismiss: false
       });
@@ -88,7 +84,7 @@ export class HomeCodeChecklistPage implements OnInit
 
       alert.addButton({
         text: 'Fatto',
-        handler: (selectedValues:any) => {
+        handler: (selectedValues: any) => {
           LogService.log('SELECTED CHECKLIST VALUES: ' + JSON.stringify(selectedValues));
           checkin.setChecklistItemsFromArray(selectedValues);
 

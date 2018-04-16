@@ -18,7 +18,94 @@ import {Subscription} from "rxjs/Subscription";
 
 @Component({
   selector: 'page-configuration-syncstate',
-  templateUrl: 'configuration.syncstate.html'
+  template: `
+    <ion-content *ngIf="viewIsReady">
+
+      <h1 class="tab-title">
+        Stato sincronizzazione
+      </h1>
+
+      <ion-list>
+
+        <ion-item class="sync-state" text-center align-items-center>
+          <ion-icon *ngIf="is_in_sync" name="happy" class="happy"></ion-icon>
+          <ion-icon *ngIf="!is_in_sync" name="sad" class="sad"></ion-icon>
+        </ion-item>
+
+        <!--ADMIN ONLY-->
+        <div class="buttons cache-clean-buttons" text-center align-items-center *ngIf="userService.isTrustedUser()">
+          <button ion-button icon-left (click)="doSomething()" color="dark">
+            <ion-icon name="refresh-circle"></ion-icon>
+            <ion-label>Sync one step</ion-label>
+          </button>
+
+          <button ion-button icon-left (click)="killAllData()" color="danger">
+            <ion-icon name="ice-cream"></ion-icon>
+            <ion-label>Kill all data</ion-label>
+          </button>
+
+          <button ion-button icon-left (click)="backgroundService.start()" color="light">
+            <ion-icon name="clock"></ion-icon>
+            <ion-label>Start Timer</ion-label>
+          </button>
+          <button ion-button icon-left (click)="backgroundService.stop()" color="light">
+            <ion-icon name="hand"></ion-icon>
+            <ion-label>Stop Timer</ion-label>
+          </button>
+        </div>
+        <!--ADMIN ONLY-->
+
+        <ion-list-header>Locali</ion-list-header>
+
+        <ion-item>
+          <ion-icon item-start name="cloud"></ion-icon>
+          Elementi sul server
+          <ion-badge item-end>{{counts.checkpoints.server}}</ion-badge>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon item-start name="phone-portrait"></ion-icon>
+          Elementi sul device
+          <ion-badge item-end>{{counts.checkpoints.device}}</ion-badge>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon item-start name="flash"></ion-icon>
+          Da sincronizzare[su/giù]
+          <ion-badge item-end color="yellow-light">{{counts.checkpoints.unsynced_up}}</ion-badge>
+          <ion-badge item-end color="violet-light">{{counts.checkpoints.unsynced_down}}</ion-badge>
+        </ion-item>
+
+
+        <ion-list-header>Tracce</ion-list-header>
+
+        <ion-item>
+          <ion-icon item-start name="cloud"></ion-icon>
+          Elementi sul server
+          <ion-badge item-end>{{counts.checkins.server}}</ion-badge>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon item-start name="phone-portrait"></ion-icon>
+          Elementi sul device
+          <ion-badge item-end>{{counts.checkins.device}}</ion-badge>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon item-start name="flash"></ion-icon>
+          Da sincronizzare[su/giù]
+          <ion-badge item-end color="yellow-light">{{counts.checkins.unsynced_up}}</ion-badge>
+          <ion-badge item-end color="violet-light">{{counts.checkins.unsynced_down}}</ion-badge>
+        </ion-item>
+
+      </ion-list>
+
+    </ion-content>
+
+    <ion-content *ngIf="!viewIsReady">
+      <h1 class="loading">{{viewNotReadyText}}</h1>
+    </ion-content>
+  `
 })
 export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 {
@@ -28,6 +115,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   private is_in_sync: boolean = false;
 
   private viewIsReady: boolean;
+  private viewNotReadyText:string  = "Caricamento in corso...";
 
   private hasInterfaceRefreshRequest = false;
   private isInterfaceRefreshRunning = false;
@@ -77,37 +165,62 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   }
 
   /**
-   * killAllData
+   * Request originated from username/password configuration change
    */
-  public killAllData():void
+  protected handleApplicationResetRequest()
   {
+      this.backgroundService.lockSyncPage();
+      this.viewIsReady = false;
+      this.viewNotReadyText = "Riconfigurazione applicazione in corso...";
+      this.killAllData().then(() => {
+        this.backgroundService.applicationResetRequested = false;
+        LogService.log("APP RESET DONE");
+        LogService.log("Starting background service...");
+        this.backgroundService.setSyncIntervalFast();
+        return this.backgroundService.start();
+      }).then(() => {
+        this.registerInterfaceRefreshRequest();
+        this.subscribeToDataChange();
+      });
+  }
+
+  /**
+   *
+   * @returns {Promise<any>}
+   */
+  public killAllData():Promise<any>
+  {
+    let self = this;
+
+    return new Promise((resolve, reject) => {
       let msg = "Stopping background service...";
       LogService.log(msg);
-      this.backgroundService.stop().then(() => {
+      self.backgroundService.stop().then(() => {
         msg = "* Background service stopped.";
         LogService.log(msg);
         //
         msg = "Resetting provider sync offsets...";
         LogService.log(msg);
-        return this.backgroundService.resetDataProvidersSyncOffset();//--------------------->
+        return self.backgroundService.resetDataProvidersSyncOffset();//--------------------->
       }).then(() => {
         msg = "* Provider sync offsets were reset.";
         LogService.log(msg);
         //
         msg = "Destroying databases...";
         LogService.log(msg);
-        return this.remoteDataService.destroyLocalDataStorages();
+        return self.remoteDataService.destroyLocalDataStorages();
       }).then(() => {
         msg = "Initializing remote data service...";
         LogService.log(msg);
-        return this.remoteDataService.initialize();
+        return self.remoteDataService.initialize();
       }).then(() => {
         LogService.log("DONE!", LogService.LEVEL_WARN);
+        resolve();
       }).catch(e => {
-        msg = "CACHE CLEAN ERROR: " + e;
-        LogService.log(msg, LogService.LEVEL_ERROR);
+        LogService.error(e);
+        reject(e);
       });
-
+    });
   }
 
   /* ------------------------------------------------------------------------------------------ INTERFACE ADMIN STUFF */
@@ -158,7 +271,9 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
           + self.counts.checkins.unsynced_down;
 
         // IS IN SYNC
-        self.is_in_sync = (self.counts.unsynced_count == 0);
+        self.is_in_sync = (self.counts.unsynced_count == 0)
+          && self.counts.checkpoints.server != 0
+          && self.counts.checkins.server != 0;
 
         self.completeFullCacheCleanAction();
 
@@ -170,6 +285,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     });
   }
 
+
   /**
    * Unlock Sync page and do other after full cache clear actions
    */
@@ -180,7 +296,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
       if(this.counts.unsynced_count == 0)
       {
         LogService.log("FULL CACHE CLEAN COMPLETED.", LogService.LEVEL_WARN);
-        this.backgroundService.setSyncIntervalSlow();
+        this.backgroundService.setSyncIntervalNormal();
         this.backgroundService.unlockSyncPage();
 
         if (this.platform.is("mobile"))
@@ -242,6 +358,24 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     }
   }
 
+  private subscribeToDataChange():void
+  {
+    this.dataChangeSubscriptionCheckin = this.checkinProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
+    this.dataChangeSubscriptionCheckpoint = this.checkpointProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
+  }
+
+  private unsubscribeToDataChange():void
+  {
+    if(this.dataChangeSubscriptionCheckin)
+    {
+      this.dataChangeSubscriptionCheckin.unsubscribe();
+    }
+    if(this.dataChangeSubscriptionCheckpoint)
+    {
+      this.dataChangeSubscriptionCheckpoint.unsubscribe();
+    }
+  }
+
 
   /**
    * Actions on component init
@@ -249,9 +383,15 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    */
   public ngOnInit(): void
   {
-    this.dataChangeSubscriptionCheckin = this.checkinProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
-    this.dataChangeSubscriptionCheckpoint = this.checkpointProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
+    if(this.backgroundService.applicationResetRequested)
+    {
+      this.handleApplicationResetRequest();
+      return;
+    }
+
     this.registerInterfaceRefreshRequest();
+    this.subscribeToDataChange();
+
   }
 
   /**
@@ -259,7 +399,6 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    */
   public ngOnDestroy(): void
   {
-    this.dataChangeSubscriptionCheckin.unsubscribe();
-    this.dataChangeSubscriptionCheckpoint.unsubscribe();
+    this.unsubscribeToDataChange();
   }
 }

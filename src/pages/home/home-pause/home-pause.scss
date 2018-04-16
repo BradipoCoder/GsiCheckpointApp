@@ -1,0 +1,39 @@
+@import "../../../theme/variables";
+
+page-home-pause {
+
+  ion-header {
+
+    .custom-background.paused {
+      background: color($colors, violet-light);
+    }
+
+    ion-grid.header-content {
+      ion-row {
+        ion-col.message {
+
+        }
+      }
+      .buttons {
+        ion-fab.qr-scan-fab {
+          bottom: -25px;
+          right: 25px;
+          &.exit {
+            right: 85px;
+          }
+        }
+      }
+    }
+  }
+
+  ion-content {
+    &.custom-background.paused {
+      background: color($colors, lightest);
+    }
+    /**/
+  }
+
+  ion-footer {
+    /**/
+  }
+}

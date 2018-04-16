@@ -227,7 +227,7 @@ export class RemoteDataService
         name: checkpoint.name,
         duration: 0,
         description: '',
-        checkin_date: moment().format(CrmDataModel.CRM_DATE_FORMAT), /*@todo!!! SERVER TIME !!!*/
+        checkin_date: moment().format(CrmDataModel.CRM_DATE_FORMAT), /*@fixme!!! SERVER TIME !!!*/
         user_id_c: self.userService.getUserData("id"),
         assigned_user_id: self.userService.getUserData("id"),
         checkin_user: self.userService.getUserData("full_name"),
@@ -261,54 +261,26 @@ export class RemoteDataService
   }
 
   /**
+   * Register a new PAUSE CHECKIN for current user at current time
    *
-   * @todo: OLD!!! - PAUSE uses this - convert to storeNewCheckinForCheckpoint and remove this!!!
-   * Register a new CHECKIN for current user at current time by matching the code passed of the checkpoints
-   * OLD!!!
-   *
-   * @deprecated
-   * @param {string} code
    * @returns {Promise<string>}
    */
-  public storeNewCheckin(code: string): Promise<Checkin>
+  public storePauseCheckin(): Promise<Checkin>
   {
     let self = this;
-    let newCheckin: Checkin;
 
     return new Promise(function (resolve, reject)
     {
-      self.checkpointProvider.getCheckpoint({selector: {code: code}}).then((relativeCheckpoint) =>
+      self.checkpointProvider.getCheckpoint({selector: {code: "PAUSA"}}).then((relativeCheckpoint) =>
       {
-        let checkin = self.checkinProvider.getNewModelInstance({
-          name: relativeCheckpoint.name,
-          duration: 0,
-          description: '',
-          checkin_date: moment().format(CrmDataModel.CRM_DATE_FORMAT), /*@todo!!! SERVER TIME !!!*/
-          user_id_c: self.userService.getUserData("id"),
-          assigned_user_id: self.userService.getUserData("id"),
-          checkin_user: self.userService.getUserData("full_name"),
-          mkt_checkpoint_id_c: relativeCheckpoint.id,
-          type: relativeCheckpoint.type,
-          code: relativeCheckpoint.code,
-          sync_state: CrmDataModel.SYNC_STATE__NEW
-        });
-        return self.checkinProvider.store(checkin);
-      }).then((checkinId:string) =>
+        return self.storeNewCheckinForCheckpoint(relativeCheckpoint);
+      }, (e) =>
       {
-        LogService.log("New Checkin stored with id: ", checkinId);
-        return self.checkinProvider.getCheckinById(checkinId);
+        return reject(e);
       }).then((checkin:Checkin) =>
       {
-        newCheckin = checkin;
-        return self.updateDurationOfPreviousCheckin(newCheckin);
-      }).then(() =>
-      {
-        return self.updateCurrentSessionCheckins();
-      }).then(() =>
-      {
-        resolve(newCheckin);
-
-      }).catch((e) =>
+        resolve(checkin);
+      }, (e) =>
       {
         return reject(e);
       });
@@ -455,9 +427,11 @@ export class RemoteDataService
       Promise.reduce(self.providers, (accu, provider) => {
         return provider.initialize();
       }, null).then(() => {
-        resolve();
-      }, (e) => {
-        reject(new Error("RDS - MANUAL BLOCK === ERR!" + e));
+        self.updateCurrentSessionCheckins().then(() => {
+          resolve();
+        }, (e) => {
+          reject();
+        });
       });
     });
   }

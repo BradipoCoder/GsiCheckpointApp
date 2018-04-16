@@ -3,6 +3,8 @@
 page-home-checkinlist {
 
   ion-header {
+    background: color($colors, green-light);
+
     ion-grid.header-content {
       ion-row {
         ion-col.message {
@@ -22,7 +24,60 @@ page-home-checkinlist {
   }
 
   ion-content {
-  /**/
+    ion-grid.checkin_list {
+      width:100%;
+      padding: 0;
+      background: color($colors, lightest);
+
+      ion-row
+      {
+        padding:5px 0 5px 16px;
+        ion-col.left{}
+        ion-col.right{
+          background: color($colors, lightest);
+          padding-right:10px;
+        }
+        &.title{
+          margin-top:10px;
+        }
+        &.first{
+          background: color($colors, green-light);
+          color: color($colors, lightest);
+          ion-col.right
+          {
+            background: color($colors, green-light);
+            ion-icon{
+              color: color($colors, text-color);
+            }
+          }
+          span.time
+          {
+            color: color($colors, text-color);
+          }
+          ion-icon{
+            color: color($colors, lightest);
+          }
+        }
+      }
+
+
+      span.name{
+        white-space: nowrap;
+      }
+
+      span.duration{
+        white-space: nowrap;
+      }
+
+      span.checklist_mod
+      {
+        white-space: nowrap;
+        & > span{
+          font-size: 1.2rem;
+        }
+      }
+
+    }
   }
 
   ion-footer{

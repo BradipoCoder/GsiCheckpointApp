@@ -105,7 +105,7 @@ export class CheckpointProvider extends LocalDocumentProvider
       self.findDocuments(options).then((res) => {
         if (_.size(res.docs) < 1)
         {
-          return reject(new Error("Locale sconosciuto!" + JSON.stringify(options)));
+          return reject(new Error("Locale sconosciuto!\n Parametri: " + JSON.stringify(options)));
         }
 
         if (_.size(res.docs) > 1)

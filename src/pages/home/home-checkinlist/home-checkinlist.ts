@@ -90,9 +90,9 @@ import * as moment from 'moment';
               <span class="duration">({{checkin.getFormattedDuration(displaySeconds)}})</span>
 
               <span class="checklist_mod" *ngIf="checkin.isCheckpointChecklistAvailable()">
-              <ion-icon name="create"></ion-icon>
-              <span>modifica rifornimento</span>
-            </span>
+                <ion-icon name="create"></ion-icon>
+                <span>modifica rifornimento</span>
+              </span>
 
             </div>
           </ion-col>
@@ -176,34 +176,6 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
   {
     this.remoteDataService.setCheckinToModify(checkin);
     this.navCtrl.setRoot(HomePage);
-
-    /*
-    this.checkpointProvider.getCheckpoint({selector: {id: checkin.mkt_checkpoint_id_c}})
-      .then((relativeCheckpoint: Checkpoint) => {
-        if (relativeCheckpoint.isChecklistAvailable())
-        {
-          LogService.log('Modify Checkin:' + checkin.code + " - " + checkin.mkt_checkpoint_id_c);
-          //LogService.log('Checkpoint: ' + relativeCheckpoint.id);
-
-          this.handleCheckpointChecklistSelection(checkin, relativeCheckpoint).then((selectedValues) => {
-            checkin.setChecklistItemsFromArray(selectedValues);
-            checkin.sync_state = CrmDataModel.SYNC_STATE__CHANGED;
-            this.checkinProvider.store(checkin, true).then(() => {
-              LogService.log('Modified, stored and queued for save');
-            }, (e) => {
-              LogService.log(e, LogService.LEVEL_ERROR);
-            });
-          }, (e) => {
-            LogService.log(e, LogService.LEVEL_ERROR);
-          });
-        } else
-        {
-          LogService.log("The checkpoint relative to this checkin does not have checklist options: " + relativeCheckpoint.code, LogService.LEVEL_WARN);
-        }
-      }, (e) => {
-        LogService.log(e, LogService.LEVEL_ERROR);
-      });
-      */
   }
 
   /**
@@ -211,9 +183,9 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
    */
   protected activatePause(): void
   {
-    this.remoteDataService.storeNewCheckin("PAUSA").then((checkin: Checkin) => {
-      LogService.log("CHECKIN REGISTERED: " + JSON.stringify(checkin));
-      //@todo: go to  HomePage
+    this.remoteDataService.storePauseCheckin().then(() => {
+      LogService.log("PAUSE REGISTERED");
+      this.navCtrl.setRoot(HomePage);
     }).catch((e) => {
       LogService.log("Errore pausa: " + e, LogService.LEVEL_ERROR);
       let toast = this.toastCtrl.create({
@@ -278,7 +250,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
 
       hours = Math.floor(shiftStartCheckinDuration / 60 / 60);
       minutes = Math.floor(shiftStartCheckinDuration / 60) - (60 * hours);
-      if(self.displaySeconds)
+      if (self.displaySeconds)
       {
         seconds = shiftStartCheckinDuration - (60 * 60 * hours) - (60 * minutes);
       }
@@ -288,7 +260,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
         durationStr += hours + " " + (hours > 1 ? "ore" : "ora") + " ";
       }
       durationStr += minutes + " min";
-      if(self.displaySeconds)
+      if (self.displaySeconds)
       {
         durationStr += " " + seconds + "s";
       }

@@ -14,17 +14,96 @@ import {ConfigurationPage} from './configuration';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
 /* OTHER */
 import _ from "lodash";
+import {HomePage} from "../home/home";
+import {ConfigurationSyncstatePage} from "./configuration.syncstate";
 
 
 @Component({
   selector: 'page-configuration-settings',
-  templateUrl: 'configuration.settings.html'
+  template: `
+    <ion-content *ngIf="viewIsReady">
+
+      <h1 class="tab-title">
+        Impostazioni applicazione
+      </h1>
+
+      <!-- Unlock buttons-->
+      <div class="buttons unlock-buttons" *ngIf="isFormDisabled()" text-center align-items-center>
+        <button ion-button icon-left (click)="onUnlockConfigForm()" color="danger">
+          <ion-icon name="unlock"></ion-icon>
+          <ion-label>Sblocca</ion-label>
+        </button>
+      </div>
+
+      <!-- Lock buttons-->
+      <div class="buttons lock-buttons" *ngIf="!isFormDisabled()" text-center align-items-center>
+        <button ion-button icon-left (click)="onLockConfigForm()">
+          <ion-icon name="lock"></ion-icon>
+          <ion-label>Blocca</ion-label>
+        </button>
+
+        <button ion-button icon-left (click)="cleanCache()" color="yellow-light">
+          <ion-icon name="warning"></ion-icon>
+          <ion-label>Ricarica dati dal server</ion-label>
+        </button>
+      </div>
+
+      <ion-list>
+
+        <ion-list-header>Applicazione</ion-list-header>
+        <ion-item>
+          <ion-label stacked>Url applicazione</ion-label>
+          <ion-input [(ngModel)]="cfg.crm_url" [disabled]="isFormDisabled()"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label stacked>Versione Rest API</ion-label>
+          <ion-input [(ngModel)]="cfg.api_version" [disabled]="isFormDisabled()"></ion-input>
+        </ion-item>
+
+        <ion-list-header>Utente</ion-list-header>
+        <ion-item>
+          <ion-label stacked>Nome utente</ion-label>
+          <ion-input [(ngModel)]="cfg.crm_username" [disabled]="isFormDisabled()"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label stacked>Password</ion-label>
+          <ion-input type="password" [(ngModel)]="cfg.crm_password" [disabled]="isFormDisabled()"></ion-input>
+        </ion-item>
+
+        <ion-list-header>Altro</ion-list-header>
+        <ion-item>
+          <ion-label stacked>Livello di logging</ion-label>
+          <ion-select [(ngModel)]="cfg.log_level" [disabled]="isFormDisabled()">
+            <ion-option value="NONE">Nessuno</ion-option>
+            <ion-option value="INFO">Info</ion-option>
+            <ion-option value="WARN">Avviso</ion-option>
+            <ion-option value="ERROR">Errore</ion-option>
+          </ion-select>
+        </ion-item>
+
+      </ion-list>
+
+      <div class="buttons save-buttons" *ngIf="!isFormDisabled()" text-center align-items-center>
+        <hr />
+        <button ion-button icon-left (click)="saveAndResetApplication()" color="dark">
+          <ion-icon name="thumbs-up"></ion-icon>
+          <ion-label>Salva</ion-label>
+        </button>
+      </div>
+
+    </ion-content>
+
+    <ion-content *ngIf="!viewIsReady">
+      <h1 class="loading">{{viewNotReadyText}}</h1>
+    </ion-content>
+  `
 })
 export class ConfigurationSettingsPage implements OnInit
 {
   private cfg: any;
 
   private viewIsReady: boolean;
+  private viewNotReadyText:string  = "Caricamento in corso...";
 
   constructor(private navCtrl: NavController
     , private platform: Platform
@@ -38,208 +117,8 @@ export class ConfigurationSettingsPage implements OnInit
     , private backgroundService: BackgroundService
     , private offlineCapableRestService: OfflineCapableRestService)
   {
-    this.viewIsReady = false;
+    //
   }
-
-
-  /**
-   * !!! NETWORK CONNECTION REQUIRED !!!
-   * destroy and recreate databases and load remote data
-   *
-   * @returns {Promise<any>}
-   */
-  cleanCache(): Promise<any>
-  {
-    let self = this;
-
-    return new Promise((resolve) => {
-      if (!self.offlineCapableRestService.isNetworkConnected())
-      {
-        let toast = self.toastCtrl.create({
-          message: "Nessuna connessione! Connettiti alla rete e riprova.",
-          duration: 5000,
-          position: 'top'
-        });
-        toast.present().then(() => {
-          resolve();
-        });
-        return;
-      }
-
-      if (self.platform.is("mobile"))
-      {
-        self.insomnia.keepAwake().then(() => {
-          LogService.log("KEEP AWAKE ON!");
-        });
-      }
-
-      let msg = "Stopping background service...";
-      LogService.log(msg);
-      self.backgroundService.stop().then(() => {
-        msg = "* Background service stopped.";
-        LogService.log(msg);
-        //
-        msg = "Resetting provider sync offsets...";
-        LogService.log(msg);
-        return self.backgroundService.resetDataProvidersSyncOffset();//--------------------->
-      }).then(() => {
-        msg = "* Provider sync offsets were reset.";
-        LogService.log(msg);
-        //
-        msg = "Logging out user...";
-        LogService.log(msg);
-        return self.userService.logout();//--------------------->
-      }).then(() => {
-        msg = "Initializing user service...";
-        LogService.log(msg);
-        return self.userService.initialize();//--------------------->
-      }).then(() => {
-        msg = "Logging in user...";
-        LogService.log(msg);
-        return self.userService.login(self.cfg.crm_username, self.cfg.crm_password);//--------------------->
-      }).then(() => {
-        msg = "Configuring user...";
-        LogService.log(msg);
-        return self.userService.configureWithOfflineUserData();//--------------------->
-      }).then(() => {
-        msg = "Destroying databases...";
-        LogService.log(msg);
-        return self.remoteDataService.destroyLocalDataStorages();//--------------------->
-      }).then(() => {
-        msg = "Initializing remote data service...";
-        LogService.log(msg);
-        return self.remoteDataService.initialize();//--------------------->
-      }).then(() => {
-        msg = "Starting full provider sync...";
-        LogService.log(msg);
-        //self.backgroundService.setSyncIntervalFast();
-        return self.backgroundService.fullySyncAllProviders();
-      }).then(() => {
-        LogService.log("DONE!", LogService.LEVEL_WARN);
-        resolve();
-      }).catch(e => {
-        msg = "CACHE CLEAN ERROR: " + e;
-        LogService.log(msg, LogService.LEVEL_ERROR);
-        resolve();
-      });
-    });
-  }
-
-  /**
-   * !!! NETWORK CONNECTION REQUIRED !!!
-   * destroy and recreate databases and load remote data
-   *
-   * @returns {Promise<any>}
-   */
-  cleanCacheOrig(): Promise<any>
-  {
-    let self = this;
-
-    return new Promise(function (resolve, reject) {
-      if (!self.offlineCapableRestService.isNetworkConnected())
-      {
-        let toast = self.toastCtrl.create({
-          message: "Nessuna connessione! Connettiti alla rete e riprova.",
-          duration: 5000,
-          position: 'top'
-        });
-        toast.present().then(() => {
-          resolve();
-        });
-        return;
-      }
-
-      if (self.platform.is("mobile"))
-      {
-        self.insomnia.keepAwake().then(() => {
-          LogService.log("KEEP AWAKE ON!");
-        });
-      }
-
-      let loaderContent = "<strong>Eliminazione cache</strong><br />";
-      let msg;
-
-      let loader = self.loadingCtrl.create({
-        content: loaderContent,
-        duration: (5 * 60 * 1000)
-      });
-
-      loader.onDidDismiss(() => {
-        self.navCtrl.push(ConfigurationPage).then(() => {
-          LogService.log("CACHE CLEAR - LOADER DISMISSED");
-        });
-      });
-
-      loader.present().then(() => {
-
-        self.backgroundService.lockSyncPage();
-
-        msg = "Stopping background service...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.backgroundService.stop();
-      }).then(() => {
-        msg = "Resetting provider sync offsets...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.backgroundService.resetDataProvidersSyncOffset();
-      }).then(() => {
-        msg = "Logging out user...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.userService.logout();
-      }).then(() => {
-        msg = "Initializing user service...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.userService.initialize();
-      }).then(() => {
-        msg = "Logging in user...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.userService.login(self.cfg.crm_username, self.cfg.crm_password);
-      }).then(() => {
-        msg = "Configuring user...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.userService.configureWithOfflineUserData();
-      }).then(() => {
-        msg = "Destroying databases...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.remoteDataService.destroyLocalDataStorages();
-      }).then(() => {
-        msg = "Initializing remote data service...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        return self.remoteDataService.initialize();
-      }).then(() => {
-        msg = "Starting background service...";
-        LogService.log(msg);
-        loader.setContent(loaderContent + msg);
-        self.backgroundService.setSyncIntervalFast();
-        return self.backgroundService.start();
-      }).then(() => {
-        loader.dismiss().then(() => {
-          LogService.log("CACHE CLEAR OK", LogService.LEVEL_WARN);
-          resolve();
-        });
-      }).catch((e) => {
-        let toast = self.toastCtrl.create({
-          message: e,
-          duration: 15000,
-          position: 'top'
-        });
-        toast.present().then(() => {
-          LogService.log("Cache clean error: " + e);
-          loader.dismiss().then(() => {
-            reject(e);
-          });
-        });
-      });
-    });
-  }
-
 
   /**
    * Save configuration values and reset application
@@ -249,6 +128,9 @@ export class ConfigurationSettingsPage implements OnInit
   saveAndResetApplication(): Promise<any>
   {
     let self = this;
+
+    this.viewIsReady = false;
+    this.viewNotReadyText = "Configurazione in corso...";
 
     return new Promise(function (resolve) {
       if (!self.offlineCapableRestService.isNetworkConnected())
@@ -264,27 +146,17 @@ export class ConfigurationSettingsPage implements OnInit
         return;
       }
 
-      let loaderContent = "<strong>Salvataggio configurazione</strong><br />";
-      let loader = self.loadingCtrl.create({
-        content: loaderContent,
-        duration: (5 * 60 * 1000)
-      });
-
-      loader.onDidDismiss(() => {
-        LogService.log("APPLICATION RESET- LOADER DISMISSED");
-      });
-
-      loader.present().then(() => {
-        LogService.log("Stopping background service...");
-        self.backgroundService.stop().then(() => {
-          self.configurationService.setMultipleConfigs(self.cfg).then(() => {
-            self.configurationService.unlockWithCode("");//lock it
+      LogService.log("Stopping background service...");
+      self.backgroundService.stop().then(() => {
+        self.configurationService.setMultipleConfigs(self.cfg).then(() => {
+          self.configurationService.unlockWithCode("");//lock it
+          self.backgroundService.start().then(() => {
             LogService.log("Configuration values were saved.");
-            return self.cleanCache();
-          }).then(() => {
-            loader.dismiss().then(() => {
-              LogService.log("APPLICATION RESET OK", LogService.LEVEL_WARN);
-            });
+            self.viewIsReady = true;
+            self.backgroundService.applicationResetRequested = true;
+            LogService.log("APPLICATION RESET REQUESTED", LogService.LEVEL_WARN);
+            self.navCtrl.setRoot(ConfigurationSyncstatePage);
+            resolve();
           });
         });
       });
@@ -335,6 +207,8 @@ export class ConfigurationSettingsPage implements OnInit
    */
   private getConfiguration(): void
   {
+    this.viewIsReady = false;
+    this.viewNotReadyText = "Caricamento in corso...";
     this.configurationService.getConfigObject().then((config) => {
       this.cfg = config;
       this.viewIsReady = true;

@@ -333,7 +333,8 @@ export class HomePage implements OnInit, OnDestroy
    */
   activatePause(): void
   {
-    this.remoteDataService.storeNewCheckin("PAUSA").then((checkin: Checkin) => {
+    //"PAUSA"
+    this.remoteDataService.storePauseCheckin().then((checkin: Checkin) => {
       LogService.log("CHECKIN REGISTERED: " + JSON.stringify(checkin));
     }).catch((e) => {
       LogService.log("Errore pausa: " + e, LogService.LEVEL_ERROR);

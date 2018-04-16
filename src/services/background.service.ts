@@ -24,9 +24,9 @@ export class BackgroundService
   private execution_count = 0;
   private execution_count_max = 0;
 
-  private startup_delay_ms = (5 * 1000);//@todo:put me back to 15
+  private startup_delay_ms = (15 * 1000);
 
-  private execution_interval_slow_ms = (5 * 1000);//@todo: put me back to 30
+  private execution_interval_slow_ms = (15 * 1000);
   private execution_interval_fast_ms = (0.5 * 1000);
   private execution_interval_ms = this.execution_interval_slow_ms;
 
@@ -36,6 +36,8 @@ export class BackgroundService
 
   /* using variable to lock user on sync page until initial sync has completed */
   private syncPageLocked = false;
+
+  public applicationResetRequested:boolean = false;
 
   constructor(private checkpointProvider: CheckpointProvider
     , private checkinProvider: CheckinProvider
@@ -210,36 +212,9 @@ export class BackgroundService
   /**
    * Set interval to do fast execution riprogramming
    */
-  public setSyncIntervalSlow(): void
+  public setSyncIntervalNormal(): void
   {
     this.execution_interval_ms = this.execution_interval_slow_ms;
-  }
-
-  //---------------------------------------------------------------------------------------------FULL SYNC ALL PROVIDERS
-  /**
-   *
-   * @returns {Promise<any>}
-   */
-  public fullySyncAllProviders(): Promise<any>
-  {
-    let self = this;
-
-    this.dataProviders = [
-      this.checkpointProvider,
-    ];
-
-    return Promise.reduce(this.dataProviders, (accu, provider, index) => {
-      LogService.log("[FULL-SYNC]PROVIDER#" + index + " - " + provider.constructor.name);
-      return new Promise((resolve) => {
-        provider.getSyncableDataCountDown().then(count => {
-          LogService.log("[FULL-SYNC]PROVIDER#" + index + " - count: " + count);
-          if (count === 0)
-          {
-            resolve();
-          }
-        });
-      });
-    }, null);
   }
 
   //-------------------------------------------------------------------------------------------------SYNC DATA PROVIDERS
@@ -275,6 +250,7 @@ export class BackgroundService
         if (providerToSync === false)
         {
           LogService.log("All providers are in sync.");
+
           return resolve();
         }
 
@@ -310,7 +286,7 @@ export class BackgroundService
    */
   public initialize(): Promise<any>
   {
-    //setTimeout(this.intervalExecution, this.startup_delay_ms, this);
+    setTimeout(this.intervalExecution, this.startup_delay_ms, this);
 
     return new Promise(resolve => {
       resolve();

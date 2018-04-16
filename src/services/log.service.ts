@@ -109,9 +109,6 @@ export class LogService
           console.error(msg);
           break;
       }
-    } else
-    {
-      console.info("NO-LOG: " + msg);
     }
   }
 
