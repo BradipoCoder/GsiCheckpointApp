@@ -1,7 +1,7 @@
 /* CORE */
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ToastController, Platform} from 'ionic-angular';
-import { Insomnia } from '@ionic-native/insomnia';
+import {Insomnia} from '@ionic-native/insomnia';
 /* PROVIDERS */
 import {CheckpointProvider} from '../../providers/checkpoint.provider';
 import {CheckinProvider} from '../../providers/checkin.provider';
@@ -39,9 +39,9 @@ import {Subscription} from "rxjs/Subscription";
             <ion-label>Sync one step</ion-label>
           </button>
 
-          <button ion-button icon-left (click)="killAllData()" color="danger">
+          <button ion-button icon-left (click)="handleApplicationResetRequest()" color="danger">
             <ion-icon name="ice-cream"></ion-icon>
-            <ion-label>Kill all data</ion-label>
+            <ion-label>Reset application</ion-label>
           </button>
 
           <button ion-button icon-left (click)="backgroundService.start()" color="light">
@@ -115,7 +115,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   private is_in_sync: boolean = false;
 
   private viewIsReady: boolean;
-  private viewNotReadyText:string  = "Caricamento in corso...";
+  private viewNotReadyText: string = "Caricamento in corso...";
 
   private hasInterfaceRefreshRequest = false;
   private isInterfaceRefreshRunning = false;
@@ -125,10 +125,10 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
 
   constructor(private toastCtrl: ToastController
-    , private platform:Platform
+    , private platform: Platform
     , private insomnia: Insomnia
-    , private checkpointProvider:CheckpointProvider
-    , private checkinProvider:CheckinProvider
+    , private checkpointProvider: CheckpointProvider
+    , private checkinProvider: CheckinProvider
     , private offlineCapableRestService: OfflineCapableRestService
     , protected backgroundService: BackgroundService
     , private remoteDataService: RemoteDataService
@@ -155,7 +155,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
   /* ------------------------------------------------------------------------------------------ INTERFACE ADMIN STUFF */
 
-  public doSomething():void
+  public doSomething(): void
   {
     this.backgroundService.syncDataProviders().then(() => {
       LogService.log("doSomething DONE.");
@@ -169,26 +169,27 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    */
   protected handleApplicationResetRequest()
   {
-      this.backgroundService.lockSyncPage();
-      this.viewIsReady = false;
-      this.viewNotReadyText = "Riconfigurazione applicazione in corso...";
-      this.killAllData().then(() => {
-        this.backgroundService.applicationResetRequested = false;
-        LogService.log("APP RESET DONE");
-        LogService.log("Starting background service...");
-        this.backgroundService.setSyncIntervalFast();
-        return this.backgroundService.start();
-      }).then(() => {
-        this.registerInterfaceRefreshRequest();
-        this.subscribeToDataChange();
-      });
+    this.backgroundService.lockSyncPage();
+    this.viewIsReady = false;
+    this.viewNotReadyText = "Riconfigurazione applicazione in corso...";
+    this.unsubscribeToDataChange();
+    this.killAllData().then(() => {
+      this.backgroundService.applicationResetRequested = false;
+      LogService.log("APP RESET DONE");
+      LogService.log("Starting background service...");
+      this.backgroundService.setSyncIntervalFast();
+      return this.backgroundService.start();
+    }).then(() => {
+      this.registerInterfaceRefreshRequest();
+      this.subscribeToDataChange();
+    });
   }
 
   /**
    *
    * @returns {Promise<any>}
    */
-  public killAllData():Promise<any>
+  public killAllData(): Promise<any>
   {
     let self = this;
 
@@ -231,12 +232,11 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    *
    * @returns {Promise<any>}
    */
-  protected updateCounts():Promise<any>
+  protected updateCounts(): Promise<any>
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
-    {
+    return new Promise(function (resolve, reject) {
       let countPromises = [
         self.checkpointProvider.getRemoteDataCount(),
         self.checkpointProvider.getDatabaseDocumentCount(),
@@ -289,11 +289,11 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   /**
    * Unlock Sync page and do other after full cache clear actions
    */
-  protected completeFullCacheCleanAction():void
+  protected completeFullCacheCleanAction(): void
   {
     if (this.backgroundService.isSyncPageLocked())
     {
-      if(this.counts.unsynced_count == 0)
+      if (this.counts.unsynced_count == 0)
       {
         LogService.log("FULL CACHE CLEAN COMPLETED.", LogService.LEVEL_WARN);
         this.backgroundService.setSyncIntervalNormal();
@@ -312,9 +312,9 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   /**
    *
    */
-  protected registerInterfaceRefreshRequest():void
+  protected registerInterfaceRefreshRequest(): void
   {
-    if(this.isInterfaceRefreshRunning)
+    if (this.isInterfaceRefreshRunning)
     {
       //LogService.log('CFG[SS] - IRR already running - skipping.');
       this.hasInterfaceRefreshRequest = true;
@@ -326,11 +326,10 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
      *
      * @param {ConfigurationSyncstatePage} self
      */
-    let recheck = function(self)
-    {
+    let recheck = function (self) {
       self.isInterfaceRefreshRunning = false;
 
-      if(self.hasInterfaceRefreshRequest)
+      if (self.hasInterfaceRefreshRequest)
       {
         self.hasInterfaceRefreshRequest = false;
         self.registerInterfaceRefreshRequest();
@@ -349,7 +348,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    *
    * @param {any} data
    */
-  protected dbChangeSubscriberNextData(data:any): void
+  protected dbChangeSubscriberNextData(data: any): void
   {
     if (_.includes(['checkpoint', 'checkin'], data.db))
     {
@@ -358,24 +357,23 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     }
   }
 
-  private subscribeToDataChange():void
+  private subscribeToDataChange(): void
   {
     this.dataChangeSubscriptionCheckin = this.checkinProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
     this.dataChangeSubscriptionCheckpoint = this.checkpointProvider.databaseChangeObservable.subscribe(data => this.dbChangeSubscriberNextData(data));
   }
 
-  private unsubscribeToDataChange():void
+  private unsubscribeToDataChange(): void
   {
-    if(this.dataChangeSubscriptionCheckin)
+    if (this.dataChangeSubscriptionCheckin)
     {
       this.dataChangeSubscriptionCheckin.unsubscribe();
     }
-    if(this.dataChangeSubscriptionCheckpoint)
+    if (this.dataChangeSubscriptionCheckpoint)
     {
       this.dataChangeSubscriptionCheckpoint.unsubscribe();
     }
   }
-
 
   /**
    * Actions on component init
@@ -383,7 +381,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    */
   public ngOnInit(): void
   {
-    if(this.backgroundService.applicationResetRequested)
+    if (this.backgroundService.applicationResetRequested)
     {
       this.handleApplicationResetRequest();
       return;
@@ -391,7 +389,6 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
     this.registerInterfaceRefreshRequest();
     this.subscribeToDataChange();
-
   }
 
   /**

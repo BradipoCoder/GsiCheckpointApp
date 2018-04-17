@@ -223,11 +223,17 @@ export class RemoteDataService
 
     return new Promise((resolve, reject) =>
     {
+
+      let now = moment.tz(moment(), "Europe/Rome").tz("GMT+0");
+
       checkin = self.checkinProvider.getNewModelInstance({
         name: checkpoint.name,
         duration: 0,
         description: '',
-        checkin_date: moment().format(CrmDataModel.CRM_DATE_FORMAT), /*@fixme!!! SERVER TIME !!!*/
+        checkin_date: now.format(CrmDataModel.CRM_DATE_FORMAT),
+        date_entered: now.format(CrmDataModel.CRM_DATE_FORMAT),
+        date_modified: now.format(CrmDataModel.CRM_DATE_FORMAT),
+
         user_id_c: self.userService.getUserData("id"),
         assigned_user_id: self.userService.getUserData("id"),
         checkin_user: self.userService.getUserData("full_name"),

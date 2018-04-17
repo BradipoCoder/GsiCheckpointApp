@@ -55,6 +55,8 @@ export class Checkin extends CrmDataModel
       }
     });
 
+    //LogService.log("CHECKIN-SETDATA[checkin_date]:" + moment.isMoment(data.checkin_date) + " - " + data.checkin_date);
+
     //date checks
     this.checkPropertyDate('checkin_date');
     this.checkPropertyDate('date_entered');

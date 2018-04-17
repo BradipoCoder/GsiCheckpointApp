@@ -56,13 +56,29 @@ export class LocalDocumentProvider
   {
   }
 
+
   /**
+   * All model instance creation must pass here
    *
    * @param {{}} data
    * @returns {Task|Checkpoint|Checkin|any}
    */
   public getNewModelInstance(data: any): any
   {
+    //CONVERT DATES TO ACCOUNT FOR +2 from GMT
+    data.date_entered = moment.tz(data.date_entered, "GMT+0").tz("Europe/Rome").format();
+    data.date_modified = moment.tz(data.date_modified, "GMT+0").tz("Europe/Rome").format();
+    if(_.has(data, 'checkin_date'))
+    {
+      data.checkin_date = moment.tz(data.checkin_date, "GMT+0").tz("Europe/Rome").format();
+    }
+
+    /*
+    if (this.underlying_model.DB_TABLE_NAME == "mkt_Checkin")
+    {
+      LogService.log("CREATING MODEL INSTANCE FROM: " + JSON.stringify(data));
+    }*/
+
     return new this.underlying_model(data);
   }
 
@@ -170,12 +186,12 @@ export class LocalDocumentProvider
           select_fields: fixedModuleFields,
           ids: missingIdArray
         }).then((res) => {
-            let records = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
+            let loadedModuleRecords = !_.isUndefined(res) && !_.isUndefined(res.entry_list) ? res.entry_list : [];
+
 
             let documents = [];
             let model;
-            _.each(records, function (record) {
-              //model = new self.underlying_model(record);
+            _.each(loadedModuleRecords, (record) => {
               model = self.getNewModelInstance(record);
               documents.push(model);
             });
@@ -379,23 +395,17 @@ export class LocalDocumentProvider
             }).then((res) => {
                 let records = !_.isUndefined(res.entry_list) ? res.entry_list : [];
 
-
-
-                //create date objects
+                /*
+                 * create date objects
+                 * Raw server date/time is in GMT+0 TZ so we need to convert it
+                 */
                 _.each(records, (record) => {
-
-                  //@fixme: correct date from here
-                  let date_entered = record.date_entered;
-                  let d1 = moment(date_entered);
-                  let d2 = d1.clone().tz("Europe/Rome");
-
-                  LogService.log("D1: " + d1.format("YYYY-MM-DD HH:mm:ss") + "   D2: " + d2.format("YYYY-MM-DD HH:mm:ss"));
-
-                  record.date_entered = moment(record.date_entered);
-                  record.date_modified = moment(record.date_modified);
+                  record.date_entered = moment.tz(record.date_entered, "GMT+0").tz("Europe/Rome");
+                  //record.date_entered = moment(record.date_entered);
+                  //record.date_modified = moment(record.date_modified);
+                  record.date_modified = moment.tz(record.date_modified, "GMT+0").tz("Europe/Rome");
                 });
-
-              //LogService.log("RECORDS: " + JSON.stringify(records));
+                //LogService.log("RECORDS: " + JSON.stringify(records));
 
                 //let newSyncOffset = _.size(records) == itemsAtOnce ? syncOffset + itemsAtOnce : 0;
                 let newSyncOffset = syncOffset + _.size(records);
