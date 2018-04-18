@@ -3,17 +3,16 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Platform, ToastController} from 'ionic-angular';
 import {Insomnia} from '@ionic-native/insomnia';
 /* PROVIDERS */
-import {CheckpointProvider} from '../../providers/checkpoint.provider';
-import {CheckinProvider} from '../../providers/checkin.provider';
+import {CheckpointProvider} from '../../../providers/checkpoint.provider';
+import {CheckinProvider} from '../../../providers/checkin.provider';
 /* SERVICES */
-import {BackgroundService} from "../../services/background.service";
-import {RemoteDataService} from '../../services/remote.data.service';
-import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
-import {LogService} from "../../services/log.service";
-import {UserService} from "../../services/user.service";
+import {BackgroundService} from "../../../services/background.service";
+import {RemoteDataService} from '../../../services/remote.data.service';
+import {OfflineCapableRestService} from '../../../services/offline.capable.rest.service';
+import {LogService} from "../../../services/log.service";
+import {UserService} from "../../../services/user.service";
 /* OTHER */
 import _ from "lodash";
-//import {Promise} from '../../../node_modules/bluebird'
 import {Subscription} from "rxjs/Subscription";
 
 @Component({

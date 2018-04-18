@@ -22,49 +22,18 @@ import {CheckpointProvider} from '../providers/checkpoint.provider';
 import {CheckinProvider} from '../providers/checkin.provider';
 import {TaskProvider} from "../providers/task.provider";
 /* Pages */
-import {CheckinsPage} from "../pages/checkins/checkins";
-import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
-import {ConfigurationPage} from "../pages/configuration/configuration";
-import {ConfigurationSettingsPage} from "../pages/configuration/configuration.settings";
-import {ConfigurationSyncstatePage} from "../pages/configuration/configuration.syncstate";
-import {ConfigurationUnlockerPage} from "../pages/configuration/configuration.unlocker";
-import {HomePage} from "../pages/home/home";
 import {InfoPage} from "../pages/info/info";
-import {LogoutPage} from "../pages/logout/logout";
 import {TasksPage} from "../pages/tasks/tasks";
 import {TaskNewPage} from "../pages/tasks/task.new";
 import {TasksInPage} from "../pages/tasks/tasks.in";
 import {TasksOutPage} from "../pages/tasks/tasks.out";
-/* Pages[HOME] */
-// import {HomeCheckinViewPage} from "../pages/home/home.checkin.view";
-// import {HomeTaskViewPage} from "../pages/home/home.task.view";
-import {HomeNoConfPage} from '../pages/home/home-no-conf/home-no-conf';
-import {HomeCodeRegPage} from '../pages/home/home-code-reg/home-code-reg';
-import {HomeCodeChecklistPage} from '../pages/home/home-code-checklist/home-code-checklist';
-import {HomeCheckinlistPage} from '../pages/home/home-checkinlist/home-checkinlist';
-import {HomePausePage} from "../pages/home/home-pause/home-pause";
-import {HomeOutPage} from "../pages/home/home-out/home-out";
 
 /* Other/Utils/Tools */
 
 @NgModule({
   declarations: [
     MekitTracerApp
-    , CheckinsPage
-    , CheckpointsPage
-    , ConfigurationPage
-    , ConfigurationSettingsPage
-    , ConfigurationSyncstatePage
-    , ConfigurationUnlockerPage
-    , HomeNoConfPage
-    , HomeCodeRegPage
-    , HomeCodeChecklistPage
-    , HomeCheckinlistPage
-    , HomePausePage
-    , HomeOutPage
-    , HomePage
     , InfoPage
-    , LogoutPage
     , TasksPage
     , TaskNewPage
     , TasksInPage
@@ -72,21 +41,7 @@ import {HomeOutPage} from "../pages/home/home-out/home-out";
   ],
   entryComponents: [
     MekitTracerApp
-    , CheckinsPage
-    , CheckpointsPage
-    , ConfigurationPage
-    , ConfigurationSettingsPage
-    , ConfigurationSyncstatePage
-    , ConfigurationUnlockerPage
-    , HomeNoConfPage
-    , HomeCodeRegPage
-    , HomeCodeChecklistPage
-    , HomeCheckinlistPage
-    , HomePausePage
-    , HomeOutPage
-    , HomePage
     , InfoPage
-    , LogoutPage
     , TasksPage
     , TaskNewPage
     , TasksInPage

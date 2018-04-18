@@ -1,10 +1,10 @@
 /* CORE */
 import {Component} from '@angular/core';
 /* SERVICES */
-import {BackgroundService} from "../../services/background.service";
+import {BackgroundService} from "../../../services/background.service";
 /* PAGES */
-import {ConfigurationSyncstatePage} from './configuration.syncstate';
-import {ConfigurationSettingsPage} from './configuration.settings';
+import {ConfigurationSyncstatePage} from '../configuration.syncstate/configuration.syncstate';
+import {ConfigurationSettingsPage} from '../configuration.settings/configuration.settings';
 
 /* OTHER */
 

@@ -1,9 +1,8 @@
 import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import {LogService} from '../../../services/log.service';
-import {ConfigurationPage} from "../../configuration/configuration";
+import {ConfigurationPage} from "../../configuration/configuration/configuration";
 
-//import _ from "lodash";
 
 @Component({
   selector: 'page-home-no-conf',

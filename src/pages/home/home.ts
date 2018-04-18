@@ -10,7 +10,9 @@ import {RemoteDataService} from "../../services/remote.data.service";
 import {HomeNoConfPage} from './home-no-conf/home-no-conf';
 import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
 import {HomeCodeChecklistPage} from "./home-code-checklist/home-code-checklist";
+
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
+
 import {Checkpoint} from "../../models/Checkpoint";
 import {HomePausePage} from "./home-pause/home-pause";
 import {HomeOutPage} from "./home-out/home-out";
@@ -37,6 +39,7 @@ export class HomePage implements OnInit
     , protected remoteDataService: RemoteDataService
     , protected userService: UserService)
   {
+
   }
 
   /**

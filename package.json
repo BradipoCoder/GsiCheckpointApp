@@ -51,7 +51,9 @@
     "pouchdb": "^6.4.3",
     "pouchdb-find": "^6.4.3",
     "rxjs": "5.5.10",
-    "sugarcrm-js-rest-consumer": "^1.0.3"
+    "sugarcrm-js-rest-consumer": "^1.0.3",
+    "sw-toolbox": "3.6.0",
+    "zone.js": "0.8.26"
   },
   "devDependencies": {
     "@ionic/app-scripts": "3.1.8",

@@ -3,17 +3,18 @@ import {Component, OnInit} from '@angular/core';
 import {LoadingController, ModalController, NavController, Platform, ToastController} from 'ionic-angular';
 import {Insomnia} from '@ionic-native/insomnia';
 /* SERVICES */
-import {ConfigurationService} from '../../services/configuration.service';
-import {UserService} from '../../services/user.service';
-import {RemoteDataService} from '../../services/remote.data.service';
-import {BackgroundService} from "../../services/background.service";
-import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
-import {LogService} from "../../services/log.service";
+import {ConfigurationService} from '../../../services/configuration.service';
+import {UserService} from '../../../services/user.service';
+import {RemoteDataService} from '../../../services/remote.data.service';
+import {BackgroundService} from "../../../services/background.service";
+import {OfflineCapableRestService} from '../../../services/offline.capable.rest.service';
+import {LogService} from "../../../services/log.service";
 /* PAGES */
-import {ConfigurationUnlockerPage} from './configuration.unlocker';
+import {ConfigurationUnlockerPage} from '../configuration.unlocker/configuration.unlocker';
+import {ConfigurationSyncstatePage} from "../configuration.syncstate/configuration.syncstate";
 /* OTHER */
 import _ from "lodash";
-import {ConfigurationSyncstatePage} from "./configuration.syncstate";
+
 
 
 @Component({

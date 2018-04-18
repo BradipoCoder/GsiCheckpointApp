@@ -11,9 +11,8 @@ import {BackgroundService} from '../services/background.service';
 
 import {HomePage} from "../pages/home/home";
 import {TasksPage} from "../pages/tasks/tasks";
-import {ConfigurationPage} from "../pages/configuration/configuration";
-// import {CheckpointsPage} from "../pages/checkpoints/checkpoints";
-// import {CheckinsPage} from "../pages/checkins/checkins";
+import {ConfigurationPage} from "../pages/configuration/configuration/configuration";
+
 
 
 @Component({
