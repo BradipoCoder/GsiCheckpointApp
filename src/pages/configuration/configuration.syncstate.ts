@@ -13,7 +13,7 @@ import {LogService} from "../../services/log.service";
 import {UserService} from "../../services/user.service";
 /* OTHER */
 import _ from "lodash";
-import {Promise} from '../../../node_modules/bluebird'
+//import {Promise} from '../../../node_modules/bluebird'
 import {Subscription} from "rxjs/Subscription";
 
 @Component({
@@ -377,13 +377,24 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
   /**
    * Actions on component init
-   * @todo: we also need calls on regular intervals
    */
   public ngOnInit(): void
   {
+    if (this.platform.is("mobile"))
+    {
+      this.insomnia.keepAwake();
+    }
+
     if (this.backgroundService.applicationResetRequested)
     {
       this.handleApplicationResetRequest();
+      return;
+    }
+
+    if (!this.userService.is_user_configured)
+    {
+      this.viewIsReady = false;
+      this.viewNotReadyText = "Clicca sul pulsante 'Impostazioni' per configurare l'applicazione.";
       return;
     }
 
@@ -396,6 +407,10 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
    */
   public ngOnDestroy(): void
   {
+    if (this.platform.is("mobile"))
+    {
+      this.insomnia.allowSleepAgain();
+    }
     this.unsubscribeToDataChange();
   }
 }

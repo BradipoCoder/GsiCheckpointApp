@@ -109,6 +109,8 @@ export class LogService
           console.error(msg);
           break;
       }
+    } else {
+      console.log("§-" + msg);
     }
   }
 
@@ -133,3 +135,4 @@ export class LogService
     return LogService.last_error.message;
   }
 }
+

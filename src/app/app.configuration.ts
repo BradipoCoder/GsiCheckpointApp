@@ -3,7 +3,7 @@
  */
 export class Configuration {
 
-  public static is_development_mode: boolean = true;
+  public static is_development_mode: boolean = false;
 
 
 }

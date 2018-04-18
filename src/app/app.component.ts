@@ -41,10 +41,7 @@ export class MekitTracerApp
     this.pages = [
       {title: 'Home', icon: 'home', component: HomePage}
       , {title: 'Segnalazioni', icon: 'text', component: TasksPage}
-      // , {title: 'Locali', icon: 'globe', component: CheckpointsPage}
-      // , {title: 'Tracciature', icon: 'flag', component: CheckinsPage}
       , {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage}
-      /*, {title: 'Esci', icon: 'power', component: LogoutPage}*/
     ];
 
     this.initializeApp();
@@ -72,7 +69,7 @@ export class MekitTracerApp
       LogService.log("APP: Background service initialized.");
       this.presentStartupPage();
     }).catch(e => {
-      LogService.log("APP-INIT-ERROR: " + e, LogService.LEVEL_ERROR);
+      LogService.error(e, "APP-INIT-ERROR");
     })
   }
 
@@ -83,6 +80,7 @@ export class MekitTracerApp
       this.statusBar.styleDefault();
       this.splashScreen.hide();
     }
+
     /*-----------------------------------------*/
     /*------------START ROOT COMPONENT---------*/
     this.rootPage = this.startupPage;

@@ -1,6 +1,6 @@
 /* Import: Core */
 import {Component, OnInit} from '@angular/core';
-import {NavController,AlertController} from 'ionic-angular';
+import {NavController, AlertController} from 'ionic-angular';
 /* Import: services */
 import {CodeScanService} from '../../../services/code.scan.service';
 import {RemoteDataService} from "../../../services/remote.data.service";
@@ -12,9 +12,8 @@ import {Checkpoint} from "../../../models/Checkpoint";
 /* Import: pages */
 import {HomePage} from "../home";
 import {Checkin} from "../../../models/Checkin";
-
 /* Import: utilities */
-import _ from "lodash";
+//import _ from "lodash";
 
 @Component({
   selector: 'page-home-code-reg',
@@ -22,9 +21,9 @@ import _ from "lodash";
     <ion-content text-center>
 
       <div class="spinner">
-        <img width="71" height="61" src="assets/image/spinner.gif" />
+        <img width="71" height="61" src="assets/image/spinner.gif"/>
       </div>
-      
+
       <ion-grid margin-top>
         <ion-row>
           <ion-col>
@@ -40,7 +39,7 @@ import _ from "lodash";
             <pre>{{getMessages()}}</pre>
           </ion-col>
         </ion-row>
-          
+
         <ion-row *ngIf="getErrorMessage()">
           <ion-col>
             <pre class="error">ERRORE: {{getErrorMessage()}}</pre>
@@ -57,21 +56,20 @@ import _ from "lodash";
 export class HomeCodeRegPage implements OnInit
 {
 
-  private messages:any = [];
+  private messages: any = [];
 
   constructor(protected navCtrl: NavController
-              , protected alertCtrl: AlertController
-              , protected codeScanService: CodeScanService
-              , protected remoteDataService: RemoteDataService
-              , protected logService: LogService
-              , protected checkpointProvider: CheckpointProvider
+    , protected alertCtrl: AlertController
+    , protected codeScanService: CodeScanService
+    , protected remoteDataService: RemoteDataService
+    , protected checkpointProvider: CheckpointProvider
   )
   {
     //
   }
 
   /**
-   *
+   * @todo: register a task for unknown code
    */
   protected registerErrorAndReset(): void
   {
@@ -87,7 +85,7 @@ export class HomeCodeRegPage implements OnInit
   private getErrorMessage(): string
   {
     let errorMessage = LogService.getLastErrorMessage();
-    if(errorMessage === "OK")
+    if (errorMessage === "OK")
     {
       errorMessage = "";
     }
@@ -117,7 +115,7 @@ export class HomeCodeRegPage implements OnInit
       self.messages.push(checkpoint.name);
       self.messages.push("registrazione in corso...");
 
-      self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint).then((registeredCheckin:Checkin) => {
+      self.remoteDataService.storeNewCheckinForCheckpoint(checkpoint).then((registeredCheckin: Checkin) => {
         checkin = registeredCheckin;
         LogService.log("Checkin registration OK: [" + checkin.code + "] " + checkin.name);
         self.messages.push("Registrazione ok.");
@@ -134,18 +132,19 @@ export class HomeCodeRegPage implements OnInit
     let barcode = this.codeScanService.getScannedCodeToRegister();
     LogService.log("STARTING CODE REGISTRATION PROCESS FOR CODE: " + barcode);
     this.messages.push("ricerca locale in corso...");
-    this.checkpointProvider.getCheckpoint({selector: {code: barcode}}).then((checkpoint:Checkpoint) => {
+    this.checkpointProvider.getCheckpoint({selector: {code: barcode}}).then((checkpoint: Checkpoint) => {
       LogService.log("Found Checkpoint: " + checkpoint.id);
       this.messages.push("locale identificato");
 
-      this.registerNewCheckinForCheckpoint(checkpoint).then((checkin:Checkin) => {
+      this.registerNewCheckinForCheckpoint(checkpoint).then((checkin: Checkin) => {
         LogService.log('Checkpoint registration OK');
         this.codeScanService.setCodeScanInProgress(false);
 
         if (checkpoint.hasChecklistValues())
         {
           this.remoteDataService.setCheckinToModify(checkin);
-        } else {
+        } else
+        {
           this.codeScanService.setCodeToRegister(false);
         }
         this.navCtrl.setRoot(HomePage).then(() => {

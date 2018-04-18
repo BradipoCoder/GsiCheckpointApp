@@ -1,7 +1,7 @@
 {
   "name": "trace_with_mekit",
   "description": "Traccia con Mekit",
-  "version": "0.2.4",
+  "version": "0.2.9",
   "author": "Mekit",
   "homepage": "http://mekit.it",
   "private": true,
@@ -31,7 +31,6 @@
     "@types/axios": "^0.14.0",
     "@types/lodash": "^4.14.67",
     "@types/moment-timezone": "^0.5.4",
-    "axios": "^0.18.0",
     "bluebird": "^3.5.0",
     "blueimp-md5": "^2.7.0",
     "cordova-android": "~7.0.0",
@@ -54,12 +53,8 @@
     "phonegap-plugin-barcodescanner": "^7.1.1",
     "pouchdb": "^6.4.3",
     "pouchdb-find": "^6.4.3",
-    "qs": "^6.5.0",
     "rxjs": "5.5.10",
-    "sugarcrm-js-rest-consumer": "^1.0.3",
-    "sw-toolbox": "3.6.0",
-    "underscore": "^1.8.3",
-    "zone.js": "0.8.26"
+    "sugarcrm-js-rest-consumer": "^1.0.3"
   },
   "devDependencies": {
     "@ionic/app-scripts": "3.1.8",
