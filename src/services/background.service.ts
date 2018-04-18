@@ -1,14 +1,11 @@
 import {Injectable} from '@angular/core';
-
 /* Services */
 import {UserService} from './user.service';
 import {LogService} from "./log.service";
-
 /* Data Providers */
 import {CheckpointProvider} from "../providers/checkpoint.provider";
 import {CheckinProvider} from "../providers/checkin.provider";
 import {TaskProvider} from "../providers/task.provider";
-
 /* Other */
 import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";

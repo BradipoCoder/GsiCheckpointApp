@@ -10,11 +10,9 @@ import {BackgroundService} from "../../services/background.service";
 import {OfflineCapableRestService} from '../../services/offline.capable.rest.service';
 import {LogService} from "../../services/log.service";
 /* PAGES */
-import {ConfigurationPage} from './configuration';
 import {ConfigurationUnlockerPage} from './configuration.unlocker';
 /* OTHER */
 import _ from "lodash";
-import {HomePage} from "../home/home";
 import {ConfigurationSyncstatePage} from "./configuration.syncstate";
 
 

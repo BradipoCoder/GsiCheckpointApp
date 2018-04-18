@@ -1,6 +1,6 @@
 /* CORE */
-import {Component, OnInit, OnDestroy} from '@angular/core';
-import {ToastController, Platform} from 'ionic-angular';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Platform, ToastController} from 'ionic-angular';
 import {Insomnia} from '@ionic-native/insomnia';
 /* PROVIDERS */
 import {CheckpointProvider} from '../../providers/checkpoint.provider';

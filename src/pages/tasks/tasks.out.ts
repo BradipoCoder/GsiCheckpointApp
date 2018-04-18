@@ -1,4 +1,4 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {App} from 'ionic-angular';
 import {TaskNewPage} from "./task.new";
 import {TaskProvider} from "../../providers/task.provider";

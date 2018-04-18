@@ -3,25 +3,21 @@
  *
  */
 import {Injectable} from '@angular/core';
-
 /* Services */
 import {OfflineCapableRestService} from './offline.capable.rest.service';
 import {UserService} from './user.service';
-
 /* Data Models */
 import {CrmDataModel} from '../models/crm.data.model';
 import {Checkpoint} from '../models/Checkpoint';
 import {Checkin} from '../models/Checkin';
-
 /* Data Providers */
 import {CheckpointProvider} from "../providers/checkpoint.provider";
 import {CheckinProvider} from "../providers/checkin.provider";
 import {TaskProvider} from "../providers/task.provider";
-
 /* Utils */
 import _ from "lodash";
 import * as moment from 'moment';
-import { Promise } from '../../node_modules/bluebird'
+import {Promise} from '../../node_modules/bluebird'
 import {LogService} from "./log.service";
 import {LocalDocumentProvider} from "../providers/local.document.provider";
 //import * as Bluebird from "bluebird";

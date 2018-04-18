@@ -7,7 +7,6 @@ import {OfflineCapableRestService} from '../services/offline.capable.rest.servic
 import {ConfigurationService} from '../services/configuration.service';
 import {LocalDocumentProvider} from './local.document.provider';
 import {Checkpoint} from '../models/Checkpoint';
-import {Checkin} from '../models/Checkin';
 import {Promise} from '../../node_modules/bluebird'
 import _ from "lodash";
 import {LogService} from "../services/log.service";

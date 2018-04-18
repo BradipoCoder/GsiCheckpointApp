@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { TasksInPage} from "./tasks.in";
-import { TasksOutPage} from "./tasks.out";
+import {Component} from '@angular/core';
+import {TasksInPage} from "./tasks.in";
+import {TasksOutPage} from "./tasks.out";
 
 @Component({
   selector: 'page-tasks',

@@ -1,20 +1,11 @@
 /* Import: Core */
-import {Component, OnInit, OnDestroy} from '@angular/core';
-import {
-  App,
-  Platform,
-  NavController,
-  ToastController,
-  /*LoadingController,*/
-  /*AlertController,*/
-  /*ModalController*/
-} from 'ionic-angular';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {App, NavController, Platform, ToastController,} from 'ionic-angular';
 /* Import: services */
 import {LogService} from "../../../services/log.service";
 import {UserService} from '../../../services/user.service';
 import {RemoteDataService} from '../../../services/remote.data.service';
 import {CodeScanService} from '../../../services/code.scan.service';
-
 /* Import: models */
 import {Checkin} from "../../../models/Checkin";
 import {HomePage} from "../home";

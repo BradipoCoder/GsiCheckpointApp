@@ -10,7 +10,6 @@ import {Checkpoint} from '../models/Checkpoint';
 
 
 import _ from "lodash";
-import {createSkipSelf} from "@angular/compiler/src/core";
 
 
 @Injectable()

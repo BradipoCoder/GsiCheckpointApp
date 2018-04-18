@@ -1,10 +1,10 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NavController, Platform, ToastController} from 'ionic-angular';
 import {LogService} from '../../../services/log.service';
 import {RemoteDataService} from '../../../services/remote.data.service';
 import {CodeScanService} from '../../../services/code.scan.service';
 import {HomePage} from "../home";
-import {Checkin} from "../../../models/Checkin";
+
 //import _ from "lodash";
 
 @Component({

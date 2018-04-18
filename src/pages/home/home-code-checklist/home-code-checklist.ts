@@ -1,6 +1,6 @@
 /* Import: Core */
 import {Component, OnInit} from '@angular/core';
-import {NavController, AlertController} from 'ionic-angular';
+import {AlertController, NavController} from 'ionic-angular';
 /* Import: services */
 import {CodeScanService} from '../../../services/code.scan.service';
 import {RemoteDataService} from "../../../services/remote.data.service";
@@ -13,7 +13,6 @@ import {Checkpoint} from "../../../models/Checkpoint";
 /* Import: pages */
 import {HomePage} from "../home";
 import {Checkin} from "../../../models/Checkin";
-
 /* Import: utilities */
 import _ from "lodash";
 

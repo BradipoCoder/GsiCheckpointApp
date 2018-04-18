@@ -1,4 +1,4 @@
-import {Component, OnInit, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {App} from 'ionic-angular';
 import {TaskProvider} from "../../providers/task.provider";
 import {Task} from "../../models/Task";
