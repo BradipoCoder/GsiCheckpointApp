@@ -619,7 +619,7 @@ export class LocalDocumentProvider
   /**
    * @see https://pouchdb.com/api.html#query_index
    * @param {{}} options
-   * @returns @returns {Promise<any>}
+   * @returns {Promise<any>}
    */
   public findDocuments(options: any): Promise<any>
   {

@@ -241,6 +241,8 @@ export class BackgroundService
             providerToSync = <LocalDocumentProvider>this.dataProviders[index];
             LogService.log(index + "> " + providerToSync.constructor.name + ": " + count);
             return false; //exit loop
+          } else {
+            return true;
           }
         });
 

@@ -115,7 +115,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   private is_in_sync: boolean = false;
 
   private viewIsReady: boolean;
-  private viewNotReadyText: string = "Caricamento in corso...";
+  private viewNotReadyText: string = "...";
 
   private hasInterfaceRefreshRequest = false;
   private isInterfaceRefreshRunning = false;

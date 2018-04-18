@@ -317,7 +317,7 @@ export class RemoteDataService
         {
           LogService.log("DURATION-UPDATE: No previous document was found.");
           resolve();
-          return;
+          return null;
         }
 
         let previousCheckin = self.checkinProvider.getNewModelInstance(res.docs[0]);
@@ -326,7 +326,7 @@ export class RemoteDataService
         {
           LogService.log("DURATION-UPDATE: Previous document is of type OUT - skipping.");
           resolve();
-          return;
+          return null;
         }
         //LogService.log("DURATION UPDATE - PREV: ", previousCheckin);
         let checkin_date_last = lastCheckin.checkin_date;
