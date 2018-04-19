@@ -6,15 +6,6 @@ import {LogService} from "../../services/log.service";
 import {UserService} from '../../services/user.service';
 import {CodeScanService} from '../../services/code.scan.service';
 import {RemoteDataService} from "../../services/remote.data.service";
-/* Import: pages */
-/*
-import {HomeNoConfPage} from './home-no-conf/home-no-conf';
-import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
-import {HomeCodeChecklistPage} from "./home-code-checklist/home-code-checklist";
-import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
-import {HomePausePage} from "./home-pause/home-pause";
-import {HomeOutPage} from "./home-out/home-out";
-*/
 /* Import: utilities */
 import {Checkpoint} from "../../models/Checkpoint";
 

@@ -3,9 +3,6 @@ import {Component} from '@angular/core';
 import {IonicPage} from 'ionic-angular';
 /* SERVICES */
 import {BackgroundService} from "../../../services/background.service";
-/* PAGES */
-import {ConfigurationSyncstatePage} from '../configuration.syncstate/configuration.syncstate';
-import {ConfigurationSettingsPage} from '../configuration.settings/configuration.settings';
 
 /* OTHER */
 
@@ -35,8 +32,8 @@ export class ConfigurationPage
 
   constructor(private backgroundService: BackgroundService)
   {
-    this.tab1 = ConfigurationSyncstatePage;
-    this.tab2 = ConfigurationSettingsPage;
+    this.tab1 = "ConfigurationSyncstatePage";
+    this.tab2 = "ConfigurationSettingsPage";
   }
 
   /**
