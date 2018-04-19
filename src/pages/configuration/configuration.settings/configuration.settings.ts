@@ -1,6 +1,6 @@
 /* CORE */
 import {Component, OnInit} from '@angular/core';
-import {LoadingController, ModalController, NavController, Platform, ToastController} from 'ionic-angular';
+import {IonicPage, LoadingController, ModalController, NavController, Platform, ToastController} from 'ionic-angular';
 import {Insomnia} from '@ionic-native/insomnia';
 /* SERVICES */
 import {ConfigurationService} from '../../../services/configuration.service';
@@ -16,7 +16,7 @@ import {ConfigurationSyncstatePage} from "../configuration.syncstate/configurati
 import _ from "lodash";
 
 
-
+@IonicPage()
 @Component({
   selector: 'page-configuration-settings',
   template: `

@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
  * Created by jack on 05/06/17.
  */
 import { Component } from '@angular/core';
-import { ViewController } from 'ionic-angular';
+import { IonicPage, ViewController } from 'ionic-angular';
 var ConfigurationUnlockerPage = /** @class */ (function () {
     function ConfigurationUnlockerPage(viewCtrl) {
         this.viewCtrl = viewCtrl;
@@ -33,6 +33,7 @@ var ConfigurationUnlockerPage = /** @class */ (function () {
         this.viewCtrl.dismiss({});
     };
     ConfigurationUnlockerPage = __decorate([
+        IonicPage(),
         Component({
             selector: 'page-configuration-unlocker',
             template: "\n    <ion-header>\n      <ion-toolbar>\n        <ion-title>\n          Codice sblocco\n        </ion-title>\n        <ion-buttons start>\n          <button ion-button (click)=\"dismiss()\">\n            <ion-icon name=\"md-close\"></ion-icon>\n          </button>\n        </ion-buttons>\n      </ion-toolbar>\n    </ion-header>\n\n    <ion-content>\n      <ion-item>\n        <p>\n          Per modificare le configurazioni \u00E8 necessario inserire il codice di sblocco.\n        </p>\n      </ion-item>\n      <ion-item>\n        <ion-label stacked>Codice sblocco</ion-label>\n        <ion-input [(ngModel)]=\"unlock_code\"></ion-input>\n      </ion-item>\n      <ion-item>\n        <ion-buttons>\n          <button ion-button color=\"primary\" icon-left (click)=\"dismiss()\">\n            <ion-icon name=\"checkmark-circle\"></ion-icon>\n            OK\n          </button>\n          <button ion-button color=\"danger\" icon-right (click)=\"cancel()\">\n            Annulla\n            <ion-icon name=\"close-circle\"></ion-icon>\n          </button>\n        </ion-buttons>\n      </ion-item>\n    </ion-content>\n  "

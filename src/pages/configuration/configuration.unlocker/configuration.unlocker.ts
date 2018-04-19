@@ -2,8 +2,9 @@
  * Created by jack on 05/06/17.
  */
 import {Component} from '@angular/core';
-import {ViewController} from 'ionic-angular';
+import {IonicPage, ViewController} from 'ionic-angular';
 
+@IonicPage()
 @Component({
   selector: 'page-configuration-unlocker',
   template: `

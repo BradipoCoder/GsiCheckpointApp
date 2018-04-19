@@ -1,9 +1,9 @@
 import {Component} from '@angular/core';
-import {NavController} from 'ionic-angular';
+import {IonicPage, NavController} from 'ionic-angular';
 import {LogService} from '../../../services/log.service';
 import {ConfigurationPage} from "../../configuration/configuration/configuration";
 
-
+@IonicPage()
 @Component({
   selector: 'page-home-no-conf',
   template: `

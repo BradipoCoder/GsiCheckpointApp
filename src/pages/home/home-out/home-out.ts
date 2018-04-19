@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {NavController, Platform, ToastController} from 'ionic-angular';
+import {IonicPage, NavController, Platform, ToastController} from 'ionic-angular';
 import {UserService} from "../../../services/user.service";
 import {LogService} from '../../../services/log.service';
 import {RemoteDataService} from '../../../services/remote.data.service';
@@ -9,6 +9,7 @@ import {Checkin} from "../../../models/Checkin";
 
 //import _ from "lodash";
 
+@IonicPage()
 @Component({
   selector: 'page-home-out',
   template: `

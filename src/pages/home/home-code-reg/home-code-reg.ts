@@ -1,6 +1,6 @@
 /* Import: Core */
 import {Component, OnInit} from '@angular/core';
-import {AlertController, NavController} from 'ionic-angular';
+import {IonicPage, AlertController, NavController} from 'ionic-angular';
 /* Import: services */
 import {CodeScanService} from '../../../services/code.scan.service';
 import {RemoteDataService} from "../../../services/remote.data.service";
@@ -15,6 +15,7 @@ import {Checkin} from "../../../models/Checkin";
 /* Import: utilities */
 //import _ from "lodash";
 
+@IonicPage()
 @Component({
   selector: 'page-home-code-reg',
   template: `

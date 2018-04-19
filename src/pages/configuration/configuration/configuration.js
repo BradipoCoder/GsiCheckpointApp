@@ -9,6 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 /* CORE */
 import { Component } from '@angular/core';
+import { IonicPage } from 'ionic-angular';
 /* SERVICES */
 import { BackgroundService } from "../../../services/background.service";
 /* PAGES */
@@ -28,6 +29,7 @@ var ConfigurationPage = /** @class */ (function () {
         return this.backgroundService.isSyncPageLocked();
     };
     ConfigurationPage = __decorate([
+        IonicPage(),
         Component({
             selector: 'page-configuration',
             template: "\n    <ion-header>\n      <ion-navbar>\n        <button ion-button *ngIf=\"!isLocked()\" menuToggle>\n          <ion-icon name=\"menu\"></ion-icon>\n        </button>\n        <ion-title float-left>Configurazione</ion-title>\n      </ion-navbar>\n    </ion-header>\n\n    <ion-tabs>\n      <ion-tab tabIcon=\"sync\" tabTitle=\"Sincronizzazione\" [root]=\"tab1\"></ion-tab>\n      <ion-tab tabIcon=\"switch\" enabled=\"{{!isLocked()}}\" tabTitle=\"Impostazioni\" [root]=\"tab2\"></ion-tab>\n    </ion-tabs>\n  "

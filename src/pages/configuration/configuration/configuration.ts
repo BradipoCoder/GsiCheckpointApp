@@ -1,5 +1,6 @@
 /* CORE */
 import {Component} from '@angular/core';
+import {IonicPage} from 'ionic-angular';
 /* SERVICES */
 import {BackgroundService} from "../../../services/background.service";
 /* PAGES */
@@ -8,6 +9,7 @@ import {ConfigurationSettingsPage} from '../configuration.settings/configuration
 
 /* OTHER */
 
+@IonicPage()
 @Component({
   selector: 'page-configuration',
   template: `

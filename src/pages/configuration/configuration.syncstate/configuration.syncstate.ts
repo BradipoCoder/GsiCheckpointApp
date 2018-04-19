@@ -1,6 +1,6 @@
 /* CORE */
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Platform, ToastController} from 'ionic-angular';
+import {IonicPage, Platform, ToastController} from 'ionic-angular';
 import {Insomnia} from '@ionic-native/insomnia';
 /* PROVIDERS */
 import {CheckpointProvider} from '../../../providers/checkpoint.provider';
@@ -15,6 +15,7 @@ import {UserService} from "../../../services/user.service";
 import _ from "lodash";
 import {Subscription} from "rxjs/Subscription";
 
+@IonicPage()
 @Component({
   selector: 'page-configuration-syncstate',
   template: `

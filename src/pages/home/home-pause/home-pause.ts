@@ -1,5 +1,5 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {NavController, Platform, ToastController} from 'ionic-angular';
+import {IonicPage, NavController, Platform, ToastController} from 'ionic-angular';
 import {LogService} from '../../../services/log.service';
 import {RemoteDataService} from '../../../services/remote.data.service';
 import {CodeScanService} from '../../../services/code.scan.service';
@@ -7,6 +7,7 @@ import {HomePage} from "../home";
 
 //import _ from "lodash";
 
+@IonicPage()
 @Component({
   selector: 'page-home-pause',
   template: `
