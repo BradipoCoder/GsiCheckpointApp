@@ -9,10 +9,9 @@ import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
 import {BackgroundService} from '../services/background.service';
 
-import {HomePage} from "../pages/home/home";
-import {TasksPage} from "../pages/tasks/tasks";
-import {ConfigurationPage} from "../pages/configuration/configuration/configuration";
-
+// import {HomePage} from "../pages/home/home";
+// import {TasksPage} from "../pages/tasks/tasks";
+// import {ConfigurationPage} from "../pages/configuration/configuration/configuration";
 
 
 @Component({
@@ -22,8 +21,10 @@ export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
   /* The page to start with */
-  startupPage: any = HomePage; //CheckpointsPage;//ConfigurationPage // HomePage // TasksPage
+  startupPage: any = "HomePage"; //ConfigurationPage // HomePage // TasksPage
   rootPage: any;
+
+
   pages: Array<{ title: string, icon: string, component: any }>;
 
   constructor(public platform: Platform
@@ -38,9 +39,9 @@ export class MekitTracerApp
 
     // Main menu items
     this.pages = [
-      {title: 'Home', icon: 'home', component: HomePage}
-      , {title: 'Segnalazioni', icon: 'text', component: TasksPage}
-      , {title: 'Configurazione', icon: 'hammer', component: ConfigurationPage}
+      {title: 'Home', icon: 'home', component: "HomePage"}
+      , {title: 'Segnalazioni', icon: 'text', component: "TasksPage"}
+      , {title: 'Configurazione', icon: 'hammer', component: "ConfigurationPage"}
     ];
 
     this.initializeApp();

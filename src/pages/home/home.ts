@@ -1,6 +1,6 @@
 /* Import: Core */
 import {Component, OnInit} from '@angular/core';
-import {NavController} from 'ionic-angular';
+import {IonicPage, NavController} from 'ionic-angular';
 /* Import: services */
 import {LogService} from "../../services/log.service";
 import {UserService} from '../../services/user.service';
@@ -10,15 +10,16 @@ import {RemoteDataService} from "../../services/remote.data.service";
 import {HomeNoConfPage} from './home-no-conf/home-no-conf';
 import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
 import {HomeCodeChecklistPage} from "./home-code-checklist/home-code-checklist";
-
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
-
-import {Checkpoint} from "../../models/Checkpoint";
 import {HomePausePage} from "./home-pause/home-pause";
 import {HomeOutPage} from "./home-out/home-out";
+
 /* Import: utilities */
+import {Checkpoint} from "../../models/Checkpoint";
+
 //import _ from "lodash";
 
+@IonicPage()
 @Component({
   selector: 'page-home',
   template: `
@@ -39,7 +40,6 @@ export class HomePage implements OnInit
     , protected remoteDataService: RemoteDataService
     , protected userService: UserService)
   {
-
   }
 
   /**
@@ -180,6 +180,14 @@ export class HomePage implements OnInit
   ngOnInit(): void
   {
     LogService.log("*** HOME INIT START ***");
+
+    /*
+    this.navCtrl.setRoot("HomeCheckinlistPage").then(() => {
+      LogService.log("GONE");
+    });
+    */
+
+    /*
     this.remoteDataService.updateCurrentSessionCheckins().then(() => {
       return this.___route___config_check();
     }).then(() => {
@@ -197,5 +205,6 @@ export class HomePage implements OnInit
     }).catch(e => {
       LogService.error(e, "HOME INIT REJECTION");
     });
+    */
   }
 }

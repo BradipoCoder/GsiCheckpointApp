@@ -1,6 +1,6 @@
 /* Import: Core */
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {App, NavController, Platform, ToastController,} from 'ionic-angular';
+import {IonicPage, App, NavController, Platform, ToastController,} from 'ionic-angular';
 /* Import: services */
 import {LogService} from "../../../services/log.service";
 import {UserService} from '../../../services/user.service';
@@ -17,6 +17,8 @@ import {HomePage} from "../home";
 import _ from "lodash";
 import * as moment from 'moment';
 
+
+@IonicPage()
 @Component({
   selector: 'page-home-checkinlist',
   template: `

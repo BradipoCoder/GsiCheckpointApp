@@ -68,7 +68,7 @@ import {TasksOutPage} from "../pages/tasks/tasks.out";
   imports: [
     BrowserModule
     , FormsModule
-    , IonicModule.forRoot(MekitTracerApp)
+    , IonicModule.forRoot(MekitTracerApp, {})
   ],
   bootstrap: [IonicApp],
 })

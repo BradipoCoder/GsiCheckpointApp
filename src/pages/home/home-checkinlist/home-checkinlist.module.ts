@@ -19,3 +19,4 @@ import {HomeCheckinlistPage} from "./home-checkinlist";
 export class HomeCheckinlistPageModule
 {
 }
+
