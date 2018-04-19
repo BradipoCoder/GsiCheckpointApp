@@ -623,7 +623,20 @@ export class LocalDocumentProvider
    */
   public findDocuments(options: any): Promise<any>
   {
-    return this.db.find(options);
+    let self = this;
+    //LogService.log("...finding doc...")
+    return new Promise((resolve) => {
+      if(!self.db)
+      {
+        resolve([]);
+      } else {
+        self.db.find(options).then((data) => {
+          resolve(data);
+        }, () => {
+          resolve([]);
+        });
+      }
+    });
   }
 
 

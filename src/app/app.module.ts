@@ -21,31 +21,15 @@ import {CodeScanService} from '../services/code.scan.service';
 import {CheckpointProvider} from '../providers/checkpoint.provider';
 import {CheckinProvider} from '../providers/checkin.provider';
 import {TaskProvider} from "../providers/task.provider";
-/* Pages */
-import {InfoPage} from "../pages/info/info";
-import {TasksPage} from "../pages/tasks/tasks";
-import {TaskNewPage} from "../pages/tasks/task.new";
-import {TasksInPage} from "../pages/tasks/tasks.in";
-import {TasksOutPage} from "../pages/tasks/tasks.out";
 
 /* Other/Utils/Tools */
 
 @NgModule({
   declarations: [
     MekitTracerApp
-    , InfoPage
-    , TasksPage
-    , TaskNewPage
-    , TasksInPage
-    , TasksOutPage
   ],
   entryComponents: [
     MekitTracerApp
-    , InfoPage
-    , TasksPage
-    , TaskNewPage
-    , TasksInPage
-    , TasksOutPage
   ],
   providers: [
     StatusBar

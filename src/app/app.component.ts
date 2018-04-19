@@ -2,17 +2,11 @@ import {Component, ViewChild} from "@angular/core";
 import {Nav, Platform} from "ionic-angular";
 import {StatusBar} from "@ionic-native/status-bar";
 import {SplashScreen} from "@ionic-native/splash-screen";
-
 import {ConfigurationService} from '../services/configuration.service';
 import {LogService} from "../services/log.service";
 import {UserService} from '../services/user.service';
 import {RemoteDataService} from '../services/remote.data.service';
 import {BackgroundService} from '../services/background.service';
-
-// import {HomePage} from "../pages/home/home";
-// import {TasksPage} from "../pages/tasks/tasks";
-// import {ConfigurationPage} from "../pages/configuration/configuration/configuration";
-
 
 @Component({
   templateUrl: 'app.html'
@@ -20,10 +14,10 @@ import {BackgroundService} from '../services/background.service';
 export class MekitTracerApp
 {
   @ViewChild(Nav) nav: Nav;
+
   /* The page to start with */
   startupPage: any = "HomePage"; //ConfigurationPage // HomePage // TasksPage
-  rootPage: any;
-
+  rootPage: any = '';
 
   pages: Array<{ title: string, icon: string, component: any }>;
 

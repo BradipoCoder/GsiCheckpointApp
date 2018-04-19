@@ -6,9 +6,6 @@ import {HomeCheckinlistPage} from "./home-checkinlist";
   declarations: [
     HomeCheckinlistPage,
   ],
-  entryComponents: [
-    HomeCheckinlistPage
-  ],
   imports: [
     IonicPageModule.forChild(HomeCheckinlistPage)
   ],

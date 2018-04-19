@@ -105,11 +105,11 @@ export class RemoteDataService
   public updateCurrentSessionCheckins(): Promise<any>
   {
     let self = this;
+
     return new Promise((resolve) =>
     {
       if(self.updating_session_checkins == true)
       {
-        //already working on it
         return resolve();
       }
       self.updating_session_checkins = true;
@@ -157,6 +157,8 @@ export class RemoteDataService
           self.updating_session_checkins = false;
           resolve();
         });
+      }, (e) => {
+        resolve();
       });
     });
   }
@@ -172,6 +174,7 @@ export class RemoteDataService
     return new Promise(function (resolve)
     {
       //IN/OUT
+
       self.checkpointProvider.getInOutCheckpoints().then((inOutCheckpoints) =>
       {
         let idList = _.map(inOutCheckpoints, "id");
@@ -191,11 +194,13 @@ export class RemoteDataService
             lastInOutCheckin = self.checkinProvider.getNewModelInstance(mostRecentCheckin);
           }
           resolve(lastInOutCheckin);
-        }).catch((e) =>
-        {
+        }, (e) => {
           LogService.log(e, LogService.LEVEL_ERROR);
           resolve(lastInOutCheckin);
         });
+      }, (e) => {
+        LogService.log(e, LogService.LEVEL_ERROR);
+        resolve(lastInOutCheckin);
       });
     }).finally(() =>
     {
@@ -424,16 +429,20 @@ export class RemoteDataService
   {
     let self = this;
 
-    return new Promise(function (resolve, reject)
+    return new Promise((resolve, reject) =>
     {
       Promise.reduce(self.providers, (accu, provider) => {
         return provider.initialize();
       }, null).then(() => {
+        resolve();
+        /*
         self.updateCurrentSessionCheckins().then(() => {
           resolve();
         }, (e) => {
           reject();
-        });
+        });*/
+      }, (e) => {
+        reject(e);
       });
     });
   }

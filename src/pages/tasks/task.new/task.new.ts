@@ -1,13 +1,13 @@
 import {Component, OnInit} from '@angular/core';
-import {NavController, ToastController} from 'ionic-angular';
-import {Task} from "../../models/Task";
-import {CrmDataModel} from "../../models/crm.data.model";
-import {TaskProvider} from "../../providers/task.provider";
-import {LogService} from "../../services/log.service";
-import {UserService} from "../../services/user.service";
-import {Checkin} from "../../models/Checkin";
-import {Checkpoint} from "../../models/Checkpoint";
-import {CheckinProvider} from "../../providers/checkin.provider";
+import {IonicPage, NavController, ToastController} from 'ionic-angular';
+import {TaskProvider} from "../../../providers/task.provider";
+import {LogService} from "../../../services/log.service";
+import {UserService} from "../../../services/user.service";
+import {Checkin} from "../../../models/Checkin";
+import {Checkpoint} from "../../../models/Checkpoint";
+import {Task} from "../../../models/Task";
+import {CrmDataModel} from "../../../models/crm.data.model";
+import {CheckinProvider} from "../../../providers/checkin.provider";
 import * as moment from 'moment';
 
 
@@ -15,10 +15,61 @@ import * as moment from 'moment';
  * @todo: 1) implementare foto?
  *
  */
-
+@IonicPage()
 @Component({
   selector: 'page-task-new',
-  templateUrl: 'task.new.html'
+  template: `
+    <ion-header>
+      <ion-navbar>
+        <ion-title>Nuova Segnalazione</ion-title>
+      </ion-navbar>
+    </ion-header>
+
+    <ion-content>
+
+      <ion-list>
+        <!--<ion-list-header>Generale</ion-list-header>-->
+        <ion-item>
+          <ion-input placeholder="Oggetto segnalazione" clearInput [(ngModel)]="task.name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-textarea placeholder="Descrizione estesa" [(ngModel)]="task.description"></ion-textarea>
+        </ion-item>
+
+        <ion-item>
+          <div class="where" *ngIf="task.check_point;">
+            <ion-icon name="pin" title="Locale" item-left></ion-icon>
+            <div class="code-name">
+              [{{task.check_point.code}}]&nbsp;{{task.check_point.name}}
+            </div>
+          </div>
+
+        </ion-item>
+      </ion-list>
+
+
+
+    </ion-content>
+
+    <ion-footer>
+      <div class="buttons">
+        <button ion-button icon-left float-left (click)="actionCancel()" color="yellow-light">
+          <ion-icon name="arrow-back"></ion-icon>
+          <ion-label>Indietro</ion-label>
+        </button>
+
+        <button ion-button icon-left float-right (click)="actionSave()" color="green-light">
+          <ion-icon name="send"></ion-icon>
+          <ion-label>Invia</ion-label>
+        </button>
+      </div>
+
+      <div text-center class="explanation">
+        Compila i campi e premi il tasto invia per registrare una segnalazione.
+      </div>
+
+    </ion-footer>
+  `
 })
 export class TaskNewPage implements OnInit
 {

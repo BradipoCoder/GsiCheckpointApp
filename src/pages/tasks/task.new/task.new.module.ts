@@ -1,18 +1,19 @@
 import {NgModule} from '@angular/core';
 import {IonicPageModule} from 'ionic-angular';
-import {HomePage} from "./home";
+import {TaskNewPage} from "./task.new";
 
 @NgModule({
   declarations: [
-    HomePage,
+    TaskNewPage,
   ],
   imports: [
-    IonicPageModule.forChild(HomePage)
+    IonicPageModule.forChild(TaskNewPage)
   ],
   exports: [
-    HomePage
+    TaskNewPage
   ]
 })
-export class HomePageModule
+export class TaskNewPageModule
 {
 }
+

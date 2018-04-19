@@ -1,6 +1,6 @@
 /* Import: Core */
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {IonicPage, App, NavController, Platform, ToastController,} from 'ionic-angular';
+import {Component, OnDestroy, OnInit, AfterViewInit} from '@angular/core';
+import {IonicPage, App, NavController, Platform, ToastController} from 'ionic-angular';
 /* Import: services */
 import {LogService} from "../../../services/log.service";
 import {UserService} from '../../../services/user.service';
@@ -122,7 +122,7 @@ import * as moment from 'moment';
     </ion-footer>
   `
 })
-export class HomeCheckinlistPage implements OnInit, OnDestroy
+export class HomeCheckinlistPage implements OnInit, OnDestroy, AfterViewInit
 {
   private checkins: Checkin[];
 
@@ -290,14 +290,23 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
   }
 
   //------------------------------------------------------------------------------------------------------INIT & DESTROY
+  ngAfterViewInit():void {
+    LogService.log("CHECKINLIST AFTER VIEW INIT");
+  }
+
   ngOnInit(): void
   {
+    LogService.log("CHECKINLIST NGInit");
+
+    /*
     let self = this;
     this.refreshAllCheckins().then(() => {
       LogService.log("Checkins refreshed.");
       self.autoUpdateIntevalExecution(self);
       self.auto_update_timeout = setInterval(self.autoUpdateIntevalExecution, (5 * 1000), self);
-    });
+    }, (e) => {
+      LogService.error(e, "CHECKINLIST NGInit");
+    });*/
   }
 
   ngOnDestroy(): void
@@ -306,3 +315,4 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
     this.auto_update_timeout = null;
   }
 }
+

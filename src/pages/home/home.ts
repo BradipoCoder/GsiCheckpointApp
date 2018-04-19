@@ -7,13 +7,14 @@ import {UserService} from '../../services/user.service';
 import {CodeScanService} from '../../services/code.scan.service';
 import {RemoteDataService} from "../../services/remote.data.service";
 /* Import: pages */
+/*
 import {HomeNoConfPage} from './home-no-conf/home-no-conf';
 import {HomeCodeRegPage} from './home-code-reg/home-code-reg';
 import {HomeCodeChecklistPage} from "./home-code-checklist/home-code-checklist";
 import {HomeCheckinlistPage} from './home-checkinlist/home-checkinlist';
 import {HomePausePage} from "./home-pause/home-pause";
 import {HomeOutPage} from "./home-out/home-out";
-
+*/
 /* Import: utilities */
 import {Checkpoint} from "../../models/Checkpoint";
 
@@ -47,8 +48,8 @@ export class HomePage implements OnInit
    */
   testActionOne(): void
   {
-    this.navCtrl.push(HomeNoConfPage).then(() => {
-      this.navCtrl.setRoot(HomeNoConfPage);
+    this.navCtrl.push("HomeNoConfPage").then(() => {
+      this.navCtrl.setRoot("HomeNoConfPage");
     });
   }
 
@@ -65,7 +66,7 @@ export class HomePage implements OnInit
     return new Promise((resolve, reject) => {
       if (!self.userService.is_user_configured)
       {
-        self.navCtrl.setRoot(HomeNoConfPage);
+        self.navCtrl.setRoot("HomeNoConfPage");
         return reject(new Error("L'applicazione non è stata ancora configurata."));
       } else
       {
@@ -88,7 +89,7 @@ export class HomePage implements OnInit
     return new Promise((resolve, reject) => {
       if (self.codeScanService.isCodeScanInProgress())
       {
-        self.navCtrl.setRoot(HomeCodeRegPage);
+        self.navCtrl.setRoot("HomeCodeRegPage");
         return reject(new Error("Code registration in progress..."));
       } else
       {
@@ -109,7 +110,7 @@ export class HomePage implements OnInit
     return new Promise((resolve, reject) => {
       if (self.remoteDataService.getCheckinToModify())
       {
-        self.navCtrl.setRoot(HomeCodeChecklistPage);
+        self.navCtrl.setRoot("HomeCodeChecklistPage");
         return reject(new Error("Checkin modification in progress..."));
       } else
       {
@@ -138,7 +139,7 @@ export class HomePage implements OnInit
 
       if (is_paused)
       {
-        self.navCtrl.setRoot(HomePausePage);
+        self.navCtrl.setRoot("HomePausePage");
         return reject(new Error("User is having a break..."));
       } else
       {
@@ -168,7 +169,7 @@ export class HomePage implements OnInit
 
       if (is_out)
       {
-        self.navCtrl.setRoot(HomeOutPage);
+        self.navCtrl.setRoot("HomeOutPage");
         return reject(new Error("User is checked out..."));
       } else
       {
@@ -177,17 +178,10 @@ export class HomePage implements OnInit
     });
   }
 
+
   ngOnInit(): void
   {
     LogService.log("*** HOME INIT START ***");
-
-    /*
-    this.navCtrl.setRoot("HomeCheckinlistPage").then(() => {
-      LogService.log("GONE");
-    });
-    */
-
-    /*
     this.remoteDataService.updateCurrentSessionCheckins().then(() => {
       return this.___route___config_check();
     }).then(() => {
@@ -199,12 +193,11 @@ export class HomePage implements OnInit
     }).then(() => {
       return this.___route___user_out();
     }).then(() => {
-      return this.navCtrl.setRoot(HomeCheckinlistPage);
+      return this.navCtrl.setRoot("HomeCheckinlistPage");
     }).then(() => {
       LogService.log("*** HOME INIT DONE ***");
     }).catch(e => {
       LogService.error(e, "HOME INIT REJECTION");
     });
-    */
   }
 }
