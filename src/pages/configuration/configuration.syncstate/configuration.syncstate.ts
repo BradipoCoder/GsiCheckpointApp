@@ -19,6 +19,15 @@ import {Subscription} from "rxjs/Subscription";
 @Component({
   selector: 'page-configuration-syncstate',
   template: `
+    <ion-header>
+      <ion-navbar>
+        <button ion-button *ngIf="!isLocked()" menuToggle>
+          <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title float-left>Stato</ion-title>
+      </ion-navbar>
+    </ion-header>
+    
     <ion-content *ngIf="viewIsReady">
 
       <h1 class="tab-title">
@@ -152,6 +161,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     };
   }
 
+
   /* ------------------------------------------------------------------------------------------ INTERFACE ADMIN STUFF */
 
   public doSomething(): void
@@ -161,6 +171,14 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     }, e => {
       LogService.log("doSomething ERROR! " + e, LogService.LEVEL_ERROR);
     });
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  public isLocked():boolean
+  {
+    return this.backgroundService.isSyncPageLocked();
   }
 
   /**

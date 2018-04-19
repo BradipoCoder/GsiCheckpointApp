@@ -16,6 +16,15 @@ import _ from "lodash";
 @Component({
   selector: 'page-configuration-settings',
   template: `
+    <ion-header>
+      <ion-navbar>
+        <button ion-button *ngIf="!isLocked()" menuToggle>
+          <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title float-left>Configurazione</ion-title>
+      </ion-navbar>
+    </ion-header>
+    
     <ion-content *ngIf="viewIsReady">
 
       <h1 class="tab-title">
@@ -116,6 +125,14 @@ export class ConfigurationSettingsPage implements OnInit
   }
 
   /**
+   * @returns {boolean}
+   */
+  public isLocked():boolean
+  {
+    return this.backgroundService.isSyncPageLocked();
+  }
+
+  /**
    * Save configuration values and reset application
    *
    * @returns {Promise<any>}
@@ -207,8 +224,9 @@ export class ConfigurationSettingsPage implements OnInit
     this.configurationService.getConfigObject().then((config) => {
       this.cfg = config;
       this.viewIsReady = true;
-    }, () => {
+    }, (e) => {
       this.cfg = {};
+      this.viewNotReadyText = "No configuration yet! " + e;
     });
   }
 

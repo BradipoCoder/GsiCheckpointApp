@@ -35,7 +35,8 @@ export class MekitTracerApp
     this.pages = [
       {title: 'Home', icon: 'home', component: "HomePage"}
       , {title: 'Segnalazioni', icon: 'text', component: "TasksPage"}
-      , {title: 'Configurazione', icon: 'hammer', component: "ConfigurationPage"}
+      , {title: 'Stato', icon: 'cloud', component: "ConfigurationSyncstatePage"}
+      , {title: 'Configurazione', icon: 'hammer', component: "ConfigurationSettingsPage"}
     ];
 
     this.initializeApp();
