@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
 import {LogService} from '../../../services/log.service';
-import {ConfigurationPage} from "../../configuration/configuration/configuration";
 
 @IonicPage()
 @Component({
@@ -40,7 +39,7 @@ import {ConfigurationPage} from "../../configuration/configuration/configuration
 })
 export class HomeNoConfPage
 {
-  constructor(protected navCtrl: NavController, protected logService: LogService)
+  constructor(protected navCtrl: NavController)
   {
   }
 
@@ -58,8 +57,8 @@ export class HomeNoConfPage
    */
   goToConfigurationPage(): void
   {
-    this.navCtrl.push(ConfigurationPage).then(() => {
-      this.navCtrl.setRoot(ConfigurationPage);
+    this.navCtrl.push("ConfigurationPage").then(() => {
+      this.navCtrl.setRoot("ConfigurationPage");
     });
   }
 }

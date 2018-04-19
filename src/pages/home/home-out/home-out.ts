@@ -4,7 +4,6 @@ import {UserService} from "../../../services/user.service";
 import {LogService} from '../../../services/log.service';
 import {RemoteDataService} from '../../../services/remote.data.service';
 import {CodeScanService} from '../../../services/code.scan.service';
-import {HomePage} from "../home";
 import {Checkin} from "../../../models/Checkin";
 
 //import _ from "lodash";
@@ -77,7 +76,7 @@ export class HomeOutPage implements OnInit, OnDestroy
   {
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcode) => {
       LogService.log("SCANNED BARCODE: " + barcode);
-      this.navCtrl.setRoot(HomePage).then(() => {
+      this.navCtrl.setRoot("HomePage").then(() => {
         LogService.log("Reset home call done.");
       });
     }, (e) => {

@@ -4,7 +4,6 @@ import {TaskProvider} from "../../../providers/task.provider";
 import {UserService} from "../../../services/user.service";
 import {LogService} from "../../../services/log.service";
 import {Task} from "../../../models/Task";
-import {TaskNewPage} from "../task.new/task.new";
 import _ from "lodash";
 import {Subscription} from "rxjs/Subscription";
 
@@ -82,7 +81,7 @@ export class TasksOutPage  implements OnInit, OnDestroy
    */
   public openNewTaskPage(): Promise<any>
   {
-    return this.rootNav.push(TaskNewPage);
+    return this.rootNav.push("TaskNewPage");
   }
 
   /**

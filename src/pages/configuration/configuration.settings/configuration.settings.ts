@@ -9,12 +9,8 @@ import {RemoteDataService} from '../../../services/remote.data.service';
 import {BackgroundService} from "../../../services/background.service";
 import {OfflineCapableRestService} from '../../../services/offline.capable.rest.service';
 import {LogService} from "../../../services/log.service";
-/* PAGES */
-import {ConfigurationUnlockerPage} from '../configuration.unlocker/configuration.unlocker';
-import {ConfigurationSyncstatePage} from "../configuration.syncstate/configuration.syncstate";
 /* OTHER */
 import _ from "lodash";
-
 
 @IonicPage()
 @Component({
@@ -154,7 +150,7 @@ export class ConfigurationSettingsPage implements OnInit
             self.viewIsReady = true;
             self.backgroundService.applicationResetRequested = true;
             LogService.log("APPLICATION RESET REQUESTED", LogService.LEVEL_WARN);
-            self.navCtrl.setRoot(ConfigurationSyncstatePage);
+            self.navCtrl.setRoot("ConfigurationSyncstatePage");
             resolve();
           });
         });
@@ -167,7 +163,7 @@ export class ConfigurationSettingsPage implements OnInit
    */
   onUnlockConfigForm(): void
   {
-    let unlockModal = this.modalCtrl.create(ConfigurationUnlockerPage, false, {});
+    let unlockModal = this.modalCtrl.create("ConfigurationUnlockerPage", false, {});
     unlockModal.onDidDismiss(data => {
       let unlock_code = _.get(data, "unlock_code", "");
       this.configurationService.unlockWithCode(unlock_code);

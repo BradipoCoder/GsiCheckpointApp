@@ -109,7 +109,6 @@ import {Subscription} from "rxjs/Subscription";
 })
 export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 {
-
   private counts: any;
 
   private is_in_sync: boolean = false;

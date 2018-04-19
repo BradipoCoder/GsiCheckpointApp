@@ -10,7 +10,6 @@ import {CheckpointProvider} from "../../../providers/checkpoint.provider";
 /* Import: models */
 import {Checkpoint} from "../../../models/Checkpoint";
 /* Import: pages */
-import {HomePage} from "../home";
 import {Checkin} from "../../../models/Checkin";
 /* Import: utilities */
 //import _ from "lodash";
@@ -76,7 +75,7 @@ export class HomeCodeRegPage implements OnInit
   {
     //@todo: register error here
     this.codeScanService.setCodeScanInProgress(false);
-    this.navCtrl.setRoot(HomePage);
+    this.navCtrl.setRoot("HomePage");
   }
 
   /**
@@ -148,7 +147,7 @@ export class HomeCodeRegPage implements OnInit
         {
           this.codeScanService.setCodeToRegister(false);
         }
-        this.navCtrl.setRoot(HomePage).then(() => {
+        this.navCtrl.setRoot("HomePage").then(() => {
           LogService.log("--- RESET HOME ---");
         });
       }, (e) => {

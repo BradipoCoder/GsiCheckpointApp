@@ -1,7 +1,5 @@
 import {Component} from '@angular/core';
 import {IonicPage} from 'ionic-angular';
-import {TasksInPage} from "../tasks.in/tasks.in";
-import {TasksOutPage} from "../tasks.out/tasks.out";
 
 @IonicPage()
 @Component({
@@ -23,11 +21,6 @@ import {TasksOutPage} from "../tasks.out/tasks.out";
   `
 })
 export class TasksPage {
-  tab1: any;
-  tab2: any;
-
-  constructor() {
-    this.tab1 = TasksInPage;
-    this.tab2 = TasksOutPage;
-  }
+  protected tab1: string = "TasksInPage";
+  protected tab2: string = "TasksOutPage";
 }

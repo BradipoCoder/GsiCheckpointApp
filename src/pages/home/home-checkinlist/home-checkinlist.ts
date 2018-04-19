@@ -8,11 +8,6 @@ import {RemoteDataService} from '../../../services/remote.data.service';
 import {CodeScanService} from '../../../services/code.scan.service';
 /* Import: models */
 import {Checkin} from "../../../models/Checkin";
-import {HomePage} from "../home";
-//import {CrmDataModel} from "../../../models/crm.data.model";
-//import {Checkpoint} from "../../../models/Checkpoint";
-/* Import: pages */
-//import {TaskNewPage} from "../../tasks/task.new";
 /* Import: utilities */
 import _ from "lodash";
 import * as moment from 'moment';
@@ -150,7 +145,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
   {
     this.codeScanService.scanQR({allowed_types: allowedTypes}).then((barcode) => {
       LogService.log("SCANNED BARCODE: " + barcode);
-      this.navCtrl.setRoot(HomePage).then(() => {
+      this.navCtrl.setRoot("HomePage").then(() => {
         LogService.log("Reset home call done.");
       });
     }, (e) => {
@@ -170,7 +165,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
   protected modifyCheckin(checkin: Checkin)
   {
     this.remoteDataService.setCheckinToModify(checkin);
-    this.navCtrl.setRoot(HomePage);
+    this.navCtrl.setRoot("HomePage");
   }
 
   /**
@@ -180,7 +175,7 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
   {
     this.remoteDataService.storePauseCheckin().then(() => {
       LogService.log("PAUSE REGISTERED");
-      this.navCtrl.setRoot(HomePage);
+      this.navCtrl.setRoot("HomePage");
     }).catch((e) => {
       LogService.log("Errore pausa: " + e, LogService.LEVEL_ERROR);
       let toast = this.toastCtrl.create({
@@ -292,11 +287,8 @@ export class HomeCheckinlistPage implements OnInit, OnDestroy
   //------------------------------------------------------------------------------------------------------INIT & DESTROY
   ngOnInit(): void
   {
-    LogService.log("CHECKINLIST NGInit");
-
     let self = this;
     this.refreshAllCheckins().then(() => {
-      LogService.log("Checkins refreshed.");
       self.autoUpdateIntevalExecution(self);
       self.auto_update_timeout = setInterval(self.autoUpdateIntevalExecution, (5 * 1000), self);
     }, (e) => {

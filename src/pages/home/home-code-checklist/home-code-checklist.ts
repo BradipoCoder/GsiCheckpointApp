@@ -11,7 +11,6 @@ import {CheckinProvider} from "../../../providers/checkin.provider";
 /* Import: models */
 import {Checkpoint} from "../../../models/Checkpoint";
 /* Import: pages */
-import {HomePage} from "../home";
 import {Checkin} from "../../../models/Checkin";
 /* Import: utilities */
 import _ from "lodash";
@@ -112,7 +111,7 @@ export class HomeCodeChecklistPage implements OnInit
     this.handleCheckpointChecklistSelection(checkin, checkpoint).then(() => {
       LogService.log('Checklist OK');
       this.remoteDataService.setCheckinToModify(null);
-      this.navCtrl.setRoot(HomePage).then(() => {
+      this.navCtrl.setRoot("HomePage").then(() => {
         LogService.log("--- RESET HOME ---");
       });
     }, (e) => {

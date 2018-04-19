@@ -21,14 +21,14 @@ import {BackgroundService} from "../../../services/background.service";
 
     <ion-tabs>
       <ion-tab tabIcon="sync" tabTitle="Sincronizzazione" [root]="tab1"></ion-tab>
-      <ion-tab tabIcon="switch" enabled="{{!isLocked()}}" tabTitle="Impostazioni" [root]="tab2"></ion-tab>
+      <ion-tab tabIcon="switch" tabTitle="Impostazioni" [root]="tab2" enabled="{{!isLocked()}}"></ion-tab>
     </ion-tabs>
   `
 })
 export class ConfigurationPage
 {
-  tab1: any;
-  tab2: any;
+  protected tab1: string;
+  protected tab2: string;
 
   constructor(private backgroundService: BackgroundService)
   {
