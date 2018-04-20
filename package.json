@@ -1,7 +1,7 @@
 {
   "name": "trace_with_mekit",
   "description": "Traccia con Mekit",
-  "version": "0.2.24",
+  "version": "0.2.25",
   "author": "Mekit",
   "homepage": "http://mekit.it",
   "private": true,
@@ -37,7 +37,6 @@
     "cordova-plugin-console": "^1.0.7",
     "cordova-plugin-device": "^2.0.1",
     "cordova-plugin-insomnia": "git+https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git",
-    "cordova-plugin-ionic": "^4.1.3",
     "cordova-plugin-network-information": "^2.0.1",
     "cordova-plugin-splashscreen": "^5.0.2",
     "cordova-plugin-statusbar": "^2.2.3",
@@ -69,14 +68,6 @@
       "ionic-plugin-keyboard": {},
       "cordova-plugin-insomnia": {},
       "cordova-plugin-splashscreen": {},
-      "cordova-plugin-ionic": {
-        "APP_ID": "0ecc230c",
-        "CHANNEL_NAME": "Master",
-        "UPDATE_METHOD": "auto",
-        "WARN_DEBUG": "true",
-        "UPDATE_API": "https://api.ionicjs.com",
-        "MAX_STORE": "2"
-      },
       "cordova-plugin-network-information": {},
       "phonegap-plugin-barcodescanner": {
         "ANDROID_SUPPORT_V4_VERSION": "27.+"
