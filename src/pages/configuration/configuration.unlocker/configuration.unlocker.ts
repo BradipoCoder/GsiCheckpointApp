@@ -57,7 +57,7 @@ export class ConfigurationUnlockerPage
    *
    * @type {string}
    */
-  unlock_code:string = "MKT";//@fixme: remote value!
+  unlock_code:string = "";
 
   constructor(public viewCtrl: ViewController)
   {}

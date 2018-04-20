@@ -57,8 +57,8 @@ export class HomeNoConfPage
    */
   goToConfigurationPage(): void
   {
-    this.navCtrl.push("ConfigurationPage").then(() => {
-      this.navCtrl.setRoot("ConfigurationPage");
+    this.navCtrl.push("ConfigurationSettingsPage").then(() => {
+      this.navCtrl.setRoot("ConfigurationSettingsPage");
     });
   }
 }

@@ -21,6 +21,7 @@
     "@angular/http": "5.2.10",
     "@angular/platform-browser": "5.2.10",
     "@angular/platform-browser-dynamic": "5.2.10",
+    "@ionic-native/app-version": "^4.7.0",
     "@ionic-native/barcode-scanner": "^4.7.0",
     "@ionic-native/core": "4.7.0",
     "@ionic-native/insomnia": "^4.3.2",
@@ -34,6 +35,7 @@
     "bluebird": "^3.5.0",
     "blueimp-md5": "^2.7.0",
     "cordova-android": "~7.0.0",
+    "cordova-plugin-app-version": "^0.1.9",
     "cordova-plugin-console": "^1.0.7",
     "cordova-plugin-device": "^2.0.1",
     "cordova-plugin-insomnia": "git+https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git",
@@ -72,7 +74,8 @@
       "phonegap-plugin-barcodescanner": {
         "ANDROID_SUPPORT_V4_VERSION": "27.+"
       },
-      "cordova-plugin-whitelist": {}
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-app-version": {}
     },
     "platforms": [
       "android"

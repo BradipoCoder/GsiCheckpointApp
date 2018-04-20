@@ -2,6 +2,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {ErrorHandler, NgModule} from "@angular/core";
 import {FormsModule} from '@angular/forms';
 import {IonicApp, IonicErrorHandler, IonicModule} from "ionic-angular";
+import { AppVersion } from '@ionic-native/app-version';
 import {MekitTracerApp} from "./app.component";
 /* Ionic */
 import {StatusBar} from "@ionic-native/status-bar";
@@ -33,6 +34,7 @@ import {TaskProvider} from "../providers/task.provider";
   ],
   providers: [
     StatusBar
+    , AppVersion
     , BackgroundService
     , BarcodeScanner
     , CheckinProvider

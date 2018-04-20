@@ -103,14 +103,14 @@ import * as moment from 'moment';
       <ion-grid padding-left padding-right>
         <ion-row>
           <ion-col text-left>
-            <ion-label class="button" float-left padding-right (tap)="registerNewTask()">
+            <button ion-button icon-left color="text-color" clear (tap)="registerNewTask()">
               <ion-icon name="text"></ion-icon>
               Segnala
-            </ion-label>
-            <ion-label class="button" float-left padding-right (tap)="activatePause()">
+            </button>
+            <button ion-button icon-left color="text-color" clear (tap)="activatePause()">
               <ion-icon name="pause"></ion-icon>
               Pausa
-            </ion-label>
+            </button>
           </ion-col>
         </ion-row>
       </ion-grid>

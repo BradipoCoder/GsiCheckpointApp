@@ -1,6 +1,7 @@
 /* CORE */
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {IonicPage, Platform, ToastController} from 'ionic-angular';
+import {App, IonicPage, Platform, ToastController} from 'ionic-angular';
+import { AppVersion } from '@ionic-native/app-version';
 import {Insomnia} from '@ionic-native/insomnia';
 /* PROVIDERS */
 import {CheckpointProvider} from '../../../providers/checkpoint.provider';
@@ -31,7 +32,7 @@ import {Subscription} from "rxjs/Subscription";
     <ion-content *ngIf="viewIsReady">
 
       <h1 class="tab-title">
-        Stato sincronizzazione
+        Stato sincronizzazione - {{appName}} v{{appVer}}
       </h1>
 
       <ion-list>
@@ -43,10 +44,10 @@ import {Subscription} from "rxjs/Subscription";
 
         <!--ADMIN ONLY-->
         <div class="buttons cache-clean-buttons" text-center align-items-center *ngIf="userService.isTrustedUser()">
-          <button ion-button icon-left (click)="doSomething()" color="dark">
-            <ion-icon name="refresh-circle"></ion-icon>
-            <ion-label>Sync one step</ion-label>
-          </button>
+          <!--<button ion-button icon-left (click)="doSomething()" color="dark">-->
+            <!--<ion-icon name="refresh-circle"></ion-icon>-->
+            <!--<ion-label>Sync one step</ion-label>-->
+          <!--</button>-->
 
           <button ion-button icon-left (click)="handleApplicationResetRequest()" color="danger">
             <ion-icon name="ice-cream"></ion-icon>
@@ -60,6 +61,11 @@ import {Subscription} from "rxjs/Subscription";
           <button ion-button icon-left (click)="backgroundService.stop()" color="light">
             <ion-icon name="hand"></ion-icon>
             <ion-label>Stop Timer</ion-label>
+          </button>
+          
+          <button ion-button icon-left color="danger" (tap)="reboot()">
+            <ion-icon name="refresh-circle"></ion-icon>
+            REBOOT
           </button>
         </div>
         <!--ADMIN ONLY-->
@@ -120,6 +126,9 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 {
   private counts: any;
 
+  private appName:string = "";
+  private appVer:string = "";
+
   private is_in_sync: boolean = false;
 
   private viewIsReady: boolean;
@@ -135,6 +144,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   constructor(private toastCtrl: ToastController
     , private platform: Platform
     , private insomnia: Insomnia
+    , private appVersion: AppVersion
     , private checkpointProvider: CheckpointProvider
     , private checkinProvider: CheckinProvider
     , private offlineCapableRestService: OfflineCapableRestService
@@ -159,18 +169,27 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
         unsynced_down: 0,
       }
     };
+
+    this.appVersion.getAppName().then((name) => {
+      this.appName = name;
+    }, () => {
+      this.appName = "Test application";
+    });
+
+    this.appVersion.getVersionNumber().then((name) => {
+      this.appVer = name;
+    }, () => {
+      this.appVer = "0.0.0";
+    });
+
   }
 
 
   /* ------------------------------------------------------------------------------------------ INTERFACE ADMIN STUFF */
 
-  public doSomething(): void
+  protected reboot(): void
   {
-    this.backgroundService.syncDataProviders().then(() => {
-      LogService.log("doSomething DONE.");
-    }, e => {
-      LogService.log("doSomething ERROR! " + e, LogService.LEVEL_ERROR);
-    });
+    window.location.href = "/";
   }
 
   /**
