@@ -28,10 +28,10 @@ perl -i -pe 's/version="\d+\.\d+\.\K(\d+)/ $1+1 /e' config.xml
 
 
 echo "Creating unsigned release version..."
-#ionic cordova build --release android
+ionic cordova build --release android
 #ionic cordova build --aot --minifyjs --minifycss --optimizejs --release android
 #ionic cordova build --release --prod android
-ionic cordova build --minifycss --minifyjs --optimizejs --release --device android
+#ionic cordova build --minifycss --minifyjs --optimizejs --release --device android
 
 
 if [ ! -f "${APKDIR}/app-release-unsigned.apk" ]; then
