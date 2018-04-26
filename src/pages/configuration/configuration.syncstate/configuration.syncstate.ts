@@ -30,47 +30,46 @@ import {Subscription} from "rxjs/Subscription";
     </ion-header>
     
     <ion-content *ngIf="viewIsReady">
-
-      <h1 class="tab-title">
-        Stato sincronizzazione
-        <br />
-        {{appName}} v{{appVer}}
-      </h1>
-
-      <ion-list>
-
-        <ion-item class="sync-state" text-center align-items-center>
-          <ion-icon *ngIf="is_in_sync" name="happy" class="happy"></ion-icon>
-          <ion-icon *ngIf="!is_in_sync" name="sad" class="sad"></ion-icon>
-        </ion-item>
+      
+      <div class="titlebar" [ngClass]="{'reset-request': backgroundService.applicationResetRequested}">
+        <h1 class="tab-title">
+          Stato sincronizzazione
+          <br />
+          {{appName}} v{{appVer}}
+          <br />
+          <div class="sync-state">
+            <ion-icon *ngIf="is_in_sync" name="happy" class="happy"></ion-icon>
+            <ion-icon *ngIf="!is_in_sync" name="sad" class="sad"></ion-icon>
+          </div>          
+        </h1>
 
         <!--ADMIN ONLY-->
         <div class="buttons cache-clean-buttons" text-center align-items-center *ngIf="userService.isTrustedUser()">
-          <!--<button ion-button icon-left (click)="doSomething()" color="dark">-->
-            <!--<ion-icon name="refresh-circle"></ion-icon>-->
-            <!--<ion-label>Sync one step</ion-label>-->
-          <!--</button>-->
 
-          <button ion-button icon-left (click)="handleApplicationResetRequest()" color="danger">
+          <button ion-button icon-left (click)="backgroundService.applicationResetRequested = true; handleApplicationResetRequest();" color="danger">
             <ion-icon name="ice-cream"></ion-icon>
             <ion-label>Reset application</ion-label>
           </button>
 
           <button ion-button icon-left (click)="backgroundService.start()" color="light">
             <ion-icon name="clock"></ion-icon>
-            <ion-label>Start Timer</ion-label>
+            <ion-label>BGS Start</ion-label>
           </button>
           <button ion-button icon-left (click)="backgroundService.stop()" color="light">
             <ion-icon name="hand"></ion-icon>
-            <ion-label>Stop Timer</ion-label>
+            <ion-label>BGS Stop</ion-label>
           </button>
-          
+
           <button ion-button icon-left color="danger" (tap)="reboot()">
             <ion-icon name="refresh-circle"></ion-icon>
             REBOOT
           </button>
         </div>
         <!--ADMIN ONLY-->
+      </div>
+      
+
+      <ion-list>
 
         <ion-list-header>Locali</ion-list-header>
 
@@ -119,7 +118,7 @@ import {Subscription} from "rxjs/Subscription";
 
     </ion-content>
 
-    <ion-content *ngIf="!viewIsReady">
+    <ion-content *ngIf="!viewIsReady" text-center align-items-center>
       <h1 class="loading">{{viewNotReadyText}}</h1>
     </ion-content>
   `
@@ -138,6 +137,8 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
   private hasInterfaceRefreshRequest = false;
   private isInterfaceRefreshRunning = false;
+
+  private appRstChkInerval:number;
 
   private dataChangeSubscriptionCheckpoint: Subscription;
   private dataChangeSubscriptionCheckin: Subscription;
@@ -204,6 +205,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 
   /**
    * Request originated from username/password configuration change
+   * (self.backgroundService.applicationResetRequested = true;)
    */
   protected handleApplicationResetRequest()
   {
@@ -212,16 +214,38 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     this.viewNotReadyText = "Riconfigurazione applicazione in corso...";
     this.unsubscribeToDataChange();
     this.killAllData().then(() => {
-      this.backgroundService.applicationResetRequested = false;
-      LogService.log("APP RESET DONE");
-      LogService.log("Starting background service...");
+      LogService.log("APP RESET - DATA CLEARED");
       this.backgroundService.setSyncIntervalFast();
-      return this.backgroundService.start();
-    }).then(() => {
-      this.registerInterfaceRefreshRequest();
-      this.subscribeToDataChange();
+      this.backgroundService.start().then(() => {
+        LogService.log("APP RESET - BACKGROUND SERVICE STARTED");
+        this.viewIsReady = true;
+        this.appRstChkInerval = setInterval(this.handleApplicationResetRequest_check, 1000, this);
+      });
     });
   }
+
+  /**
+   *
+   * @param {ConfigurationSyncstatePage} self
+   */
+  protected handleApplicationResetRequest_check(self:ConfigurationSyncstatePage)
+  {
+    LogService.log("APP RESET - tick");
+    self.updateCounts().then(() => {
+      if(self.is_in_sync)
+      {
+        LogService.log("APP RESET - FULLY SYNCED");
+        clearInterval(self.appRstChkInerval);
+        self.appRstChkInerval = null;
+        self.backgroundService.setSyncIntervalNormal();
+        //REBOOT ENTIRE APPLICATION
+        window.location.href = "/";
+      } else {
+        LogService.log("APP RESET - TICK(waiting for full sync)");
+      }
+    });
+  }
+
 
   /**
    *
@@ -426,13 +450,6 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     if (this.backgroundService.applicationResetRequested)
     {
       this.handleApplicationResetRequest();
-      return;
-    }
-
-    if (!this.userService.is_user_configured)
-    {
-      this.viewIsReady = false;
-      this.viewNotReadyText = "Clicca sul pulsante 'Impostazioni' per configurare l'applicazione.";
       return;
     }
 

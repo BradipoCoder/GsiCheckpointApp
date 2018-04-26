@@ -16,7 +16,7 @@ export class MekitTracerApp
   @ViewChild(Nav) nav: Nav;
 
   /* The page to start with */
-  startupPage: any = "HomePage"; //ConfigurationPage // HomePage // TasksPage
+  startupPage: any = "HomePage"; //HomePage // ConfigurationSyncstatePage
   rootPage: any = '';
 
   pages: Array<{ title: string, icon: string, component: any }>;
