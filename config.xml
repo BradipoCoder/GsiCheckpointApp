@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="it.mekit.tracer" version="0.3.14" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="it.mekit.tracer" version="0.3.15" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Traccia GSI</name>
     <description>Traccia GSI</description>
     <author email="hello@mekit.it" href="http://mekit.it">Mekit</author>
@@ -57,6 +57,6 @@
         <variable name="ANDROID_SUPPORT_V4_VERSION" value="27.+" />
     </plugin>
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
-    <engine name="android" spec="~7.0.0" />
     <plugin name="cordova-plugin-app-version" spec="^0.1.9" />
+    <engine name="android" spec="~7.0.0" />
 </widget>

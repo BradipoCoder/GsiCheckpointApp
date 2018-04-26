@@ -2,12 +2,12 @@
 import {Component, OnInit} from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
 /* Import: services */
-import {LogService} from "../../services/log.service";
-import {UserService} from '../../services/user.service';
-import {CodeScanService} from '../../services/code.scan.service';
-import {RemoteDataService} from "../../services/remote.data.service";
+import {LogService} from "../../../services/log.service";
+import {UserService} from '../../../services/user.service';
+import {CodeScanService} from '../../../services/code.scan.service';
+import {RemoteDataService} from "../../../services/remote.data.service";
 /* Import: utilities */
-import {Checkpoint} from "../../models/Checkpoint";
+import {Checkpoint} from "../../../models/Checkpoint";
 
 //import _ from "lodash";
 

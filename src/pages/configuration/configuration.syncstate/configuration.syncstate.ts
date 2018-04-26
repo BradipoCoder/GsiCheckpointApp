@@ -32,7 +32,9 @@ import {Subscription} from "rxjs/Subscription";
     <ion-content *ngIf="viewIsReady">
 
       <h1 class="tab-title">
-        Stato sincronizzazione - {{appName}} v{{appVer}}
+        Stato sincronizzazione
+        <br />
+        {{appName}} v{{appVer}}
       </h1>
 
       <ion-list>
