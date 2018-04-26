@@ -41,13 +41,9 @@ import * as moment from "moment";
         </ion-row>
         <ion-row>
           <ion-col color="darkest">
-            <div class="buttons">
-              <ion-fab bottom right class="qr-scan-fab">
-                <button ion-fab color="yellow-light" (tap)="scanQRCode(['IN'])">
-                  <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
-                </button>
-              </ion-fab>
-            </div>
+            <button class="scan" ion-fab color="yellow-light" (tap)="scanQRCode(['IN'])">
+              <ion-icon ios="md-qr-scanner" md="md-qr-scanner"></ion-icon>
+            </button>
           </ion-col>
         </ion-row>
       </ion-grid>
