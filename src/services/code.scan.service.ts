@@ -60,8 +60,7 @@ export class CodeScanService
         });
       } else
       {
-        //@todo: should we reset?
-        //self.setCodeScanInProgress(false);
+        //this should not happen at all
         reject(new Error("Code scan is already in progress!"));
       }
     });
@@ -148,28 +147,11 @@ export class CodeScanService
     codes[Checkpoint.TYPE_IN] = ["CSI-IN"];
     codes[Checkpoint.TYPE_OUT] = ["CSI-OUT"];
     //codes[Checkpoint.TYPE_CHK] = ["108", "142", "211", "274", "AT03", "ES12"];//normali
-    codes[Checkpoint.TYPE_CHK] = ["151", "360", "AT61"];//bagni
+    //codes[Checkpoint.TYPE_CHK] = ["151", "360", "AT61"];//bagni
     //codes[Checkpoint.TYPE_CHK] = ["124", "248", "A158", "AT76", "S103"];
-    //codes[Checkpoint.TYPE_CHK] = ["AT88"];//"AT76",
+    codes[Checkpoint.TYPE_CHK] = ["124", "AT76"];//"AT76",
 
     let allowFakes = codes[expected_type];
-
-    /*
-     * unallow the same codes to be returned twice in a row
-     */
-    try {
-      let lastCheckinOperation = this.remoteDataService.getLastOperation();
-      if(lastCheckinOperation.type == Checkpoint.TYPE_CHK && !_.isEmpty(lastCheckinOperation.code))
-      {
-        allowFakes = _.pull(allowFakes, lastCheckinOperation.code);
-        if(!_.size(allowFakes))
-        {
-          allowFakes = codes[expected_type];
-        }
-      }
-    } catch(e) {
-      //all of them
-    }
 
     let code = _.sample(allowFakes);
     //console.log("Not mobile - faking("+expected_type+"): "+JSON.stringify(allowFakes)+"...: " + code);

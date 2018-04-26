@@ -134,7 +134,22 @@ export class HomeCodeRegPage implements OnInit
     this.messages.push("ricerca locale in corso...");
     this.checkpointProvider.getCheckpoint({selector: {code: barcode}}).then((checkpoint: Checkpoint) => {
       LogService.log("Found Checkpoint: " + checkpoint.id);
+      LogService.log("Found Checkpoint: " + JSON.stringify(checkpoint));
       this.messages.push("locale identificato");
+
+
+      let lastOperation = this.remoteDataService.getLastOperation();
+      let lastOperationCheckpoint = lastOperation.getCheckpoint();
+      LogService.log("Last OP Checkpoint: " + JSON.stringify(lastOperationCheckpoint));
+
+      //BLOCK REPEATED CODE SCANS
+      if(lastOperationCheckpoint)
+      {
+        if(lastOperationCheckpoint.code == checkpoint.code) {
+          LogService.error(new Error("Scansione codice locale["+checkpoint.code+"] ripetuto!"));
+          return;
+        }
+      }
 
       this.registerNewCheckinForCheckpoint(checkpoint).then((checkin: Checkin) => {
         LogService.log('Checkpoint registration OK');
@@ -153,6 +168,7 @@ export class HomeCodeRegPage implements OnInit
       }, (e) => {
         LogService.error(e);
       });
+
     }, (e) => {
       LogService.error(e);
     });
