@@ -5,6 +5,7 @@ import {LogService} from '../../../services/log.service';
 import {RemoteDataService} from '../../../services/remote.data.service';
 import {CodeScanService} from '../../../services/code.scan.service';
 import {Checkin} from "../../../models/Checkin";
+import * as moment from "moment";
 
 //import _ from "lodash";
 
@@ -17,19 +18,19 @@ import {Checkin} from "../../../models/Checkin";
         <ion-row>
           <ion-col>
             <div class="user-avatar-wrapper">
-              <img [src]="userService.getUserData('avatar_uri')">
+              <!--<img [src]="userService.getUserData('avatar_uri')">-->
+              <img src="assets/image/user.png">
             </div>
           </ion-col>
         </ion-row>
         <ion-row>
           <ion-col>
-            <h1>Arrivederci {{userService.getUserData("first_name") ||
-            userService.getUserData("name")}}</h1>
+            <h1>{{greeting}}</h1>
           </ion-col>
         </ion-row>
         <ion-row>
           <ion-col color="darkest">
-            <ion-label>Hai segnalato la tua uscita il {{lastCheckout.getFormattedCheckinDate()}}.</ion-label>
+            <ion-label>{{phrase1}}</ion-label>
             <!--<ion-label>Oggi {{getTodaysDate("D MMMM")}} hai lavorato<br/>{{shiftTotalDuration}}</ion-label>-->
           </ion-col>
         </ion-row>
@@ -55,8 +56,10 @@ import {Checkin} from "../../../models/Checkin";
 })
 export class HomeOutPage implements OnInit, OnDestroy
 {
-
   private lastCheckout: Checkin;
+
+  private greeting:string;
+  private phrase1:string;
 
   constructor(protected navCtrl: NavController
     , protected platform: Platform
@@ -65,7 +68,8 @@ export class HomeOutPage implements OnInit, OnDestroy
     , protected userService: UserService
     , protected remoteDataService: RemoteDataService)
   {
-    //
+    this.greeting = 'Ciao stranger!';
+    this.phrase1 = '';
   }
 
   /**
@@ -89,23 +93,44 @@ export class HomeOutPage implements OnInit, OnDestroy
     });
   }
 
-  /**
-   *
-   * @returns {boolean}
-   */
-  protected isMobileDevice(): boolean
-  {
-    return !this.platform.is("core");
-  }
 
   ngOnInit(): void
   {
     try
     {
       this.lastCheckout = this.remoteDataService.getLastOperation();
+      let lastCheckoutDate = moment(this.lastCheckout.checkin_date);
+      let minutesPassed = moment().diff(lastCheckoutDate, 'minutes');
+      let loggedOutRecently = (minutesPassed < 180);
+
+      LogService.log("MIN PASSES: " + minutesPassed);
+
+      if(loggedOutRecently) {
+        this.greeting = 'Arrivederci '
+      } else {
+        this.greeting = 'Ciao '
+      }
+      let name = this.userService.getUserData("first_name") || this.userService.getUserData("name");
+      this.greeting += name;
+
+
+      if(loggedOutRecently) {
+        this.phrase1 = 'Hai segnalato la tua uscita alle '
+          + this.lastCheckout.getFormattedCheckinDate('HH:mm')
+          + '.';
+      } else {
+        this.phrase1 = 'La tua ultima uscita è stata il '
+          + this.lastCheckout.getFormattedCheckinDate('DD/MM/YYYY')
+          + ' alle '
+          + this.lastCheckout.getFormattedCheckinDate('HH:mm')
+          + '.';
+      }
+
+
     } catch (e)
     {
-      //
+      //REBOOT
+      window.location.href = "/";
     }
   }
 
