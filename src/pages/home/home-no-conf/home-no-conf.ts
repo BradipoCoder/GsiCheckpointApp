@@ -13,16 +13,14 @@ import {LogService} from '../../../services/log.service';
       
       <ion-grid margin-top>        
         <ion-row>
-          <ion-col>
-            <ion-label color="darkest">
-              Per iniziare ad usare l'applicazione completa la configurazione.
-            </ion-label>
+          <ion-col color="darkest">
+            Per iniziare ad usare l'applicazione completa la configurazione.
           </ion-col>
         </ion-row>
 
         <ion-row>
-          <ion-col>
-            <pre class="error">{{getErrorMessage()}}</pre>
+          <ion-col class="error">
+            {{getErrorMessage()}}
           </ion-col>
         </ion-row>
 

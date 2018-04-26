@@ -24,7 +24,7 @@ import _ from "lodash";
         <ion-title float-left>Configurazione</ion-title>
       </ion-navbar>
     </ion-header>
-    
+
     <ion-content *ngIf="viewIsReady">
 
       <h1 class="tab-title">
@@ -33,7 +33,7 @@ import _ from "lodash";
 
       <!-- Unlock buttons-->
       <div class="buttons unlock-buttons" *ngIf="isFormDisabled()" text-center align-items-center>
-        <button ion-button icon-left (click)="onUnlockConfigForm()" color="danger">
+        <button ion-button icon-left (click)="unlockConfigForm()" color="danger">
           <ion-icon name="unlock"></ion-icon>
           <ion-label>Sblocca</ion-label>
         </button>
@@ -41,12 +41,12 @@ import _ from "lodash";
 
       <!-- Lock buttons-->
       <div class="buttons lock-buttons" *ngIf="!isFormDisabled()" text-center align-items-center>
-        <button ion-button icon-left (click)="onLockConfigForm()">
+        <button ion-button icon-left (click)="lockConfigForm()">
           <ion-icon name="lock"></ion-icon>
           <ion-label>Blocca</ion-label>
         </button>
 
-        <button ion-button icon-left (click)="cleanCache()" color="yellow-light">
+        <button ion-button icon-left (click)="saveAndResetApplication()" color="yellow-light">
           <ion-icon name="warning"></ion-icon>
           <ion-label>Ricarica dati dal server</ion-label>
         </button>
@@ -88,7 +88,7 @@ import _ from "lodash";
       </ion-list>
 
       <div class="buttons save-buttons" *ngIf="!isFormDisabled()" text-center align-items-center>
-        <hr />
+        <hr/>
         <button ion-button icon-left (click)="saveAndResetApplication()" color="dark">
           <ion-icon name="thumbs-up"></ion-icon>
           <ion-label>Salva</ion-label>
@@ -178,7 +178,7 @@ export class ConfigurationSettingsPage implements OnInit
   /**
    * Ask user for unlock code and attempt to unlock the configuration service
    */
-  onUnlockConfigForm(): void
+  unlockConfigForm(): void
   {
     let unlockModal = this.modalCtrl.create("ConfigurationUnlockerPage", false, {});
     unlockModal.onDidDismiss(data => {
@@ -200,7 +200,7 @@ export class ConfigurationSettingsPage implements OnInit
   /**
    * Lock the configuration service
    */
-  onLockConfigForm(): void
+  lockConfigForm(): void
   {
     this.configurationService.unlockWithCode("");
   }

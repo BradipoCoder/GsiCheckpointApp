@@ -22,7 +22,7 @@ import {IonicPage, ViewController} from 'ionic-angular';
     </ion-header>
 
     <ion-content>
-      <ion-item>
+      <ion-item text-wrap>
         <p>
           Per modificare le configurazioni è necessario inserire il codice di sblocco.
         </p>
