@@ -21,7 +21,7 @@ import {Checkin} from "../../../models/Checkin";
     <ion-content text-center>
 
       <div class="spinner">
-        <img width="71" height="61" src="assets/image/spinner.gif"/>
+        <img width="40" height="40" src="assets/image/spinner.gif"/>
       </div>
 
       <ion-grid margin-top>

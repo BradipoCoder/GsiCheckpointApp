@@ -15,6 +15,7 @@ import {UserService} from "../../../services/user.service";
 /* OTHER */
 import _ from "lodash";
 import {Subscription} from "rxjs/Subscription";
+import {TaskProvider} from "../../../providers/task.provider";
 
 @IonicPage()
 @Component({
@@ -67,54 +68,32 @@ import {Subscription} from "rxjs/Subscription";
         </div>
         <!--ADMIN ONLY-->
       </div>
-      
-
-      <ion-list>
-
-        <ion-list-header>Locali</ion-list-header>
-
-        <ion-item>
-          <ion-icon item-start name="cloud"></ion-icon>
-          Elementi sul server
-          <ion-badge item-end>{{counts.checkpoints.server}}</ion-badge>
-        </ion-item>
-
-        <ion-item>
-          <ion-icon item-start name="phone-portrait"></ion-icon>
-          Elementi sul device
-          <ion-badge item-end>{{counts.checkpoints.device}}</ion-badge>
-        </ion-item>
-
-        <ion-item>
-          <ion-icon item-start name="flash"></ion-icon>
-          Da sincronizzare[su/giù]
-          <ion-badge item-end color="yellow-light">{{counts.checkpoints.unsynced_up}}</ion-badge>
-          <ion-badge item-end color="violet-light">{{counts.checkpoints.unsynced_down}}</ion-badge>
-        </ion-item>
 
 
-        <ion-list-header>Tracce</ion-list-header>
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="left">Elemento</th>
+            <th class="numeric"><ion-icon item-start name="cloud"></ion-icon></th>
+            <th class="numeric"><ion-icon item-start name="phone-portrait"></ion-icon></th>
+            <th class="numeric"><ion-icon item-start name="cloud-upload"></ion-icon></th>
+            <th class="numeric"><ion-icon item-start name="cloud-download"></ion-icon></th>
+            <th class="numeric"><ion-icon item-start name="thunderstorm"></ion-icon></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let providerState of providerStates;">
+            <td class="left">{{providerState.name}}</td>
+            <td class="numeric">{{providerState.count_server}}</td>
+            <td class="numeric">{{providerState.count_device}}</td>
+            <td class="numeric">{{providerState.count_unsynced_up}}</td>
+            <td class="numeric">{{providerState.count_unsynced_down}}</td>
+            <td class="numeric">{{providerState.count_unsynced_all}}</td>
+          </tr>
+        </tbody>
+      </table>
 
-        <ion-item>
-          <ion-icon item-start name="cloud"></ion-icon>
-          Elementi sul server
-          <ion-badge item-end>{{counts.checkins.server}}</ion-badge>
-        </ion-item>
-
-        <ion-item>
-          <ion-icon item-start name="phone-portrait"></ion-icon>
-          Elementi sul device
-          <ion-badge item-end>{{counts.checkins.device}}</ion-badge>
-        </ion-item>
-
-        <ion-item>
-          <ion-icon item-start name="flash"></ion-icon>
-          Da sincronizzare[su/giù]
-          <ion-badge item-end color="yellow-light">{{counts.checkins.unsynced_up}}</ion-badge>
-          <ion-badge item-end color="violet-light">{{counts.checkins.unsynced_down}}</ion-badge>
-        </ion-item>
-
-      </ion-list>
+      <!--<ion-badge item-end>{{counts.checkins.device}}</ion-badge>-->
 
     </ion-content>
 
@@ -125,12 +104,11 @@ import {Subscription} from "rxjs/Subscription";
 })
 export class ConfigurationSyncstatePage implements OnInit, OnDestroy
 {
-  private counts: any;
-
   private appName:string = "";
   private appVer:string = "";
 
   private is_in_sync: boolean = false;
+  private total_unsynced_count: number = 0;
 
   private viewIsReady: boolean;
   private viewNotReadyText: string = "preparazione in corso...";
@@ -143,6 +121,8 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   private dataChangeSubscriptionCheckpoint: Subscription;
   private dataChangeSubscriptionCheckin: Subscription;
 
+  protected providerStates:any = {};
+
 
   constructor(private toastCtrl: ToastController
     , private platform: Platform
@@ -150,6 +130,7 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
     , private appVersion: AppVersion
     , private checkpointProvider: CheckpointProvider
     , private checkinProvider: CheckinProvider
+    , private taskProvider: TaskProvider
     , private offlineCapableRestService: OfflineCapableRestService
     , protected backgroundService: BackgroundService
     , private remoteDataService: RemoteDataService
@@ -157,21 +138,32 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
   {
     this.viewIsReady = false;
 
-    this.counts = {
-      unsynced_count: 0, /* total unsynced count */
-      checkpoints: {
-        server: 0,
-        device: 0,
-        unsynced_up: 0,
-        unsynced_down: 0,
+    this.providerStates = [
+      {
+        name: 'Locali',
+        count_server: 0,
+        count_device: 0,
+        count_unsynced_up: 0,
+        count_unsynced_down: 0,
+        count_unsynced_all: 0,
       },
-      checkins: {
-        server: 0,
-        device: 0,
-        unsynced_up: 0,
-        unsynced_down: 0,
+      {
+        name: 'Tracce',
+        count_server: 0,
+        count_device: 0,
+        count_unsynced_up: 0,
+        count_unsynced_down: 0,
+        count_unsynced_all: 0
+      },
+      {
+        name: 'Compiti',
+        count_server: 0,
+        count_device: 0,
+        count_unsynced_up: 0,
+        count_unsynced_down: 0,
+        count_unsynced_all: 0
       }
-    };
+    ];
 
     this.appVersion.getAppName().then((name) => {
       this.appName = name;
@@ -309,35 +301,34 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
         self.checkinProvider.getDatabaseDocumentCount(),
         self.checkinProvider.getSyncableDataCountUp(),
         self.checkinProvider.getSyncableDataCountDown(),
+
+        self.taskProvider.getRemoteDataCount(),
+        self.taskProvider.getDatabaseDocumentCount(),
+        self.taskProvider.getSyncableDataCountUp(),
+        self.taskProvider.getSyncableDataCountDown(),
       ];
 
       Promise.all(countPromises).then((data) => {
         LogService.log("SYNC COUNT DATA" + JSON.stringify(data));
 
-        //CHECKPOINTS
-        self.counts.checkpoints.server = data[0];
-        self.counts.checkpoints.device = data[1];
-        self.counts.checkpoints.unsynced_up = data[2];
-        self.counts.checkpoints.unsynced_down = data[3];
+        self.total_unsynced_count = 0;
 
-        //CHECKINS
-        self.counts.checkins.server = data[4];
-        self.counts.checkins.device = data[5];
-        self.counts.checkins.unsynced_up = data[6];
-        self.counts.checkins.unsynced_down = data[7];
-
-        //TOTAL UNSYNCED COUNT
-        self.counts.unsynced_count = self.counts.checkpoints.unsynced_up
-          + self.counts.checkpoints.unsynced_down
-          + self.counts.checkins.unsynced_up
-          + self.counts.checkins.unsynced_down;
+        //CHECKPOINTS[0] - CHECKINS[1] - TASKS[2]
+        let moduleNumber;
+        let moduleDataOffset;
+        for (moduleNumber = 0; moduleNumber <= 2; moduleNumber++)
+        {
+          moduleDataOffset = (moduleNumber * 4);
+          self.providerStates[moduleNumber].count_server = data[moduleDataOffset];
+          self.providerStates[moduleNumber].count_device = data[moduleDataOffset + 1];
+          self.providerStates[moduleNumber].count_unsynced_up = data[moduleDataOffset + 2];
+          self.providerStates[moduleNumber].count_unsynced_down = data[moduleDataOffset + 3];
+          self.providerStates[moduleNumber].count_unsynced_all = data[moduleDataOffset + 2] + data[moduleDataOffset + 3];
+          self.total_unsynced_count += self.providerStates[moduleNumber].count_unsynced_all;
+        }
 
         // IS IN SYNC
-        self.is_in_sync = (self.counts.unsynced_count == 0)
-          && self.counts.checkpoints.server != 0
-          && self.counts.checkins.server != 0;
-
-        self.completeFullCacheCleanAction();
+        self.is_in_sync = (self.total_unsynced_count == 0);
 
         self.viewIsReady = true;
         resolve();
@@ -345,30 +336,6 @@ export class ConfigurationSyncstatePage implements OnInit, OnDestroy
         reject(e);
       });
     });
-  }
-
-
-  /**
-   * Unlock Sync page and do other after full cache clear actions
-   */
-  protected completeFullCacheCleanAction(): void
-  {
-    if (this.backgroundService.isSyncPageLocked())
-    {
-      if (this.counts.unsynced_count == 0)
-      {
-        LogService.log("FULL CACHE CLEAN COMPLETED.", LogService.LEVEL_WARN);
-        this.backgroundService.setSyncIntervalNormal();
-        this.backgroundService.unlockSyncPage();
-
-        if (this.platform.is("mobile"))
-        {
-          this.insomnia.allowSleepAgain().then(() => {
-            LogService.log("KEEP AWAKE OFF!");
-          });
-        }
-      }
-    }
   }
 
   /**
