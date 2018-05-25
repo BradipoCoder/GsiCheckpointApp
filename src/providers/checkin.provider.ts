@@ -38,7 +38,7 @@ export class CheckinProvider extends LocalDocumentProvider
     * remoteQuery - CRM is role based - no need to filter by user id (it will NOT work)
     */
     this.sync_configuration = {
-      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted', 'syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY'],
+      syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted', 'syncWithRemote_PUSH'],
       remoteDbTableName: this.underlying_model.DB_TABLE_NAME,
       remoteQuery: "",
       processRecordsAtOnce: 15,
@@ -173,6 +173,21 @@ export class CheckinProvider extends LocalDocumentProvider
       });
     });
   }
+
+  private syncWithRemote_PUSH(): Promise<any>
+  {
+    /*
+    let self = this;
+    let dbTableName = self.underlying_model.DB_TABLE_NAME;
+
+    return new Promise(function (resolve) {
+
+      LogService.log("syncWithRemote_PUSH...working...");
+      resolve();
+
+    });*/
+    return this.syncWithRemote_PUSH__NEW__CHANGED_TEMPORARY();
+  };
 
   /**
    *

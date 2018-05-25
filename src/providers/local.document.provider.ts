@@ -33,6 +33,8 @@ export class LocalDocumentProvider
   protected database_name: string;
   protected database_options: any = {auto_compaction: false};
 
+  protected lastSyncOffsets: any = {};
+
   protected sync_configuration: any = {
     syncFunctions: ['syncDownNew', 'syncDownChanged', 'syncDownDeleted'],
     remoteDbTableName: 'some_table',
@@ -364,18 +366,31 @@ export class LocalDocumentProvider
         .then((cfg) => {
             config = cfg;
             syncOffset = _.has(config, configCheckKey) ? config[configCheckKey] : 0;
+
+            /**
+             * This condition is bad because it blocks sync - we need to reset SyncOffset
+             */
+            if(_.has(self.lastSyncOffsets, configCheckKey) && syncOffset == self.lastSyncOffsets[configCheckKey])
+            {
+              LogService.log("LAST SYNC OFFSET REPEATED(" + configCheckKey+" = "+syncOffset+")! Resetting syncOffset to ZERO!", LogService.LEVEL_WARN);
+              syncOffset = 0;
+            }
+            self.lastSyncOffsets[configCheckKey] = syncOffset;
+
+            //@fixme: this is BAD! WRONG!
+            /*
             if (maxRecords > 0)
             {
               if (syncOffset + itemsAtOnce > maxRecords)
               {
                 itemsAtOnce = maxRecords - syncOffset;
               }
-              /* max_results: 0 below would result in loading 20 items (SugarCRM's default) so let's limit it to one */
+              /* max_results: 0 & below would result in loading 20 items (SugarCRM's default) so let's limit it to one * /
               if (itemsAtOnce <= 0)
               {
                 itemsAtOnce = 1;
               }
-            }
+              }*/
 
             LogService.log("SYNC OFFSET[" + configCheckKey + "]: " + syncOffset);
             //LogService.log("LOADING FROM[" + dbTableName + "] WITH QUERY: " + query);
@@ -402,7 +417,9 @@ export class LocalDocumentProvider
                   //record.date_modified = moment(record.date_modified);
                   record.date_modified = moment.tz(record.date_modified, "GMT+0").tz("Europe/Rome");
                 });
+
                 //LogService.log("RECORDS: " + JSON.stringify(records));
+
 
                 //let newSyncOffset = _.size(records) == itemsAtOnce ? syncOffset + itemsAtOnce : 0;
                 let newSyncOffset = syncOffset + _.size(records);
